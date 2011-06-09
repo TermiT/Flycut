@@ -9,8 +9,8 @@
 //  at <http://jumpcut.sourceforge.net/> for details.
 
 #import "AppController.h"
-#import "PTHotKey.h"
-#import "PTHotKeyCenter.h"
+#import "SGHotKey.h"
+#import "SGHotKeyCenter.h"
 #import "SRRecorderCell.h"
 #import "UKLoginItemRegistry.h"
 
@@ -36,7 +36,7 @@
 {
 	if ( ! [[NSUserDefaults standardUserDefaults] floatForKey:@"lastRun"] || [[NSUserDefaults standardUserDefaults] floatForKey:@"lastRun"] < 0.6  ) {
 		// A decent starting value for the main hotkey is control-option-V
-		[mainRecorder setKeyCombo:SRMakeKeyCombo(9, 786432)];
+		[mainRecorder setKeyCombo:SRMakeKeyCombo(9, 1179648)];
 		
 		// Something we'd really like is to transfer over info from 0.5x if we can get at it --
 		if ( [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"Jumpcut"] ) {
@@ -70,7 +70,7 @@
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithInt:15],
 		@"displayNum",
-		[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:9],[NSNumber numberWithInt:786432],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]],
+		[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:9],[NSNumber numberWithInt:1179648],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]],
 		@"ShortcutRecorder mainHotkey",
 		[NSNumber numberWithInt:40],
 		@"rememberNum",
@@ -80,13 +80,13 @@
 		@"menuIcon",
 		[NSNumber numberWithFloat:.25],
 		@"bezelAlpha",
-		[NSNumber numberWithBool:NO],
+		[NSNumber numberWithBool:YES],
 		@"stickyBezel",
 		[NSNumber numberWithBool:NO],
 		@"wraparoundBezel",
-		[NSNumber numberWithBool:NO],
-		@"launchOnStartup",
-		[NSNumber numberWithBool:YES],
+		[NSNumber numberWithBool:NO],// No by default
+		@"loadOnStartup",
+		[NSNumber numberWithBool:YES], 
 		@"menuSelectionPastes",
 		nil]
 		];
@@ -97,8 +97,8 @@
 {
 	// Hotkey default value
 	if ( ! [[NSUserDefaults standardUserDefaults] floatForKey:@"lastRun"] || [[NSUserDefaults standardUserDefaults] floatForKey:@"lastRun"] < 0.6  ) {
-		// A decent starting value for the main hotkey is control-option-V
-		[mainRecorder setKeyCombo:SRMakeKeyCombo(9, 786432)];
+		// A decent starting value for the main hotkey is shift-command-V
+		[mainRecorder setKeyCombo:SRMakeKeyCombo(9, 1179648)];
 		NSLog(@"Setting hotkey");
 		if ( [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"Jumpcut"] ) {
 			NSLog(@"Pulling old preference");
@@ -147,7 +147,7 @@
 	} else if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 2 ) {
 		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
 	} else {
-		[statusItem setImage:[NSImage imageNamed:@"net.sf.jumpcut.scissors_bw16.png"]];
+		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
     }
 	[statusItem setMenu:jcMenu];
     [statusItem setEnabled:YES];
@@ -204,7 +204,7 @@
 		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
 	} else {
 		[statusItem setTitle:@""];
-		[statusItem setImage:[NSImage imageNamed:@"net.sf.jumpcut.scissors_bw16.png"]];
+		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
     }
 }
 
@@ -481,17 +481,17 @@
 {
 	if (mainHotKey != nil)
 	{
-		[[PTHotKeyCenter sharedCenter] unregisterHotKey:mainHotKey];
+		[[SGHotKeyCenter sharedCenter] unregisterHotKey:mainHotKey];
 		[mainHotKey release];
 		mainHotKey = nil;
 	}
-	mainHotKey = [[PTHotKey alloc] initWithIdentifier:@"mainHotKey"
-											   keyCombo:[PTKeyCombo keyComboWithKeyCode:[mainRecorder keyCombo].code
+	mainHotKey = [[SGHotKey alloc] initWithIdentifier:@"mainHotKey"
+											   keyCombo:[SGKeyCombo keyComboWithKeyCode:[mainRecorder keyCombo].code
 																			  modifiers:[mainRecorder cocoaToCarbonFlags: [mainRecorder keyCombo].flags]]];
-	[mainHotKey setName: @"Activate Jumpcut HotKey"]; //This is typically used by PTKeyComboPanel
+	[mainHotKey setName: @"Activate Flycut HotKey"]; //This is typically used by PTKeyComboPanel
 	[mainHotKey setTarget: self];
 	[mainHotKey setAction: @selector(hitMainHotKey:)];
-	[[PTHotKeyCenter sharedCenter] registerHotKey:mainHotKey];
+	[[SGHotKeyCenter sharedCenter] registerHotKey:mainHotKey];
 }
 
 -(IBAction)clearClippingList:(id)sender {
@@ -596,7 +596,7 @@
 
 -(void) loadEngineFromPList
 {
-    NSString *path = [[NSString stringWithString:@"~/Library/Application Support/Jumpcut/JCEngine.save"] 					stringByExpandingTildeInPath];
+    NSString *path = [[NSString stringWithString:@"~/Library/Application Support/Flycut/JCEngine.save"] 					stringByExpandingTildeInPath];
     NSDictionary *loadDict = [[NSDictionary alloc] initWithContentsOfFile:path];
     NSEnumerator *enumerator;
     NSDictionary *aSavedClipping;
@@ -665,7 +665,7 @@
     int i;
     BOOL isDir;
     NSString *path;
-    path = [[NSString stringWithString:@"~/Library/Application Support/Jumpcut"] stringByExpandingTildeInPath];
+    path = [[NSString stringWithString:@"~/Library/Application Support/Flycut"] stringByExpandingTildeInPath];
     if ( ![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] || ! isDir ) {
         NSLog(@"Creating Application Support directory");
         [[NSFileManager defaultManager] createDirectoryAtPath:path
@@ -740,6 +740,7 @@
 		[self toggleMainHotKey: aRecorder];
 		[self setHotKeyPreferenceForRecorder: aRecorder];
 	}
+	NSLog(@"code: %d, flags: %d", newKeyCombo.code, newKeyCombo.flags);
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification
@@ -749,7 +750,7 @@
         [self saveEngine] ;
     }
 	//Unregister our hot key (not required)
-	[[PTHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
+	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
 	[mainHotKey release];
 	mainHotKey = nil;
 	[self hideBezel];
