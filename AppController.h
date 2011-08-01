@@ -12,12 +12,13 @@
 #import "SRRecorderControl.h"
 #import "SRKeyCodeTransformer.h"
 #import "JumpcutStore.h"
+#import "SGHotKey.h"
 
 @class PTHotKey;
 
 @interface AppController : NSObject {
     BezelWindow					*bezel;
-	PTHotKey					*mainHotKey;
+	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
 	IBOutlet NSPanel			*prefsPanel;
 	int							mainHotkeyModifiers;

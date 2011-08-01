@@ -562,7 +562,6 @@
     if ( [self isValidClippingNumber:[NSNumber numberWithInt:count]] ) {
         return [clippingStore clippingContentsAtPosition:count];
     } else { // It fails -- we shouldn't be passed this, but...
-        NSLog(@"Asked for non-existant clipping count: %d");
         return @"";
     }
 }
@@ -740,7 +739,7 @@
 		[self toggleMainHotKey: aRecorder];
 		[self setHotKeyPreferenceForRecorder: aRecorder];
 	}
-	NSLog(@"code: %d, flags: %d", newKeyCombo.code, newKeyCombo.flags);
+	NSLog(@"code: %lu, flags: %lu", newKeyCombo.code, newKeyCombo.flags);
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification
