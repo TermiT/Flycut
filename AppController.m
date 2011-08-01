@@ -292,24 +292,24 @@
 -(void)fakeCommandV
 	/*" +fakeCommandV synthesizes keyboard events for Cmd-v Paste 
 	shortcut. "*/ 
-	// Code from a Mark Mason post to Cocoadev-l
-	// What are the flaws in this approach?
-	//  We don't know whether we can really accept the paste
-	//  We have no way of judging whether it's gone through
-	//  Simulating keypresses could have oddball consequences (for instance, if something else was trapping control v)
-	//  Not all apps may take Command-V as a paste command (xemacs, for instance?)
-	// Some sort of AE-based (or System Events-based, or service-based) paste would be preferable in many circumstances.
-	// On the other hand, this doesn't require scripting support, should work for Carbon, etc.
-	// Ideally, in the future, we will be able to tell from what environment JC was passed the trigger
-	// and have different behavior from each.
-{ 
-	NSNumber *keyCode = [srTransformer reverseTransformedValue:@"V"];
-	CGKeyCode veeCode = (CGKeyCode)[keyCode intValue];
-	CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, true ); // Command down
-	CGPostKeyboardEvent( (CGCharCode)'v', veeCode, true ); // V down 
-	CGPostKeyboardEvent( (CGCharCode)'v', veeCode, false ); //  V up 
-	CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, false ); // Command up
+{     
+    CGEventSourceRef sourceRef = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
+    if (!sourceRef)
+    {
+        NSLog(@"No event source");
+        return;
+    }
+    //9 = "v"
+    CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, (CGKeyCode)9, true);
+    CGEventSetFlags(eventDown, kCGEventFlagMaskCommand);
+    CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, (CGKeyCode)9, false);
+    CGEventPost(kCGHIDEventTap, eventDown);
+    CGEventPost(kCGHIDEventTap, eventUp);
+    CFRelease(eventDown);
+    CFRelease(eventUp);
+    CFRelease(sourceRef);
 } 
+
 
 -(void)pollPB:(NSTimer *)timer
 {
@@ -421,7 +421,7 @@
 				break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				NSLog(@"PRESSED %d", pressed);
-				NSLog(@"CODE %d", [mainRecorder keyCombo].code);
+				NSLog(@"CODE %ld", [mainRecorder keyCombo].code);
 				break;
 		}		
 	}
@@ -464,7 +464,7 @@
 }
 
 
-- (void)hitMainHotKey:(PTHotKey *)hotKey
+- (void)hitMainHotKey:(SGHotKey *)hotKey
 {
 	if ( ! isBezelDisplayed ) {
 		[NSApp activateIgnoringOtherApps:YES];
@@ -667,14 +667,15 @@
     path = [[NSString stringWithString:@"~/Library/Application Support/Flycut"] stringByExpandingTildeInPath];
     if ( ![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] || ! isDir ) {
         NSLog(@"Creating Application Support directory");
-        [[NSFileManager defaultManager] createDirectoryAtPath:path
+        [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES
 												   attributes:[NSDictionary dictionaryWithObjectsAndKeys:
 													   @"NSFileModificationDate", [NSNull null],
 													   @"NSFileOwnerAccountName", [NSNull null],
 													   @"NSFileGroupOwnerAccountName", [NSNull null],
 													   @"NSFilePosixPermissions", [NSNull null],
 													   @"NSFileExtensionsHidden", [NSNull null],
-													   nil]
+                                                               nil]
+                                                        error:nil
 			];
     }
 	
@@ -714,7 +715,7 @@
 	}
 }
 
-- (BOOL)shortcutRecorder:(SRRecorderControl *)aRecorder isKeyCode:(signed short)keyCode andFlagsTaken:(unsigned int)flags reason:(NSString **)aReason
+- (BOOL)shortcutRecorder:(SRRecorderControl *)aRecorder isKeyCode:(NSInteger)keyCode andFlagsTaken:(NSUInteger)flags reason:(NSString **)aReason
 {
 	if (aRecorder == mainRecorder)
 	{

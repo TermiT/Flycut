@@ -122,7 +122,7 @@
 -(void) resetDisplayString
 {
     NSString *newDisplayString, *firstLineOfClipping;
-	unsigned start, lineEnd, contentsEnd;
+	NSUInteger start, lineEnd, contentsEnd;
 	NSRange startRange = NSMakeRange(0,0);
 	NSRange contentsRange;
 	// We're resetting the display string, so release the old one.

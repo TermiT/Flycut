@@ -14,7 +14,7 @@
 #import "JumpcutStore.h"
 #import "SGHotKey.h"
 
-@class PTHotKey;
+@class SGHotKey;
 
 @interface AppController : NSObject {
     BezelWindow					*bezel;
@@ -70,7 +70,7 @@
 -(void) loadEngineFromPList;
 
 // Hotkey related
--(void)hitMainHotKey:(PTHotKey *)hotKey;
+-(void)hitMainHotKey:(SGHotKey *)hotKey;
 
 // Bezel related
 -(void) showBezel;
