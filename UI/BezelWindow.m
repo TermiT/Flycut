@@ -17,10 +17,6 @@
   				backing:(NSBackingStoreType)bufferingType
 					defer:(BOOL)flag
 {
-
-	contentRect.origin.y += contentRect.size.height/4; 
-	contentRect.size.width += contentRect.size.width/2; 
-	contentRect.origin.x -= (contentRect.size.width/3)/2; 
 	self = [super initWithContentRect:contentRect
 							styleMask:NSBorderlessWindowMask
 							backing:NSBackingStoreBuffered
@@ -34,7 +30,7 @@
 		[self setMovableByWindowBackground:NO];
 		[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
 		float lineHeight = 16;
-		NSRect textFrame = NSMakeRect(12, 36, [self frame].size.width - 24, 18 * lineHeight - 12);
+		NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
 		textField = [[RoundRecTextField alloc] initWithFrame:textFrame];
 		[[self contentView] addSubview:textField];
 		[textField setEditable:NO];
@@ -54,14 +50,7 @@
 		[charField setDrawsBackground:YES];
 		[charField setBordered:NO];
 		[charField setAlignment:NSCenterTextAlignment];
-		[self setInitialFirstResponder:textField];
-		/*icon = [NSImage imageNamed:@"net.sf.jumpcut.ghost_scissors_small.png"];
-		if ( [icon isValid] ) {
-			NSRect iconFrame = NSMakeRect( ([self frame].size.width - [icon size].width) / 2, [self frame].size.height - [icon size].height - 24, [icon size].width, [icon size].height);
-			iconView = [[NSImageView alloc] initWithFrame:iconFrame];
-			[iconView setImage:icon];
-			[[self contentView] addSubview:iconView];
-		}*/
+		[self setInitialFirstResponder:textField];         
 		return self;
 	}
 	return nil;

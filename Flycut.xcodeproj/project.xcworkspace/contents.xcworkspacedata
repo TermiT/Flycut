@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:Jumpcut.xcodeproj">
+      location = "self:Flycut.xcodeproj">
    </FileRef>
 </Workspace>

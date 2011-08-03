@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		773ABFB113E9AA1A00AE3969 /* NSWindow+TrueCenter.h in Headers */ = {isa = PBXBuildFile; fileRef = 773ABFAF13E9AA1A00AE3969 /* NSWindow+TrueCenter.h */; };
+		773ABFB213E9AA1A00AE3969 /* NSWindow+TrueCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 773ABFB013E9AA1A00AE3969 /* NSWindow+TrueCenter.m */; };
 		7761C87C139BDE7F000FB3AB /* JumpcutClipping.h in Headers */ = {isa = PBXBuildFile; fileRef = 7761C878139BDE7F000FB3AB /* JumpcutClipping.h */; };
 		7761C87D139BDE7F000FB3AB /* JumpcutClipping.m in Sources */ = {isa = PBXBuildFile; fileRef = 7761C879139BDE7F000FB3AB /* JumpcutClipping.m */; };
 		7761C87E139BDE7F000FB3AB /* JumpcutStore.h in Headers */ = {isa = PBXBuildFile; fileRef = 7761C87A139BDE7F000FB3AB /* JumpcutStore.h */; };
@@ -99,6 +101,8 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Jumpcut_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Jumpcut_Prefix.pch; sourceTree = "<group>"; };
+		773ABFAF13E9AA1A00AE3969 /* NSWindow+TrueCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+TrueCenter.h"; sourceTree = "<group>"; };
+		773ABFB013E9AA1A00AE3969 /* NSWindow+TrueCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSWindow+TrueCenter.m"; sourceTree = "<group>"; };
 		7761C878139BDE7F000FB3AB /* JumpcutClipping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JumpcutClipping.h; sourceTree = "<group>"; };
 		7761C879139BDE7F000FB3AB /* JumpcutClipping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JumpcutClipping.m; sourceTree = "<group>"; };
 		7761C87A139BDE7F000FB3AB /* JumpcutStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JumpcutStore.h; sourceTree = "<group>"; };
@@ -293,6 +297,8 @@
 				7761C88D139BDEAF000FB3AB /* RoundRecBezierPath.m */,
 				7761C88E139BDEAF000FB3AB /* RoundRecTextField.h */,
 				7761C88F139BDEAF000FB3AB /* RoundRecTextField.m */,
+				773ABFAF13E9AA1A00AE3969 /* NSWindow+TrueCenter.h */,
+				773ABFB013E9AA1A00AE3969 /* NSWindow+TrueCenter.m */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -362,6 +368,7 @@
 				7761C8AE139BDF12000FB3AB /* SRRecorderCell.h in Headers */,
 				7761C8B0139BDF12000FB3AB /* SRRecorderControl.h in Headers */,
 				7761C8B2139BDF12000FB3AB /* SRValidator.h in Headers */,
+				773ABFB113E9AA1A00AE3969 /* NSWindow+TrueCenter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,7 +405,7 @@
 			attributes = {
 				LastUpgradeCheck = 0410;
 			};
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Jumpcut" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Flycut" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -465,6 +472,7 @@
 				7761C8AF139BDF12000FB3AB /* SRRecorderCell.m in Sources */,
 				7761C8B1139BDF12000FB3AB /* SRRecorderControl.m in Sources */,
 				7761C8B3139BDF12000FB3AB /* SRValidator.m in Sources */,
+				773ABFB213E9AA1A00AE3969 /* NSWindow+TrueCenter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -558,7 +566,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Jumpcut" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Flycut" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
