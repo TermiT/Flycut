@@ -42,6 +42,11 @@
 		@"loadOnStartup",
 		[NSNumber numberWithBool:YES], 
 		@"menuSelectionPastes",
+        // Flycut new options
+        [NSNumber numberWithFloat:500.0],
+        @"bezelWidth",
+        [NSNumber numberWithFloat:320.0],
+        @"bezelHeight",
 		nil]
 		];
 	return [super init];
@@ -60,17 +65,21 @@
 	clippingStore = [[JumpcutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
 											   displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
 										withDisplayLength:_DISPLENGTH];
+    
+    NSRect screenFrame = [[NSScreen mainScreen] frame];
+    widthSlider.maxValue = screenFrame.size.width;
+    heightSlider.maxValue = screenFrame.size.height;
+    
 	// Set up the bezel window
-
-    NSSize screenSize = [[NSScreen mainScreen] frame].size;
-    NSSize bezelSize = NSMakeSize(screenSize.width/3, screenSize.height/3);
-	NSRect windowFrame = NSMakeRect( 0, 0, bezelSize.width, bezelSize.height);
+	NSRect windowFrame = NSMakeRect(0, 0,
+                                    [[NSUserDefaults standardUserDefaults] floatForKey:@"bezelWidth"],
+                                    [[NSUserDefaults standardUserDefaults] floatForKey:@"bezelHeight"]);
 	bezel = [[BezelWindow alloc] initWithContentRect:windowFrame
 										   styleMask:NSBorderlessWindowMask
 											 backing:NSBackingStoreBuffered
 											   defer:NO];
-	[bezel setDelegate:self];
     [bezel trueCenter];
+	[bezel setDelegate:self];
 
 	// Create our pasteboard interface
     jcPasteboard = [NSPasteboard generalPasteboard];
@@ -128,6 +137,23 @@
 	// a cutout to allow the user interface to interact w/the bezel.
 	[bezel setAlpha:[sender floatValue]];
 }
+
+-(IBAction) setBezelWidth:(id)sender
+{
+    NSSize bezelSize = NSMakeSize([sender floatValue], bezel.frame.size.height);
+	NSRect windowFrame = NSMakeRect( 0, 0, bezelSize.width, bezelSize.height);
+	[bezel setFrame:windowFrame display:NO];
+    [bezel trueCenter];
+}
+
+-(IBAction) setBezelHeight:(id)sender
+{
+    NSSize bezelSize = NSMakeSize(bezel.frame.size.width, [sender floatValue]);
+	NSRect windowFrame = NSMakeRect( 0, 0, bezelSize.width, bezelSize.height);
+	[bezel setFrame:windowFrame display:NO];
+    [bezel trueCenter];
+}
+
 
 -(IBAction) switchMenuIcon:(id)sender
 {
@@ -649,18 +675,6 @@
 }
 
 - (BOOL)shortcutRecorder:(SRRecorderControl *)aRecorder isKeyCode:(NSInteger)keyCode andFlagsTaken:(NSUInteger)flags reason:(NSString **)aReason {
-	if (aRecorder == mainRecorder) {
-		BOOL isTaken = NO;
-/*		
-		KeyCombo kc = [delegateDisallowRecorder keyCombo];
-		
-		if (kc.code == keyCode && kc.flags == flags) isTaken = YES;
-		
-		*aReason = [delegateDisallowReasonField stringValue];
-*/		
-		return isTaken;
-	}
-	
 	return NO;
 }
 

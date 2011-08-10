@@ -36,6 +36,8 @@
     NSStatusItem *statusItem;
     // The menu attatched to same
     IBOutlet NSMenu *jcMenu;
+    IBOutlet NSSlider * heightSlider;
+    IBOutlet NSSlider * widthSlider;
     // A timer which will let us check the pasteboard;
     // this should default to every .5 seconds but be user-configurable
     NSTimer *pollPBTimer;
@@ -88,6 +90,8 @@
 -(IBAction) setRememberNumPref:(id)sender;
 -(IBAction) setDisplayNumPref:(id)sender;
 -(IBAction) setBezelAlpha:(id)sender;
+-(IBAction) setBezelHeight:(id)sender;
+-(IBAction) setBezelWidth:(id)sender;
 -(IBAction) switchMenuIcon:(id)sender;
 -(IBAction) toggleLoadOnStartup:(id)sender;
 -(IBAction) toggleMainHotKey:(id)sender;

@@ -10,13 +10,15 @@
 
 #import "BezelWindow.h"
 
+static const float lineHeight = 16;
+
 @implementation BezelWindow
 
 - (id)initWithContentRect:(NSRect)contentRect
 				styleMask:(NSUInteger)aStyle
   				backing:(NSBackingStoreType)bufferingType
-					defer:(BOOL)flag
-{
+					defer:(BOOL)flag {
+    
 	self = [super initWithContentRect:contentRect
 							styleMask:NSBorderlessWindowMask
 							backing:NSBackingStoreBuffered
@@ -29,7 +31,6 @@
 		[self setHasShadow:NO];
 		[self setMovableByWindowBackground:NO];
 		[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
-		float lineHeight = 16;
 		NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
 		textField = [[RoundRecTextField alloc] initWithFrame:textFrame];
 		[[self contentView] addSubview:textField];
@@ -54,6 +55,17 @@
 		return self;
 	}
 	return nil;
+}
+
+
+- (void) update  {
+    [super update];
+    [self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
+    NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
+    [textField setFrame:textFrame];
+    NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
+    [charField setFrame:charFrame];
+    
 }
 
 - (void) setAlpha:(float)newValue
@@ -95,10 +107,6 @@
 	[textField setStringValue:bezelText];
 }
 
-- (void)setFrame:(NSRect)frameRect display:(BOOL)displayFlag animate:(BOOL)animationFlag
-{
-	[super setFrame:frameRect display:displayFlag animate:animationFlag];
-}
 
 - (NSColor *)roundedBackgroundWithRect:(NSRect)bgRect withRadius:(float)radius withAlpha:(float)alpha
 {
@@ -167,6 +175,5 @@
 - (void)setDelegate:(id)newDelegate {
     delegate = newDelegate;
 }
-
 
 @end
