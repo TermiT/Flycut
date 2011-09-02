@@ -100,12 +100,10 @@
 
 -(void) setDisplayLen:(int)newDisplayLength
 {
-    NSEnumerator *listEnum = [jcList objectEnumerator];
-    JumpcutClipping *aClipping;
-    
+  
     if ( newDisplayLength > 0 ) {
         jcDisplayLen = newDisplayLength;
-        while ( aClipping = [listEnum nextObject] ) {
+        for (JumpcutClipping *aClipping in jcList) {
             [aClipping setDisplayLength:newDisplayLength];
         }
     }
