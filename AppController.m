@@ -475,25 +475,26 @@
 }
 
 - (void)updateMenu {
-    int passedSeparator = 0;
-    NSMenuItem *oldItem;
-    NSMenuItem *item;
-    NSString *pbMenuTitle;
+    
     NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]];
-    NSEnumerator *menuEnumerator = [[jcMenu itemArray] reverseObjectEnumerator];
-    NSEnumerator *clipEnumerator = [returnedDisplayStrings reverseObjectEnumerator];
+    
+    NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
+    
+    NSArray *clipStrings = [[returnedDisplayStrings reverseObjectEnumerator] allObjects];
+
+    int passedSeparator = 0;
 	
     //remove clippings from menu
-    while( oldItem = [menuEnumerator nextObject] ) {
+    for (NSMenuItem *oldItem in menuItems) {
 		if( [oldItem isSeparatorItem]) {
             passedSeparator++;
         } else if ( passedSeparator == 2 ) {
             [jcMenu removeItem:oldItem];
-        }
+        }     
     }
 	
-	
-    while( pbMenuTitle = [clipEnumerator nextObject] ) {
+    for(NSString *pbMenuTitle in clipStrings) {
+        NSMenuItem *item;
         item = [[NSMenuItem alloc] initWithTitle:pbMenuTitle
 										  action:@selector(processMenuClippingSelection:)
 								   keyEquivalent:@""];
@@ -556,24 +557,35 @@
 
 -(void) loadEngineFromPList
 {
-    NSString *path = [[NSString stringWithString:@"~/Library/Application Support/Flycut/JCEngine.save"] 					stringByExpandingTildeInPath];
+    NSString *path = [[NSString 
+                       stringWithString:@"~/Library/Application Support/Flycut/JCEngine.save"] 					stringByExpandingTildeInPath];
     NSDictionary *loadDict = [[NSDictionary alloc] initWithContentsOfFile:path];
-    NSEnumerator *enumerator;
-    NSDictionary *aSavedClipping;
+    
+   
     NSArray *savedJCList;
 	NSRange loadRange;
-	int rangeCap;
-	if ( loadDict != nil ) {
+	
+    int rangeCap;
+	
+    if ( loadDict != nil ) {
+
         savedJCList = [loadDict objectForKey:@"jcList"];
+        
         if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-			// There's probably a nicer way to prevent the range from going out of bounds, but this works.
-			rangeCap = [savedJCList count] < [[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"] ? [savedJCList count] : [[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"];
+
+            int rememberNumPref = [[NSUserDefaults standardUserDefaults] 
+                                   integerForKey:@"rememberNum"];
+            // There's probably a nicer way to prevent the range from going out of bounds, but this works.
+			rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
 			loadRange = NSMakeRange(0, rangeCap);
-			enumerator = [[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator];
-			while ( aSavedClipping = [enumerator nextObject] ) {
+			
+            NSArray *toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
+            
+            for( NSDictionary *aSavedClipping in toBeRestoredClips) {
 				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
 									ofType:[aSavedClipping objectForKey:@"Type"]];
             }
+
         } else {
 			NSLog(@"Not array");
 		}
