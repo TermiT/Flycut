@@ -340,8 +340,9 @@
             case NSHomeFunctionKey:
 				if ( [clippingStore jcListCount] > 0 ) {
 					stackPosition = 0;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-					//[bezel setCharString:[NSString stringWithFormat:@"%d", stackPosition + 1]];
+					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", 
+                                           1, [clippingStore jcListCount]]];
+
 					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
 				}
 				break;

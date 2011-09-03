@@ -39,7 +39,7 @@ Constructor:
 
 -(id) init
 {
-	if( self = [super init] )
+	if( [super init] )
 	{
 		tabView = nil;
 		itemsList = [[NSMutableDictionary alloc] init];
@@ -294,11 +294,10 @@ This is simply a list of all tab view items in order.
 
 -(NSArray*) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar
 {
-	int					itemCount = [tabView numberOfTabViewItems],
-	x;
-	NSTabViewItem*		theItem = [tabView tabViewItemAtIndex:0];
-	//NSMutableArray*	defaultItems = [NSMutableArray arrayWithObjects: [theItem identifier], NSToolbarSeparatorItemIdentifier, nil];
-	NSMutableArray*	defaultItems = [NSMutableArray array];
+	int	itemCount = [tabView numberOfTabViewItems];
+    int x;
+	NSTabViewItem* theItem;
+    NSMutableArray*	defaultItems = [NSMutableArray array];
 	
 	for( x = 0; x < itemCount; x++ )
 	{
