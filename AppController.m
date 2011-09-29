@@ -22,9 +22,9 @@
 - (id)init
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-		[NSNumber numberWithInt:15],
+		[NSNumber numberWithInt:10],
 		@"displayNum",
-		[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:9],[NSNumber numberWithInt:1179648],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]],
+		[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:9],[NSNumber numberWithLong:1179648],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]],
 		@"ShortcutRecorder mainHotkey",
 		[NSNumber numberWithInt:40],
 		@"rememberNum",
@@ -47,8 +47,8 @@
         @"bezelWidth",
         [NSNumber numberWithFloat:320.0],
         @"bezelHeight",
-		nil]
-		];
+        [NSDictionary dictionary],
+        @"store", nil]];
 	return [super init];
 }
 
@@ -383,7 +383,7 @@
 				break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				NSLog(@"PRESSED %d", pressed);
-				NSLog(@"CODE %ld", [mainRecorder keyCombo].code);
+				NSLog(@"CODE %d", [mainRecorder keyCombo].code);
 				break;
 		}		
 	}
@@ -558,11 +558,7 @@
 
 -(void) loadEngineFromPList
 {
-    NSString *path = [[NSString 
-                       stringWithString:@"~/Library/Application Support/Flycut/JCEngine.save"] 					stringByExpandingTildeInPath];
-    NSDictionary *loadDict = [[NSDictionary alloc] initWithContentsOfFile:path];
-    
-   
+    NSDictionary *loadDict = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];   
     NSArray *savedJCList;
 	NSRange loadRange;
 	
@@ -573,23 +569,16 @@
         savedJCList = [loadDict objectForKey:@"jcList"];
         
         if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-
             int rememberNumPref = [[NSUserDefaults standardUserDefaults] 
                                    integerForKey:@"rememberNum"];
             // There's probably a nicer way to prevent the range from going out of bounds, but this works.
 			rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
 			loadRange = NSMakeRange(0, rangeCap);
-			
             NSArray *toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
-            
-            for( NSDictionary *aSavedClipping in toBeRestoredClips) {
+            for( NSDictionary *aSavedClipping in toBeRestoredClips)
 				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
 									ofType:[aSavedClipping objectForKey:@"Type"]];
-            }
-
-        } else {
-			NSLog(@"Not array");
-		}
+        } else NSLog(@"Not array");
         [self updateMenu];
         [loadDict release];
     }
@@ -635,24 +624,6 @@
 {
     NSMutableDictionary *saveDict;
     NSMutableArray *jcListArray = [NSMutableArray array];
-    int i;
-    BOOL isDir;
-    NSString *path;
-    path = [[NSString stringWithString:@"~/Library/Application Support/Flycut"] stringByExpandingTildeInPath];
-    if ( ![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] || ! isDir ) {
-        NSLog(@"Creating Application Support directory");
-        [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES
-												   attributes:[NSDictionary dictionaryWithObjectsAndKeys:
-													   @"NSFileModificationDate", [NSNull null],
-													   @"NSFileOwnerAccountName", [NSNull null],
-													   @"NSFileGroupOwnerAccountName", [NSNull null],
-													   @"NSFilePosixPermissions", [NSNull null],
-													   @"NSFileExtensionsHidden", [NSNull null],
-                                                               nil]
-                                                        error:nil
-			];
-    }
-	
     saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
     [saveDict setObject:@"0.7" forKey:@"version"];
     [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
@@ -661,22 +632,14 @@
                  forKey:@"displayLen"];
     [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
                  forKey:@"displayNum"];
-    for ( i = 0 ; i < [clippingStore jcListCount]; i++) {
+    for (int i = 0 ; i < [clippingStore jcListCount]; i++)
 		[jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-			[clippingStore clippingContentsAtPosition:i], @"Contents",
-			[clippingStore clippingTypeAtPosition:i], @"Type",
-			[NSNumber numberWithInt:i], @"Position",
-			nil
-			]
-			];
-    }
+                                [clippingStore clippingContentsAtPosition:i], @"Contents",
+                                [clippingStore clippingTypeAtPosition:i], @"Type",
+                                [NSNumber numberWithInt:i], @"Position",nil]];
     [saveDict setObject:jcListArray forKey:@"jcList"];
-	
-    if ( [saveDict writeToFile:[path stringByAppendingString:@"/JCEngine.save"] atomically:true] ) {
-		// NSLog(@"Engine contents saved.");
-    } else {
-		NSLog(@"Engine contents NOT saved.");
-    }
+    [[NSUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)setHotKeyPreferenceForRecorder:(SRRecorderControl *)aRecorder {
@@ -696,7 +659,7 @@
 		[self toggleMainHotKey: aRecorder];
 		[self setHotKeyPreferenceForRecorder: aRecorder];
 	}
-	NSLog(@"code: %lu, flags: %lu", newKeyCombo.code, newKeyCombo.flags);
+	NSLog(@"code: %d, flags: %u", newKeyCombo.code, newKeyCombo.flags);
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
