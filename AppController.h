@@ -97,4 +97,6 @@
 -(IBAction) toggleMainHotKey:(id)sender;
 -(void) setHotKeyPreferenceForRecorder:(SRRecorderControl *)aRecorder;
 
+- (IBAction)enableDropboxButtonClicked:(NSButton*)sender;
+
 @end
