@@ -294,36 +294,25 @@
 //					if ( [clippingStore jcListCount] > 1 ) stackPosition++;
 					stackPosition = 0;
                     [self updateMenu];
-					if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 ) {
+					if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
                         [self saveEngine];
-                    }
                 }
             }
-        } else {
-            // NSLog(@"Contents: Non-string");
-        }
+        } 
     }
-	
 }
 
-- (void)processBezelKeyDown:(NSEvent *)theEvent
-{
+- (void)processBezelKeyDown:(NSEvent *)theEvent {
 	int newStackPosition;
 	// AppControl should only be getting these directly from bezel via delegation
-	if ( [theEvent type] == NSKeyDown )
-	{
-		if ( [theEvent keyCode] == [mainRecorder keyCombo].code )
-		{
-			if ( [theEvent modifierFlags] & NSShiftKeyMask )
-			{
-				[self stackUp];
-			} else {
-				[self stackDown];
-			}
+	if ([theEvent type] == NSKeyDown) {
+		if ([theEvent keyCode] == [mainRecorder keyCombo].code ) {
+			if ([theEvent modifierFlags] & NSShiftKeyMask) [self stackUp];
+			 else [self stackDown];
 			return;
 		}
 		unichar pressed = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
-		switch ( pressed ) {
+		switch (pressed) {
 			case 0x1B:
 				[self hideApp];
 				break;
@@ -621,8 +610,7 @@
 	}
 }
 
--(void) saveEngine
-{
+-(void) saveEngine {
     NSMutableDictionary *saveDict;
     NSMutableArray *jcListArray = [NSMutableArray array];
     saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
@@ -663,13 +651,14 @@
 	NSLog(@"code: %d, flags: %u", newKeyCombo.code, newKeyCombo.flags);
 }
 
-- (IBAction)enableDropboxButtonClicked:(NSButton*)sender
-{
+- (IBAction)toggleDropboxSync:(NSButtonCell*)sender {
     DBUserDefaults * defaults = [DBUserDefaults standardUserDefaults];
     // First, let's check to make sure Dropbox is available on this machine
-    if([DBUserDefaults isDropboxAvailable])
-        [defaults promptDropboxUnavailable];        
-    else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
+    if (sender.state == 1) { 
+        if([DBUserDefaults isDropboxAvailable])
+            [defaults promptDropboxUnavailable];        
+        else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
+    } else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
 }
 
 
@@ -677,6 +666,9 @@
 	if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
 		NSLog(@"Saving on exit");
         [self saveEngine];
+    } else {
+        // Remove clips from store
+        [[DBUserDefaults standardUserDefaults] setValue:[NSDictionary dictionary] forKey:@"store"];
     }
 	//Unregister our hot key (not required)
 	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
@@ -691,6 +683,27 @@
 		removeObserver:self
 				  name:@"AppleSelectedInputSourcesChangedNotification"
 				object:nil];
+}
+
+-(BOOL) dropboxSync {
+    return [DBUserDefaults isDropboxSyncEnabled];
+}
+-(void)setDropboxSync:(BOOL)enable {
+    DBUserDefaults * defaults = [DBUserDefaults standardUserDefaults];
+    if (enable) { 
+        if([DBUserDefaults isDropboxAvailable])
+            [defaults promptDropboxUnavailable];        
+        else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
+    } else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
+}
+
+- (void)syncPromptDidSelectOption:(DBSyncPromptOption)option {                                                              
+    //TODO
+}
+
+- (void)syncPromptDidCancel {
+    [dropboxCheckbox setState:0];
+    [self setDropboxSync:NO];
 }
 
 - (void) dealloc {
