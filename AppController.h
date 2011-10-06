@@ -17,7 +17,7 @@
 
 @class SGHotKey;
 
-@interface AppController : NSObject <DBSyncPromptDelegate> {
+@interface AppController : NSObject {
     BezelWindow					*bezel;
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;

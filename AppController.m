@@ -49,7 +49,10 @@
         [NSNumber numberWithFloat:320.0],
         @"bezelHeight",
         [NSDictionary dictionary],
-        @"store", nil]];
+        @"store",
+        [NSNumber numberWithBool:YES],
+        @"skipPasswordFields",
+        nil]];
 	return [super init];
 }
 
@@ -121,6 +124,13 @@
 	// Stack position starts @ 0 by default
 	stackPosition = 0;
 
+    [[NSNotificationCenter defaultCenter] addObserverForName:@"DBSyncPromptUserDidCancelNotification" 
+     object:nil queue:nil usingBlock:^(NSNotification *notification) {
+                  [self setDropboxSync:NO];
+
+         //[[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
+
+     }];
 	[NSApp activateIgnoringOtherApps: YES];
 }
 
@@ -283,8 +293,8 @@
         pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         if ( type != nil ) {
 			NSString *contents = [jcPasteboard stringForType:type];
-			if ( contents == nil ) {
-//                NSLog(@"Contents: Empty");
+			if ( contents == nil || ([jcPasteboard stringForType:@"PasswordPboardType"] && [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"]) ) {
+                NSLog(@"Contents: Empty");
             } else {
 				if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
 					&&  ! [pbCount isEqualTo:pbBlockCount] ) {
@@ -652,6 +662,7 @@
 }
 
 - (IBAction)toggleDropboxSync:(NSButtonCell*)sender {
+
     DBUserDefaults * defaults = [DBUserDefaults standardUserDefaults];
     // First, let's check to make sure Dropbox is available on this machine
     if (sender.state == 1) { 
@@ -694,16 +705,10 @@
         if([DBUserDefaults isDropboxAvailable])
             [defaults promptDropboxUnavailable];        
         else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
-    } else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
-}
-
-- (void)syncPromptDidSelectOption:(DBSyncPromptOption)option {                                                              
-    //TODO
-}
-
-- (void)syncPromptDidCancel {
-    [dropboxCheckbox setState:0];
-    [self setDropboxSync:NO];
+    } else {
+        [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
+        [dropboxCheckbox setState:NSOffState];   
+    }
 }
 
 - (void) dealloc {
