@@ -181,6 +181,20 @@
     return clipHasName;
 }
 
+- (BOOL)isEqual:(id)other {
+    if (other == self)
+        return YES;
+    if (!other || ![other isKindOfClass:[self class]])
+        return NO;
+    JumpcutClipping * otherClip = (JumpcutClipping *)other;
+    return ([self.type isEqualToString:otherClip.type] &&
+            [self.displayString isEqualToString:otherClip.displayString] &&
+            (self.displayLength == otherClip.displayLength) &&
+            [self.contents isEqualToString:otherClip.contents]);
+}
+
+
+
 -(void) dealloc
 {
     [clipContents release];

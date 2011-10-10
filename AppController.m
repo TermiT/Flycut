@@ -14,6 +14,7 @@
 #import "SRRecorderCell.h"
 #import "UKLoginItemRegistry.h"
 #import "NSWindow+TrueCenter.h"
+#import "NSWindow+ULIZoomEffect.h"
 #import "DBUserDefaults.h"
 
 #define _DISPLENGTH 40
@@ -52,6 +53,8 @@
         @"store",
         [NSNumber numberWithBool:YES],
         @"skipPasswordFields",
+        [NSNumber numberWithBool:NO],
+        @"removeDuplicates",
         nil]];
 	return [super init];
 }
@@ -402,7 +405,8 @@
 		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
 	} 
 	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
-		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];	[bezel makeKeyAndOrderFront:nil];
+		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
+    [bezel makeKeyAndOrderFrontWithPopEffect];
 	isBezelDisplayed = YES;
 }
 
