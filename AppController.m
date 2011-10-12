@@ -55,6 +55,8 @@
         @"skipPasswordFields",
         [NSNumber numberWithBool:NO],
         @"removeDuplicates",
+        [NSNumber numberWithBool:YES],
+        @"popUpAnimation",
         nil]];
 	return [super init];
 }
@@ -406,7 +408,9 @@
 	} 
 	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
 		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-    [bezel makeKeyAndOrderFrontWithPopEffect];
+    if ([[DBUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"]) 
+        [bezel makeKeyAndOrderFrontWithPopEffect];
+    else [bezel makeKeyAndOrderFront:self];
 	isBezelDisplayed = YES;
 }
 
