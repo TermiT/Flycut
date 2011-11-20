@@ -337,10 +337,12 @@
                 break;
 			case NSUpArrowFunctionKey: 
 			case NSLeftArrowFunctionKey: 
+            case 0x6B: // k
 				[self stackUp];
 				break;
 			case NSDownArrowFunctionKey: 
 			case NSRightArrowFunctionKey:
+            case 0x6A: // j
 				[self stackDown];
 				break;
             case NSHomeFunctionKey:
