@@ -322,6 +322,7 @@
 			return;
 		}
 		unichar pressed = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+        NSUInteger modifiers = [theEvent modifierFlags];
 		switch ( pressed ) {
 			case 0x1B:
 				[self hideApp];
@@ -329,6 +330,11 @@
 			case 0x3: case 0xD: // Enter or Return
 				[self pasteFromStack];
 				break;
+            case 44: // Comma
+                if ( modifiers & NSCommandKeyMask ) {
+                    [self showPreferencePanel:nil];
+                }
+                break;
 			case NSUpArrowFunctionKey: 
 			case NSLeftArrowFunctionKey: 
 				[self stackUp];
