@@ -322,6 +322,7 @@
 			return;
 		}
 		unichar pressed = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+        NSUInteger modifiers = [theEvent modifierFlags];
 		switch ( pressed ) {
 			case 0x1B:
 				[self hideApp];
@@ -329,46 +330,54 @@
 			case 0x3: case 0xD: // Enter or Return
 				[self pasteFromStack];
 				break;
+            case 0x2C: // Comma
+                if ( modifiers & NSCommandKeyMask ) {
+                    [self showPreferencePanel:nil];
+                }
+                break;
 			case NSUpArrowFunctionKey: 
 			case NSLeftArrowFunctionKey: 
+            case 0x6B: // k
 				[self stackUp];
 				break;
 			case NSDownArrowFunctionKey: 
 			case NSRightArrowFunctionKey:
+            case 0x6A: // j
 				[self stackDown];
 				break;
             case NSHomeFunctionKey:
 				if ( [clippingStore jcListCount] > 0 ) {
 					stackPosition = 0;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", 
-                                           1, [clippingStore jcListCount]]];
-
-					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+					[self updateBezel];
 				}
 				break;
             case NSEndFunctionKey:
 				if ( [clippingStore jcListCount] > 0 ) {
 					stackPosition = [clippingStore jcListCount] - 1;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+					[self updateBezel];
 				}
 				break;
             case NSPageUpFunctionKey:
 				if ( [clippingStore jcListCount] > 0 ) {
 					stackPosition = stackPosition - 10; if ( stackPosition < 0 ) stackPosition = 0;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+					[self updateBezel];
 				}
 				break;
 			case NSPageDownFunctionKey:
 				if ( [clippingStore jcListCount] > 0 ) {
 					stackPosition = stackPosition + 10; if ( stackPosition >= [clippingStore jcListCount] ) stackPosition = [clippingStore jcListCount] - 1;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
-				}
+                    [self updateBezel];
+                }
 				break;
-			case NSBackspaceCharacter: break;
-            case NSDeleteCharacter: break;
+			case NSBackspaceCharacter:
+            case NSDeleteCharacter:
+                if ([clippingStore jcListCount] == 0)
+                    return;
+
+                [clippingStore clearItem:stackPosition];
+                [self updateBezel];
+                [self updateMenu];
+                break;
             case NSDeleteFunctionKey: break;
 			case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: 				// Numeral 
 			case 0x35: case 0x36: case 0x37: case 0x38: case 0x39:
@@ -395,14 +404,28 @@
 	[self toggleMainHotKey:[NSNull null]];
 }
 
+- (void) updateBezel
+{
+    if (stackPosition >= [clippingStore jcListCount] && stackPosition != 0) { // deleted last item
+        stackPosition = [clippingStore jcListCount] - 1;
+    }
+    if (stackPosition == 0 && [clippingStore jcListCount] == 0) { // empty
+        [bezel setText:@""];
+        [bezel setCharString:@"Empty"];
+    }
+    else { // normal
+        [bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+        [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+    }
+}
+
 - (void) showBezel
 {
-	if ( [clippingStore jcListCount] > 0 && [clippingStore jcListCount] > stackPosition ) {
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
-	} 
-	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
-		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];	[bezel makeKeyAndOrderFront:nil];
+    [self updateBezel];
+	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)]) {
+		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
+        [bezel makeKeyAndOrderFront:nil];
+    }
 	isBezelDisplayed = YES;
 }
 

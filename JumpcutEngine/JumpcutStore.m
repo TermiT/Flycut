@@ -79,6 +79,10 @@
     jcList = emptyJCList;
 }
 
+-(void) clearItem:(int)index
+{
+    [jcList removeObjectAtIndex:index];
+}
 
 // Set various values
 -(void) setRememberNum:(int)nowRemembering
