@@ -73,6 +73,7 @@
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type;
 
 // Delete a clipping
+-(void) clearItem:(int)index;
 
 // Delete all list clippings
 -(void) clearList;

@@ -75,6 +75,7 @@
 -(void)hitMainHotKey:(SGHotKey *)hotKey;
 
 // Bezel related
+-(void) updateBezel;
 -(void) showBezel;
 -(void) hideBezel;
 -(void) processBezelKeyDown:(NSEvent *)theEvent;
