@@ -121,18 +121,19 @@
 
 -(void) resetDisplayString
 {
-    NSString *newDisplayString, *firstLineOfClipping;
+    NSString *newDisplayString, *firstLineOfClipping, *trimmedString;
 	NSUInteger start, lineEnd, contentsEnd;
 	NSRange startRange = NSMakeRange(0,0);
 	NSRange contentsRange;
 	// We're resetting the display string, so release the old one.
     [clipDisplayString release];
 	// We want to restrict the display string to the clipping contents through the first line break.
-	[clipContents getLineStart:&start end:&lineEnd contentsEnd:&contentsEnd forRange:startRange];
+    trimmedString = [clipContents stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    [trimmedString getLineStart:&start end:&lineEnd contentsEnd:&contentsEnd forRange:startRange];
 	contentsRange = NSMakeRange(0, contentsEnd);
-	firstLineOfClipping = [clipContents substringWithRange:contentsRange];
+	firstLineOfClipping = [trimmedString substringWithRange:contentsRange];
     if ( [firstLineOfClipping length] > clipDisplayLength ) {
-        newDisplayString = [[NSString stringWithString:[firstLineOfClipping substringToIndex:clipDisplayLength]] stringByAppendingString:@"..."];   
+        newDisplayString = [[NSString stringWithString:[firstLineOfClipping substringToIndex:clipDisplayLength]] stringByAppendingString:@"…"];   
     } else {
         newDisplayString = [NSString stringWithString:firstLineOfClipping];
     }
@@ -179,6 +180,20 @@
 {
     return clipHasName;
 }
+
+- (BOOL)isEqual:(id)other {
+    if (other == self)
+        return YES;
+    if (!other || ![other isKindOfClass:[self class]])
+        return NO;
+    JumpcutClipping * otherClip = (JumpcutClipping *)other;
+    return ([self.type isEqualToString:otherClip.type] &&
+            [self.displayString isEqualToString:otherClip.displayString] &&
+            (self.displayLength == otherClip.displayLength) &&
+            [self.contents isEqualToString:otherClip.contents]);
+}
+
+
 
 -(void) dealloc
 {

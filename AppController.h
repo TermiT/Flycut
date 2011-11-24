@@ -13,6 +13,7 @@
 #import "SRKeyCodeTransformer.h"
 #import "JumpcutStore.h"
 #import "SGHotKey.h"
+#import "DBSyncPromptDelegate.h"
 
 @class SGHotKey;
 
@@ -51,7 +52,12 @@
 	NSDictionary *standardPreferences;
     int jcDisplayNum;
 	BOOL issuedRememberResizeWarning;
+    BOOL dropboxSync;
+    
+    IBOutlet NSButtonCell * dropboxCheckbox;
 }
+
+//@property(retain, nonatomic) IBOutlet NSButtonCell * dropboxCheckbox;
 
 // Basic functionality
 -(void) pollPB:(NSTimer *)timer;
@@ -86,6 +92,9 @@
 -(IBAction) processMenuClippingSelection:(id)sender;
 -(IBAction) activateAndOrderFrontStandardAboutPanel:(id)sender;
 
+-(BOOL) dropboxSync;
+-(void)setDropboxSync:(BOOL)enable;
+
 // Preference related
 -(IBAction) showPreferencePanel:(id)sender;
 -(IBAction) setRememberNumPref:(id)sender;
@@ -97,7 +106,5 @@
 -(IBAction) toggleLoadOnStartup:(id)sender;
 -(IBAction) toggleMainHotKey:(id)sender;
 -(void) setHotKeyPreferenceForRecorder:(SRRecorderControl *)aRecorder;
-
-- (IBAction)enableDropboxButtonClicked:(NSButton*)sender;
 
 @end

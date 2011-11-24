@@ -67,6 +67,8 @@
 		DB46BEF114346B2F0025EA0E /* DBUserDefaults.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; };
 		DB46BEF314346C660025EA0E /* DBSyncPromptDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEF214346C660025EA0E /* DBSyncPromptDelegate.h */; };
 		DB46BEF514346C6D0025EA0E /* DBUserDefaults.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEF414346C6D0025EA0E /* DBUserDefaults.h */; };
+		DBEB0C9C1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h in Headers */ = {isa = PBXBuildFile; fileRef = DBEB0C9A1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h */; };
+		DBEB0C9D1442F2AE0080D24E /* NSWindow+ULIZoomEffect.m in Sources */ = {isa = PBXBuildFile; fileRef = DBEB0C9B1442F2AE0080D24E /* NSWindow+ULIZoomEffect.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -168,6 +170,8 @@
 		DB46BEEE14346A7C0025EA0E /* DBUserDefaultsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DBUserDefaultsController.m; sourceTree = "<group>"; };
 		DB46BEF214346C660025EA0E /* DBSyncPromptDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DBSyncPromptDelegate.h; path = ../DBUserDefaults.framework/Headers/DBSyncPromptDelegate.h; sourceTree = "<group>"; };
 		DB46BEF414346C6D0025EA0E /* DBUserDefaults.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DBUserDefaults.h; path = ../DBUserDefaults.framework/Headers/DBUserDefaults.h; sourceTree = "<group>"; };
+		DBEB0C9A1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSWindow+ULIZoomEffect.h"; sourceTree = "<group>"; };
+		DBEB0C9B1442F2AE0080D24E /* NSWindow+ULIZoomEffect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSWindow+ULIZoomEffect.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -314,6 +318,8 @@
 				7761C88F139BDEAF000FB3AB /* RoundRecTextField.m */,
 				773ABFAF13E9AA1A00AE3969 /* NSWindow+TrueCenter.h */,
 				773ABFB013E9AA1A00AE3969 /* NSWindow+TrueCenter.m */,
+				DBEB0C9A1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h */,
+				DBEB0C9B1442F2AE0080D24E /* NSWindow+ULIZoomEffect.m */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -398,6 +404,7 @@
 				7761C8B2139BDF12000FB3AB /* SRValidator.h in Headers */,
 				773ABFB113E9AA1A00AE3969 /* NSWindow+TrueCenter.h in Headers */,
 				DB46BEEF14346A7C0025EA0E /* DBUserDefaultsController.h in Headers */,
+				DBEB0C9C1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -503,6 +510,7 @@
 				7761C8B3139BDF12000FB3AB /* SRValidator.m in Sources */,
 				773ABFB213E9AA1A00AE3969 /* NSWindow+TrueCenter.m in Sources */,
 				DB46BEF014346A7C0025EA0E /* DBUserDefaultsController.m in Sources */,
+				DBEB0C9D1442F2AE0080D24E /* NSWindow+ULIZoomEffect.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

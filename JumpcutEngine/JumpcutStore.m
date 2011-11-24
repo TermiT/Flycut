@@ -26,6 +26,7 @@
 
 #import "JumpcutStore.h"
 #import "JumpcutClipping.h"
+#import "DBUserDefaults.h"
 
 @implementation JumpcutStore
 
@@ -56,7 +57,11 @@
     newClipping = [[JumpcutClipping alloc] initWithContents:clipping
 												   withType:type
 										  withDisplayLength:[self displayLen]];
-	// Push it onto our recent clippings stack
+
+    if ([jcList containsObject:newClipping] && [[[DBUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
+        [jcList removeObject:newClipping];
+    }
+    // Push it onto our recent clippings stack
 	[jcList insertObject:newClipping atIndex:0];
 	// Delete clippings older than jcRememberNum
 	while ( [jcList count] > jcRememberNum ) {

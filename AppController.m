@@ -14,6 +14,7 @@
 #import "SRRecorderCell.h"
 #import "UKLoginItemRegistry.h"
 #import "NSWindow+TrueCenter.h"
+#import "NSWindow+ULIZoomEffect.h"
 #import "DBUserDefaults.h"
 
 #define _DISPLENGTH 40
@@ -49,7 +50,14 @@
         [NSNumber numberWithFloat:320.0],
         @"bezelHeight",
         [NSDictionary dictionary],
-        @"store", nil]];
+        @"store",
+        [NSNumber numberWithBool:YES],
+        @"skipPasswordFields",
+        [NSNumber numberWithBool:NO],
+        @"removeDuplicates",
+        [NSNumber numberWithBool:YES],
+        @"popUpAnimation",
+        nil]];
 	return [super init];
 }
 
@@ -121,6 +129,13 @@
 	// Stack position starts @ 0 by default
 	stackPosition = 0;
 
+    [[NSNotificationCenter defaultCenter] addObserverForName:@"DBSyncPromptUserDidCancelNotification" 
+     object:nil queue:nil usingBlock:^(NSNotification *notification) {
+                  [self setDropboxSync:NO];
+
+         //[[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
+
+     }];
 	[NSApp activateIgnoringOtherApps: YES];
 }
 
@@ -283,8 +298,8 @@
         pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         if ( type != nil ) {
 			NSString *contents = [jcPasteboard stringForType:type];
-			if ( contents == nil ) {
-//                NSLog(@"Contents: Empty");
+			if ( contents == nil || ([jcPasteboard stringForType:@"PasswordPboardType"] && [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"]) ) {
+                NSLog(@"Contents: Empty");
             } else {
 				if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
 					&&  ! [pbCount isEqualTo:pbBlockCount] ) {
@@ -294,37 +309,26 @@
 //					if ( [clippingStore jcListCount] > 1 ) stackPosition++;
 					stackPosition = 0;
                     [self updateMenu];
-					if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 ) {
+					if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
                         [self saveEngine];
-                    }
                 }
             }
-        } else {
-            // NSLog(@"Contents: Non-string");
-        }
+        } 
     }
-	
 }
 
-- (void)processBezelKeyDown:(NSEvent *)theEvent
-{
+- (void)processBezelKeyDown:(NSEvent *)theEvent {
 	int newStackPosition;
 	// AppControl should only be getting these directly from bezel via delegation
-	if ( [theEvent type] == NSKeyDown )
-	{
-		if ( [theEvent keyCode] == [mainRecorder keyCombo].code )
-		{
-			if ( [theEvent modifierFlags] & NSShiftKeyMask )
-			{
-				[self stackUp];
-			} else {
-				[self stackDown];
-			}
+	if ([theEvent type] == NSKeyDown) {
+		if ([theEvent keyCode] == [mainRecorder keyCombo].code ) {
+			if ([theEvent modifierFlags] & NSShiftKeyMask) [self stackUp];
+			 else [self stackDown];
 			return;
 		}
 		unichar pressed = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
         NSUInteger modifiers = [theEvent modifierFlags];
-		switch ( pressed ) {
+		switch (pressed) {
 			case 0x1B:
 				[self hideApp];
 				break;
@@ -407,26 +411,30 @@
 
 - (void) updateBezel
 {
-    if (stackPosition >= [clippingStore jcListCount] && stackPosition != 0) { // deleted last item
-        stackPosition = [clippingStore jcListCount] - 1;
-    }
-    if (stackPosition == 0 && [clippingStore jcListCount] == 0) { // empty
-        [bezel setText:@""];
-        [bezel setCharString:@"Empty"];
-    }
-    else { // normal
-        [bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
-        [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-    }
+	if (stackPosition >= [clippingStore jcListCount] && stackPosition != 0) { // deleted last item
+		stackPosition = [clippingStore jcListCount] - 1;
+	}
+	if (stackPosition == 0 && [clippingStore jcListCount] == 0) { // empty
+		[bezel setText:@""];
+		[bezel setCharString:@"Empty"];
+	}
+	else { // normal
+		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+	}
 }
 
 - (void) showBezel
 {
-    [self updateBezel];
-	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)]) {
+	if ( [clippingStore jcListCount] > 0 && [clippingStore jcListCount] > stackPosition ) {
+		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+	} 
+	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
 		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-        [bezel makeKeyAndOrderFront:nil];
-    }
+	if ([[DBUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"]) 
+		[bezel makeKeyAndOrderFrontWithPopEffect];
+	else [bezel makeKeyAndOrderFront:self];
 	isBezelDisplayed = YES;
 }
 
@@ -439,14 +447,14 @@
 
 -(void)hideApp
 {
-    [self hideBezel];
+	[self hideBezel];
 	isBezelPinned = NO;
 	[NSApp hide:self];
 }
 
 - (void) applicationWillResignActive:(NSApplication *)app; {
 	// This should be hidden anyway, but just in case it's not.
-    [self hideBezel];
+	[self hideBezel];
 }
 
 
@@ -644,8 +652,7 @@
 	}
 }
 
--(void) saveEngine
-{
+-(void) saveEngine {
     NSMutableDictionary *saveDict;
     NSMutableArray *jcListArray = [NSMutableArray array];
     saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
@@ -686,13 +693,15 @@
 	NSLog(@"code: %d, flags: %u", newKeyCombo.code, newKeyCombo.flags);
 }
 
-- (IBAction)enableDropboxButtonClicked:(NSButton*)sender
-{
+- (IBAction)toggleDropboxSync:(NSButtonCell*)sender {
+
     DBUserDefaults * defaults = [DBUserDefaults standardUserDefaults];
     // First, let's check to make sure Dropbox is available on this machine
-    if([DBUserDefaults isDropboxAvailable])
-        [defaults promptDropboxUnavailable];        
-    else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
+    if (sender.state == 1) { 
+        if([DBUserDefaults isDropboxAvailable])
+            [defaults promptDropboxUnavailable];        
+        else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
+    } else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
 }
 
 
@@ -700,6 +709,9 @@
 	if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
 		NSLog(@"Saving on exit");
         [self saveEngine];
+    } else {
+        // Remove clips from store
+        [[DBUserDefaults standardUserDefaults] setValue:[NSDictionary dictionary] forKey:@"store"];
     }
 	//Unregister our hot key (not required)
 	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
@@ -714,6 +726,21 @@
 		removeObserver:self
 				  name:@"AppleSelectedInputSourcesChangedNotification"
 				object:nil];
+}
+
+-(BOOL) dropboxSync {
+    return [DBUserDefaults isDropboxSyncEnabled];
+}
+-(void)setDropboxSync:(BOOL)enable {
+    DBUserDefaults * defaults = [DBUserDefaults standardUserDefaults];
+    if (enable) { 
+        if([DBUserDefaults isDropboxAvailable])
+            [defaults promptDropboxUnavailable];        
+        else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
+    } else {
+        [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
+        [dropboxCheckbox setState:NSOffState];   
+    }
 }
 
 - (void) dealloc {
