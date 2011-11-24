@@ -61,6 +61,12 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		AABE497C09FF9CD000A6A239 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = AABE497B09FF9CD000A6A239 /* AppController.m */; };
 		AAFAC85F0A1BD9DD00DC6025 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */; };
+		DB46BEEB143466ED0025EA0E /* DBUserDefaults.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; };
+		DB46BEEF14346A7C0025EA0E /* DBUserDefaultsController.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEED14346A7C0025EA0E /* DBUserDefaultsController.h */; };
+		DB46BEF014346A7C0025EA0E /* DBUserDefaultsController.m in Sources */ = {isa = PBXBuildFile; fileRef = DB46BEEE14346A7C0025EA0E /* DBUserDefaultsController.m */; };
+		DB46BEF114346B2F0025EA0E /* DBUserDefaults.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; };
+		DB46BEF314346C660025EA0E /* DBSyncPromptDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEF214346C660025EA0E /* DBSyncPromptDelegate.h */; };
+		DB46BEF514346C6D0025EA0E /* DBUserDefaults.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEF414346C6D0025EA0E /* DBUserDefaults.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -88,6 +94,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				DB46BEF114346B2F0025EA0E /* DBUserDefaults.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +163,11 @@
 		AABE497A09FF9CD000A6A239 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		AABE497B09FF9CD000A6A239 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DBUserDefaults.framework; sourceTree = "<group>"; };
+		DB46BEED14346A7C0025EA0E /* DBUserDefaultsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DBUserDefaultsController.h; sourceTree = "<group>"; };
+		DB46BEEE14346A7C0025EA0E /* DBUserDefaultsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DBUserDefaultsController.m; sourceTree = "<group>"; };
+		DB46BEF214346C660025EA0E /* DBSyncPromptDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DBSyncPromptDelegate.h; path = ../DBUserDefaults.framework/Headers/DBSyncPromptDelegate.h; sourceTree = "<group>"; };
+		DB46BEF414346C6D0025EA0E /* DBUserDefaults.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DBUserDefaults.h; path = ../DBUserDefaults.framework/Headers/DBUserDefaults.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +177,7 @@
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				AAFAC85F0A1BD9DD00DC6025 /* Carbon.framework in Frameworks */,
+				DB46BEEB143466ED0025EA0E /* DBUserDefaults.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,6 +187,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				DB46BEEC14346A7C0025EA0E /* DBUserDefaultsController */,
 				AABE497A09FF9CD000A6A239 /* AppController.h */,
 				AABE497B09FF9CD000A6A239 /* AppController.m */,
 				7761C89B139BDF12000FB3AB /* ShortcutRecorder */,
@@ -189,6 +203,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */,
 				AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
@@ -344,6 +359,17 @@
 			path = SGHotKeysLib;
 			sourceTree = "<group>";
 		};
+		DB46BEEC14346A7C0025EA0E /* DBUserDefaultsController */ = {
+			isa = PBXGroup;
+			children = (
+				DB46BEED14346A7C0025EA0E /* DBUserDefaultsController.h */,
+				DB46BEEE14346A7C0025EA0E /* DBUserDefaultsController.m */,
+				DB46BEF214346C660025EA0E /* DBSyncPromptDelegate.h */,
+				DB46BEF414346C6D0025EA0E /* DBUserDefaults.h */,
+			);
+			path = DBUserDefaultsController;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -351,6 +377,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB46BEF314346C660025EA0E /* DBSyncPromptDelegate.h in Headers */,
+				DB46BEF514346C6D0025EA0E /* DBUserDefaults.h in Headers */,
 				77A4F3AD139BD72300F39666 /* SGHotKey.h in Headers */,
 				77A4F3AF139BD72300F39666 /* SGHotKeyCenter.h in Headers */,
 				77A4F3B1139BD72300F39666 /* SGKeyCodeTranslator.h in Headers */,
@@ -369,6 +397,7 @@
 				7761C8B0139BDF12000FB3AB /* SRRecorderControl.h in Headers */,
 				7761C8B2139BDF12000FB3AB /* SRValidator.h in Headers */,
 				773ABFB113E9AA1A00AE3969 /* NSWindow+TrueCenter.h in Headers */,
+				DB46BEEF14346A7C0025EA0E /* DBUserDefaultsController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +502,7 @@
 				7761C8B1139BDF12000FB3AB /* SRRecorderControl.m in Sources */,
 				7761C8B3139BDF12000FB3AB /* SRValidator.m in Sources */,
 				773ABFB213E9AA1A00AE3969 /* NSWindow+TrueCenter.m in Sources */,
+				DB46BEF014346A7C0025EA0E /* DBUserDefaultsController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -534,6 +564,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CODE_SIGN_IDENTITY = "";
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = Flycut;
@@ -546,6 +577,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CODE_SIGN_IDENTITY = "";
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

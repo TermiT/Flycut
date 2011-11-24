@@ -9,6 +9,7 @@
 //  at <http://jumpcut.sourceforge.net/> for details.
 
 #import "BezelWindow.h"
+#import "DBUserDefaults.h"
 
 static const float lineHeight = 16;
 
@@ -30,7 +31,7 @@ static const float lineHeight = 16;
 		[self setOpaque:NO];
 		[self setHasShadow:NO];
 		[self setMovableByWindowBackground:NO];
-		[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
+		[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
 		NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
 		textField = [[RoundRecTextField alloc] initWithFrame:textFrame];
 		[[self contentView] addSubview:textField];
@@ -60,7 +61,7 @@ static const float lineHeight = 16;
 
 - (void) update  {
     [super update];
-    [self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
+    [self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
     NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
     [textField setFrame:textFrame];
     NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
@@ -70,7 +71,7 @@ static const float lineHeight = 16;
 
 - (void) setAlpha:(float)newValue
 {
-	[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
+	[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
 	[[self contentView] setNeedsDisplay:YES];
 }
 
