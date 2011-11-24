@@ -4,7 +4,7 @@ Flycut is a clean and simple clipboard manager for developers. Every time you co
 Developed by developers for developers.
 
 **Donation**
-<a href='http://www.pledgie.com/campaigns/16338'>Donate</a>
+<a href='http://www.pledgie.com/campaigns/16338'>here</a>
 
 **MacAppStore:**
 http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12
