@@ -278,7 +278,7 @@
     }
     //9 = "v"
     CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, (CGKeyCode)9, true);
-    CGEventSetFlags(eventDown, kCGEventFlagMaskCommand);
+    CGEventSetFlags(eventDown, kCGEventFlagMaskCommand|0x000008); // some apps want bit set for one of the command keys
     CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, (CGKeyCode)9, false);
     CGEventPost(kCGHIDEventTap, eventDown);
     CGEventPost(kCGHIDEventTap, eventUp);
