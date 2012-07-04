@@ -78,5 +78,8 @@
 // Delete all list clippings
 -(void) clearList;
 
+// Move the clipping at index to the top
+-(void) clippingMoveToTop:(int)index;
+
 // Delete all named clippings
 @end
