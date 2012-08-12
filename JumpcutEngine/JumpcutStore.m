@@ -89,6 +89,13 @@
     [jcList removeObjectAtIndex:index];
 }
 
+-(void) clippingMoveToTop:(int)index
+{
+	JumpcutClipping *clipping = [jcList objectAtIndex:index];
+	[jcList insertObject:clipping atIndex:0];
+	[jcList removeObjectAtIndex:index+1];
+}
+
 // Set various values
 -(void) setRememberNum:(int)nowRemembering
 {

@@ -57,6 +57,8 @@
         @"removeDuplicates",
         [NSNumber numberWithBool:YES],
         @"popUpAnimation",
+        [NSNumber numberWithBool:NO],
+        @"pasteMovesToTop",
         nil]];
 	return [super init];
 }
@@ -251,11 +253,21 @@
 - (void)pasteFromStack
 {
 	if ( [clippingStore jcListCount] > stackPosition ) {
-		[self addClipToPasteboardFromCount:stackPosition];
+		[self pasteIndex: stackPosition];
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 		[self performSelector:@selector(fakeCommandV) withObject:nil afterDelay:0.2];
 	} else {
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+	}
+}
+
+- (void)pasteIndex:(int) position {
+	[self addClipToPasteboardFromCount:position];
+
+	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"pasteMovesToTop"] ) {
+		[clippingStore clippingMoveToTop:position];
+		stackPosition = 0;
+		[self updateMenu];
 	}
 }
 
@@ -541,8 +553,9 @@
 
 -(IBAction)processMenuClippingSelection:(id)sender
 {
-    int index=[[sender menu] indexOfItem:sender];
-    [self addClipToPasteboardFromCount:index];
+	int index=[[sender menu] indexOfItem:sender];
+	[self pasteIndex:index];
+
 	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"menuSelectionPastes"] ) {
 		[self performSelector:@selector(hideApp) withObject:nil];
 		[self performSelector:@selector(fakeCommandV) withObject:nil afterDelay:0.2];
