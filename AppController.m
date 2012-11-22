@@ -261,6 +261,17 @@
 	}
 }
 
+- (void)changeStack
+{
+	if ( [clippingStore jcListCount] > stackPosition ) {
+		[self pasteIndex: stackPosition];
+		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+	} else {
+		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+	}
+}
+
+
 - (void)pasteIndex:(int) position {
 	[self addClipToPasteboardFromCount:position];
 
@@ -344,9 +355,12 @@
 			case 0x1B:
 				[self hideApp];
 				break;
-			case 0x3: case 0xD: // Enter or Return
+            case 0xD: // Enter or Return
 				[self pasteFromStack];
 				break;
+			case 0x3:
+                [self changeStack];
+                break;
             case 0x2C: // Comma
                 if ( modifiers & NSCommandKeyMask ) {
                     [self showPreferencePanel:nil];
