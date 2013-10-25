@@ -87,6 +87,11 @@
     jcList = emptyJCList;
 }
 
+-(void) mergeList {
+    NSString *merge = [[[[jcList reverseObjectEnumerator] allObjects] valueForKey:@"clipContents"] componentsJoinedByString:@"\n"];
+    [self addClipping:merge ofType:NSStringFromClass([merge class])];
+}
+
 -(void) clearItem:(int)index
 {
     [jcList removeObjectAtIndex:index];

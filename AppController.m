@@ -519,6 +519,11 @@
     }
 }
 
+-(IBAction)mergeClippingList:(id)sender {
+    [clippingStore mergeList];
+    [self updateMenu];
+}
+
 - (void)updateMenu {
     
     NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]];

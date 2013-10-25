@@ -69,6 +69,7 @@
 -(void) stackUp;
 -(void) stackDown;
 -(IBAction)clearClippingList:(id)sender;
+-(IBAction)mergeClippingList:(id)sender;
 
 // Stack related
 -(BOOL) isValidClippingNumber:(NSNumber *)number;
