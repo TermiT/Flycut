@@ -51,6 +51,9 @@
 
 // Add a clipping
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type{
+    if ([clipping length] == 0) {
+        return;
+    }
     // Clipping object
     JumpcutClipping * newClipping;
 	// Create clipping
