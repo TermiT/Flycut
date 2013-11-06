@@ -51,6 +51,9 @@
 
 // Add a clipping
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type{
+    if ([clipping length] == 0) {
+        return;
+    }
     // Clipping object
     JumpcutClipping * newClipping;
 	// Create clipping
@@ -82,6 +85,11 @@
     emptyJCList = [[NSMutableArray alloc] init];
     [jcList release];
     jcList = emptyJCList;
+}
+
+-(void) mergeList {
+    NSString *merge = [[[[jcList reverseObjectEnumerator] allObjects] valueForKey:@"clipContents"] componentsJoinedByString:@"\n"];
+    [self addClipping:merge ofType:NSStringFromClass([merge class])];
 }
 
 -(void) clearItem:(int)index

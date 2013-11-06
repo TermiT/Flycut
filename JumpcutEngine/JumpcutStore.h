@@ -78,6 +78,9 @@
 // Delete all list clippings
 -(void) clearList;
 
+// Merge all list clippings
+-(void) mergeList;
+
 // Move the clipping at index to the top
 -(void) clippingMoveToTop:(int)index;
 
