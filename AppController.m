@@ -744,6 +744,8 @@
     } else {
         // Remove clips from store
         [[DBUserDefaults standardUserDefaults] setValue:[NSDictionary dictionary] forKey:@"store"];
+        NSLog(@"Saving preferences on exit");
+        [[DBUserDefaults standardUserDefaults] synchronize];
     }
 	//Unregister our hot key (not required)
 	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
