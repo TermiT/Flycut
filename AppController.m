@@ -299,10 +299,11 @@
         NSLog(@"No event source");
         return;
     }
-    //9 = "v"
-    CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, (CGKeyCode)9, true);
+    NSNumber *keyCode = [srTransformer reverseTransformedValue:@"V"];                               
+    CGKeyCode veeCode = (CGKeyCode)[keyCode intValue];
+    CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, veeCode, true);
     CGEventSetFlags(eventDown, kCGEventFlagMaskCommand|0x000008); // some apps want bit set for one of the command keys
-    CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, (CGKeyCode)9, false);
+    CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, veeCode, false);
     CGEventPost(kCGHIDEventTap, eventDown);
     CGEventPost(kCGHIDEventTap, eventUp);
     CFRelease(eventDown);
