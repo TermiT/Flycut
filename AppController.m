@@ -424,7 +424,7 @@
 				break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				NSLog(@"PRESSED %d", pressed);
-				NSLog(@"CODE %d", [mainRecorder keyCombo].code);
+				NSLog(@"CODE %ld", (long)[mainRecorder keyCombo].code);
 				break;
 		}		
 	}
@@ -723,7 +723,7 @@
 		[self toggleMainHotKey: aRecorder];
 		[self setHotKeyPreferenceForRecorder: aRecorder];
 	}
-	NSLog(@"code: %d, flags: %u", newKeyCombo.code, newKeyCombo.flags);
+	NSLog(@"code: %ld, flags: %lu", (long)newKeyCombo.code, (unsigned long)newKeyCombo.flags);
 }
 
 - (IBAction)toggleDropboxSync:(NSButtonCell*)sender {
