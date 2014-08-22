@@ -59,6 +59,8 @@
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
         @"pasteMovesToTop",
+        [NSNumber numberWithBool:NO],
+        @"hideMenuItem",
         nil]];
 	return [super init];
 }
