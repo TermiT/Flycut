@@ -63,14 +63,14 @@
         @"hideMenuItem",
         nil]];
     
-    [[NSNotificationCenter defaultCenter]
-        addObserverForName:DBUserDefaultsDidChangeNotification
-        object:nil
-        queue:nil
-        usingBlock:^(NSNotification *notification) {
-            [self setStatusItemHidden:[[DBUserDefaults standardUserDefaults] boolForKey:@"hideMenuItem"]];
-        }];
-
+	[[NSNotificationCenter defaultCenter]
+		addObserverForName:DBUserDefaultsDidChangeNotification
+		object:nil
+		queue:nil
+		usingBlock:^(NSNotification *notification) {
+			[self setStatusItemHidden:[[DBUserDefaults standardUserDefaults] boolForKey:@"hideMenuItem"]];
+		}];
+	
 	return [super init];
 }
 
