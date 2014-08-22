@@ -62,6 +62,15 @@
         [NSNumber numberWithBool:NO],
         @"hideMenuItem",
         nil]];
+    
+    [[NSNotificationCenter defaultCenter]
+        addObserverForName:DBUserDefaultsDidChangeNotification
+        object:nil
+        queue:nil
+        usingBlock:^(NSNotification *notification) {
+            [self setStatusItemHidden:[[DBUserDefaults standardUserDefaults] boolForKey:@"hideMenuItem"]];
+        }];
+
 	return [super init];
 }
 
@@ -100,18 +109,7 @@
     pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
 
 	// Build the statusbar menu
-    statusItem = [[[NSStatusBar systemStatusBar]
-            statusItemWithLength:NSVariableStatusItemLength] retain];
-    [statusItem setHighlightMode:YES];
-	if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 1 ) {
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]]; 
-	} else if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 2 ) {
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
-	} else {
-		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
-    }
-	[statusItem setMenu:jcMenu];
-    [statusItem setEnabled:YES];
+    [self setStatusItemHidden:[[DBUserDefaults standardUserDefaults] boolForKey:@"hideMenuItem"]];
 	
     // If our preferences indicate that we are saving, load the dictionary from the saved plist
     // and use it to get everything set up.
@@ -777,6 +775,29 @@
     } else {
         [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
         [dropboxCheckbox setState:NSOffState];   
+    }
+}
+
+-(void)setStatusItemHidden:(BOOL)hidden {
+    if (hidden && statusItem != nil) {
+        NSLog(@"hide status bar");
+        [[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
+        [statusItem release];
+        statusItem = nil;
+    } else if (!hidden && statusItem == nil) {
+        NSLog(@"show status bar");
+        statusItem = [[[NSStatusBar systemStatusBar]
+                statusItemWithLength:NSVariableStatusItemLength] retain];
+        [statusItem setHighlightMode:YES];
+        if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 1 ) {
+            [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]];
+        } else if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 2 ) {
+            [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]];
+        } else {
+            [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
+        }
+        [statusItem setMenu:jcMenu];
+        [statusItem setEnabled:YES];
     }
 }
 

@@ -96,6 +96,9 @@
 -(BOOL) dropboxSync;
 -(void)setDropboxSync:(BOOL)enable;
 
+// Status item related
+-(void)setStatusItemHidden:(BOOL)hidden;
+
 // Preference related
 -(IBAction) showPreferencePanel:(id)sender;
 -(IBAction) setRememberNumPref:(id)sender;
