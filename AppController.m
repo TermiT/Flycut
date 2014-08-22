@@ -100,6 +100,7 @@
 										   styleMask:NSBorderlessWindowMask
 											 backing:NSBackingStoreBuffered
 											   defer:NO];
+    [bezel.preferencesBtn setAction:@selector(onBezelPreferencesBtnAction:)];
     [bezel trueCenter];
 	[bezel setDelegate:self];
 
@@ -287,6 +288,11 @@
 	if ( ! isBezelPinned ) {
 		[self pasteFromStack];
 	}
+}
+
+-(void)onBezelPreferencesBtnAction:(id)sender {
+    [self hideBezel];
+    [self showPreferencePanel:sender];
 }
 
 -(void)fakeCommandV

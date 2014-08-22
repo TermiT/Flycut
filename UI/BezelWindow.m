@@ -52,7 +52,12 @@ static const float lineHeight = 16;
 		[charField setDrawsBackground:YES];
 		[charField setBordered:NO];
 		[charField setAlignment:NSCenterTextAlignment];
-		[self setInitialFirstResponder:textField];         
+        _preferencesBtn = [[[NSButton alloc] initWithFrame:NSMakeRect(self.frame.size.width - 36, 10, 16, 16)] retain];
+        [self.preferencesBtn setImage:[NSImage imageNamed:@"preferences"]];
+        [self.preferencesBtn setBordered:NO];
+        [self.preferencesBtn setButtonType:NSMomentaryChangeButton];
+        [[self contentView] addSubview:self.preferencesBtn];
+		[self setInitialFirstResponder:textField];
 		return self;
 	}
 	return nil;

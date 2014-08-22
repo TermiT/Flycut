@@ -87,6 +87,7 @@
 -(void) hideBezel;
 -(void) processBezelKeyDown:(NSEvent *)theEvent;
 -(void) metaKeysReleased;
+-(void) onBezelPreferencesBtnAction:(id)sender;
 
 // Menu related
 -(void) updateMenu;

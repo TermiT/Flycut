@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0ED04A1A19A7ED1900E722A1 /* preferences.png in Resources */ = {isa = PBXBuildFile; fileRef = 0ED04A1819A7ED1900E722A1 /* preferences.png */; };
+		0ED04A1B19A7ED1900E722A1 /* preferences@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0ED04A1919A7ED1900E722A1 /* preferences@2x.png */; };
 		773ABFB113E9AA1A00AE3969 /* NSWindow+TrueCenter.h in Headers */ = {isa = PBXBuildFile; fileRef = 773ABFAF13E9AA1A00AE3969 /* NSWindow+TrueCenter.h */; };
 		773ABFB213E9AA1A00AE3969 /* NSWindow+TrueCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 773ABFB013E9AA1A00AE3969 /* NSWindow+TrueCenter.m */; };
 		7761C87C139BDE7F000FB3AB /* JumpcutClipping.h in Headers */ = {isa = PBXBuildFile; fileRef = 7761C878139BDE7F000FB3AB /* JumpcutClipping.h */; };
@@ -104,6 +106,8 @@
 
 /* Begin PBXFileReference section */
 		0474801818D46BDB00AA9857 /* Flycut.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Flycut.entitlements; sourceTree = "<group>"; };
+		0ED04A1819A7ED1900E722A1 /* preferences.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = preferences.png; path = Resources/preferences.png; sourceTree = "<group>"; };
+		0ED04A1919A7ED1900E722A1 /* preferences@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "preferences@2x.png"; path = "Resources/preferences@2x.png"; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -259,6 +263,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				0ED04A1819A7ED1900E722A1 /* preferences.png */,
+				0ED04A1919A7ED1900E722A1 /* preferences@2x.png */,
 				7794D3D6139BF2B10047E862 /* flycut.icns */,
 				7761C8CD139BE06B000FB3AB /* com.generalarcade.flycut.16.png */,
 				7761C8CE139BE06B000FB3AB /* com.generalarcade.flycut.32.png */,
@@ -477,10 +483,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */,
+				0ED04A1B19A7ED1900E722A1 /* preferences@2x.png in Resources */,
 				7761C8DB139BE06B000FB3AB /* com.generalarcade.flycut.16.png in Resources */,
 				7761C8DC139BE06B000FB3AB /* com.generalarcade.flycut.32.png in Resources */,
 				7761C8DF139BE06B000FB3AB /* jumpcut.icns in Resources */,
 				7761C8E0139BE06B000FB3AB /* net.sf.jumpcut.ghost_scissors_small.png in Resources */,
+				0ED04A1A19A7ED1900E722A1 /* preferences.png in Resources */,
 				7761C8E1139BE06B000FB3AB /* net.sf.jumpcut.preferences.acknowledgements.tiff in Resources */,
 				7761C8E2139BE06B000FB3AB /* net.sf.jumpcut.preferences.appearance.tiff in Resources */,
 				7761C8E3139BE06B000FB3AB /* net.sf.jumpcut.preferences.general.tiff in Resources */,

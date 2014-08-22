@@ -24,6 +24,8 @@
 	id					delegate;
 }
 
+@property (nonatomic, retain, readonly) NSButton * preferencesBtn;
+
 - (NSColor *)roundedBackgroundWithRect:(NSRect)bgRect withRadius:(float)radius withAlpha:(float)alpha;
 - (NSColor *)sizedBezelBackgroundWithRadius:(float)radius withAlpha:(float)alpha;
 
