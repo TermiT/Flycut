@@ -786,12 +786,10 @@
 
 -(void)setStatusItemHidden:(BOOL)hidden {
     if (hidden && statusItem != nil) {
-        NSLog(@"hide status bar");
         [[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
         [statusItem release];
         statusItem = nil;
     } else if (!hidden && statusItem == nil) {
-        NSLog(@"show status bar");
         statusItem = [[[NSStatusBar systemStatusBar]
                 statusItemWithLength:NSVariableStatusItemLength] retain];
         [statusItem setHighlightMode:YES];
