@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6751" systemVersion="14C1510" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+    <dependencies>
+        <deployment version="1050" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6751"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
+            <connections>
+                <outlet property="delegate" destination="213" id="214"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <menu title="菜单" id="206" userLabel="Menu Extra Menu">
+            <items>
+                <menuItem isSeparatorItem="YES" id="209">
+                    <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                </menuItem>
+                <menuItem title="清除全部" id="207">
+                    <connections>
+                        <action selector="clearClippingList:" target="213" id="404"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="合并所有条目" id="ZiK-rh-Jic">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="mergeClippingList:" target="213" id="5fh-mR-OYH"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="偏好设置…" keyEquivalent="," id="208">
+                    <connections>
+                        <action selector="showPreferencePanel:" target="213" id="487"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="关于 Flycut" id="210">
+                    <connections>
+                        <action selector="activateAndOrderFrontStandardAboutPanel:" target="213" id="735"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="211">
+                    <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                </menuItem>
+                <menuItem title="退出" id="212">
+                    <connections>
+                        <action selector="terminate:" target="-2" id="216"/>
+                    </connections>
+                </menuItem>
+            </items>
+        </menu>
+        <customObject id="213" userLabel="AppController" customClass="AppController">
+            <connections>
+                <outlet property="dropboxCheckbox" destination="858" id="896"/>
+                <outlet property="heightSlider" destination="784" id="806"/>
+                <outlet property="jcMenu" destination="206" id="215"/>
+                <outlet property="mainRecorder" destination="555" id="556"/>
+                <outlet property="prefsPanel" destination="218" id="220"/>
+                <outlet property="widthSlider" destination="776" id="807"/>
+            </connections>
+        </customObject>
+        <userDefaultsController id="808" customClass="DBUserDefaultsController"/>
+        <window title="偏好设置" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="218" userLabel="PrefsPanel" customClass="NSPanel">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="542" y="303" width="507" height="471"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
+            <value key="minSize" type="size" width="213" height="107"/>
+            <view key="contentView" id="219">
+                <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <tabView type="noTabsNoBorder" id="345">
+                        <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <font key="font" metaFont="system"/>
+                        <tabViewItems>
+                            <tabViewItem label="常规" identifier="net.sf.jumpcut.preferences.general.tiff" id="359">
+                                <view key="view" id="360">
+                                    <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="387">
+                                            <rect key="frame" x="-3" y="180" width="555" height="305"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <view key="contentView">
+                                                <rect key="frame" x="0.0" y="0.0" width="555" height="305"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <subviews>
+                                                    <button toolTip="通过按下 &quot;escape&quot; 或 &quot;return&quot; 手动关闭面板。" id="390">
+                                                        <rect key="frame" x="14" y="275" width="97" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="固定面板" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="750">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.stickyBezel" id="811"/>
+                                                        </connections>
+                                                    </button>
+                                                    <popUpButton verticalHuggingPriority="750" id="392">
+                                                        <rect key="frame" x="79" y="133" width="189" height="26"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <popUpButtonCell key="cell" type="push" title="从不" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="395" id="751">
+                                                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                            <font key="font" metaFont="menu"/>
+                                                            <menu key="menu" title="OtherViews" id="393">
+                                                                <items>
+                                                                    <menuItem title="从不" state="on" id="395"/>
+                                                                    <menuItem title="退出时" id="394"/>
+                                                                    <menuItem title="每次复制后" id="396"/>
+                                                                </items>
+                                                            </menu>
+                                                        </popUpButtonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="selectedIndex" keyPath="values.savePreference" id="823"/>
+                                                        </connections>
+                                                    </popUpButton>
+                                                    <button id="398">
+                                                        <rect key="frame" x="14" y="214" width="204" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="开机自动启动 Flycut" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="753">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <action selector="toggleLoadOnStartup:" target="213" id="773"/>
+                                                            <binding destination="808" name="value" keyPath="values.loadOnStartup" id="820"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button id="857">
+                                                        <rect key="frame" x="14" y="194" width="247" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="使用 Dropbox 同步设置和复制历史" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="858">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="213" name="value" keyPath="self.dropboxSync" id="895"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button id="897">
+                                                        <rect key="frame" x="14" y="77" width="247" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="不记录密码框中的内容" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="898">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.skipPasswordFields" id="902"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button id="903">
+                                                        <rect key="frame" x="14" y="57" width="247" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="忽略重复内容" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="904">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.removeDuplicates" id="906"/>
+                                                        </connections>
+                                                    </button>
+                                                    <textField verticalHuggingPriority="750" id="416">
+                                                        <rect key="frame" x="13" y="150" width="76" height="34"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="754">
+                                                            <font key="font" size="13" name="STHeitiSC-Light"/>
+                                                            <string key="title">剪贴选项:
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="418">
+                                                        <rect key="frame" x="13" y="139" width="33" height="14"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="755">
+                                                            <font key="font" metaFont="smallSystem"/>
+                                                            <string key="title">保存
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="419">
+                                                        <rect key="frame" x="13" y="113" width="62" height="14"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="记录" id="756">
+                                                            <font key="font" size="11" name="STHeitiSC-Light"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="420">
+                                                        <rect key="frame" x="134" y="113" width="95" height="14"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="在菜单栏中显示" id="757">
+                                                            <font key="font" metaFont="smallSystem"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="470">
+                                                        <rect key="frame" x="79" y="108" width="25" height="22"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="758">
+                                                            <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="483">
+                                                                <attributedString key="attributedStringForZero">
+                                                                    <fragment content="0"/>
+                                                                </attributedString>
+                                                                <decimal key="minimum" value="NaN"/>
+                                                                <decimal key="maximum" value="NaN"/>
+                                                            </numberFormatter>
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.rememberNum" id="826"/>
+                                                        </connections>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="471">
+                                                        <rect key="frame" x="224" y="108" width="24" height="22"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="759">
+                                                            <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="484">
+                                                                <attributedString key="attributedStringForZero">
+                                                                    <fragment content="0"/>
+                                                                </attributedString>
+                                                                <decimal key="minimum" value="NaN"/>
+                                                                <decimal key="maximum" value="NaN"/>
+                                                            </numberFormatter>
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.displayNum" id="832"/>
+                                                        </connections>
+                                                    </textField>
+                                                    <stepper toolTip="指定保存的条目数" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="472">
+                                                        <rect key="frame" x="104" y="106" width="19" height="27"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="760"/>
+                                                        <connections>
+                                                            <action selector="setRememberNumPref:" target="213" id="485"/>
+                                                            <binding destination="808" name="value" keyPath="values.rememberNum" id="829"/>
+                                                        </connections>
+                                                    </stepper>
+                                                    <stepper toolTip="指定显示在菜单中的条目数" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="473">
+                                                        <rect key="frame" x="249" y="106" width="19" height="27"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="5" maxValue="99" doubleValue="5" valueWraps="YES" id="761"/>
+                                                        <connections>
+                                                            <action selector="setDisplayNumPref:" target="213" id="486"/>
+                                                            <binding destination="808" name="value" keyPath="values.displayNum" previousBinding="852" id="853"/>
+                                                            <binding destination="808" name="maxValue" keyPath="values.rememberNum" id="852"/>
+                                                        </connections>
+                                                    </stepper>
+                                                    <button toolTip="在面板中，最后一个条目向下定位到第一个条目，第一条目向上定位到最后一个条目。" id="692">
+                                                        <rect key="frame" x="14" y="255" width="162" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="循环面板" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="762">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.wraparoundBezel" id="814"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button toolTip="选择菜单中的条目直接粘贴，而不是替换剪贴板的内容。" id="694">
+                                                        <rect key="frame" x="14" y="235" width="162" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="选中后直接粘贴" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="763">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" size="13" name="STHeitiSC-Light"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.menuSelectionPastes" id="817"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button id="914">
+                                                        <rect key="frame" x="14" y="37" width="230" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <buttonCell key="cell" type="check" title="粘贴的条目视为最新" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="915">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" size="13" name="STHeitiSC-Light"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.pasteMovesToTop" id="922"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                            </view>
+                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </box>
+                                    </subviews>
+                                </view>
+                            </tabViewItem>
+                            <tabViewItem label="快捷键" identifier="net.sf.jumpcut.preferences.hotkey.tiff" id="346">
+                                <view key="view" id="347">
+                                    <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="348">
+                                            <rect key="frame" x="0.0" y="227" width="555" height="125"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <view key="contentView">
+                                                <rect key="frame" x="0.0" y="0.0" width="555" height="125"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <subviews>
+                                                    <textField verticalHuggingPriority="750" id="497">
+                                                        <rect key="frame" x="247" y="48" width="255" height="61"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="点击记录器然后直接输入以更改快捷键。点 &quot;X&quot; 以清除快捷键。使用与其他程序冲突的快捷键可能会导致难以预料的结果。" id="748">
+                                                            <font key="font" metaFont="label"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <customView id="555" customClass="SRRecorderControl">
+                                                        <rect key="frame" x="89" y="87" width="150" height="22"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="213" id="591"/>
+                                                        </connections>
+                                                    </customView>
+                                                    <textField verticalHuggingPriority="750" id="350">
+                                                        <rect key="frame" x="34" y="79" width="65" height="26"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="747">
+                                                            <font key="font" size="10" name="STHeitiSC-Light"/>
+                                                            <string key="title">主快捷键
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                </subviews>
+                                            </view>
+                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </box>
+                                    </subviews>
+                                </view>
+                            </tabViewItem>
+                            <tabViewItem label="外观" identifier="net.sf.jumpcut.preferences.appearance.tiff" id="498">
+                                <view key="view" id="499">
+                                    <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="500" userLabel="Box - Box">
+                                            <rect key="frame" x="-3" y="173" width="555" height="316"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <view key="contentView">
+                                                <rect key="frame" x="0.0" y="0.0" width="555" height="316"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <subviews>
+                                                    <slider verticalHuggingPriority="750" id="505">
+                                                        <rect key="frame" x="119" y="279" width="306" height="25"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <sliderCell key="cell" alignment="left" minValue="0.10000000000000001" maxValue="0.90000000000000002" doubleValue="0.25" tickMarkPosition="below" numberOfTickMarks="16" sliderType="linear" id="764">
+                                                            <font key="font" size="12" name="Helvetica"/>
+                                                        </sliderCell>
+                                                        <connections>
+                                                            <action selector="setBezelAlpha:" target="213" id="528"/>
+                                                            <binding destination="808" name="value" keyPath="values.bezelAlpha" id="847"/>
+                                                        </connections>
+                                                    </slider>
+                                                    <textField verticalHuggingPriority="750" id="508">
+                                                        <rect key="frame" x="121" y="262" width="80" height="13"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="765">
+                                                            <font key="font" metaFont="label"/>
+                                                            <string key="title">亮色
+
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="509">
+                                                        <rect key="frame" x="381" y="262" width="42" height="13"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" id="766">
+                                                            <font key="font" metaFont="label"/>
+                                                            <string key="title">暗色
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <slider verticalHuggingPriority="750" id="776">
+                                                        <rect key="frame" x="119" y="216" width="306" height="25"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <sliderCell key="cell" state="on" alignment="left" minValue="200" maxValue="2000" doubleValue="500" tickMarkPosition="below" numberOfTickMarks="50" sliderType="linear" id="781">
+                                                            <font key="font" size="12" name="Helvetica"/>
+                                                        </sliderCell>
+                                                        <connections>
+                                                            <action selector="setBezelWidth:" target="213" id="805"/>
+                                                            <binding destination="808" name="value" keyPath="values.bezelWidth" id="838"/>
+                                                        </connections>
+                                                    </slider>
+                                                    <textField verticalHuggingPriority="750" id="777">
+                                                        <rect key="frame" x="121" y="186" width="80" height="26"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="780">
+                                                            <font key="font" size="10" name="STHeitiSC-Light"/>
+                                                            <string key="title">小
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="778">
+                                                        <rect key="frame" x="381" y="199" width="42" height="13"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="大" id="779">
+                                                            <font key="font" size="10" name="STHeitiSC-Light"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <popUpButton verticalHuggingPriority="750" id="513">
+                                                        <rect key="frame" x="118" y="100" width="130" height="26"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <popUpButtonCell key="cell" type="push" title="Flycut 图标" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="515" id="767">
+                                                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                            <font key="font" metaFont="menu"/>
+                                                            <menu key="menu" title="OtherViews" id="514">
+                                                                <items>
+                                                                    <menuItem title="Flycut 图标" state="on" id="515"/>
+                                                                    <menuItem title="白色剪刀" id="517"/>
+                                                                    <menuItem title="黑色剪刀" id="516"/>
+                                                                </items>
+                                                            </menu>
+                                                        </popUpButtonCell>
+                                                        <connections>
+                                                            <action selector="switchMenuIcon:" target="213" id="529"/>
+                                                            <binding destination="808" name="selectedIndex" keyPath="values.menuIcon" id="844"/>
+                                                        </connections>
+                                                    </popUpButton>
+                                                    <textField verticalHuggingPriority="750" id="521">
+                                                        <rect key="frame" x="16" y="106" width="80" height="13"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="768">
+                                                            <font key="font" metaFont="label"/>
+                                                            <string key="title">菜单栏图标
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="774">
+                                                        <rect key="frame" x="16" y="222" width="80" height="17"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="面板宽度" id="775">
+                                                            <font key="font" metaFont="label"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <slider verticalHuggingPriority="750" id="784">
+                                                        <rect key="frame" x="119" y="159" width="306" height="25"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <sliderCell key="cell" state="on" alignment="left" minValue="200" maxValue="2000" doubleValue="320" tickMarkPosition="below" numberOfTickMarks="50" sliderType="linear" id="791">
+                                                            <font key="font" size="12" name="Helvetica"/>
+                                                        </sliderCell>
+                                                        <connections>
+                                                            <action selector="setBezelHeight:" target="213" id="804"/>
+                                                            <binding destination="808" name="value" keyPath="values.bezelHeight" id="841"/>
+                                                        </connections>
+                                                    </slider>
+                                                    <textField verticalHuggingPriority="750" id="785">
+                                                        <rect key="frame" x="121" y="142" width="80" height="13"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="小" id="790">
+                                                            <font key="font" size="10" name="STHeitiSC-Light"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="786">
+                                                        <rect key="frame" x="381" y="142" width="42" height="13"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="大" id="789">
+                                                            <font key="font" size="10" name="STHeitiSC-Light"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="787">
+                                                        <rect key="frame" x="16" y="165" width="80" height="17"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="面板高度" id="788">
+                                                            <font key="font" metaFont="label"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="526">
+                                                        <rect key="frame" x="16" y="287" width="97" height="13"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="769">
+                                                            <font key="font" metaFont="label"/>
+                                                            <string key="title">面板透明度
+</string>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <button id="910">
+                                                        <rect key="frame" x="14" y="68" width="189" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <buttonCell key="cell" type="check" title="启用面板动画" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="911">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" size="13" name="STHeitiSC-Light"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.popUpAnimation" id="913"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                            </view>
+                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </box>
+                                    </subviews>
+                                </view>
+                            </tabViewItem>
+                            <tabViewItem label="致谢" identifier="com.generalarcade.flycut.32.png" id="352">
+                                <view key="view" id="353">
+                                    <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="354">
+                                            <rect key="frame" x="-3" y="109" width="555" height="376"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <view key="contentView">
+                                                <rect key="frame" x="0.0" y="0.0" width="555" height="376"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <subviews>
+                                                    <scrollView horizontalLineScroll="0.0" horizontalPageScroll="0.0" verticalLineScroll="0.0" verticalPageScroll="0.0" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" id="356">
+                                                        <rect key="frame" x="16" y="16" width="476" height="346"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <clipView key="contentView" id="Yuw-af-7PF">
+                                                            <rect key="frame" x="1" y="1" width="474" height="344"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <subviews>
+                                                                <textView editable="NO" importsGraphics="NO" richText="NO" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="357">
+                                                                    <rect key="frame" x="0.0" y="0.0" width="398" height="406"/>
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                                    <size key="minSize" width="474" height="344"/>
+                                                                    <size key="maxSize" width="551" height="10000000"/>
+                                                                    <attributedString key="textStorage">
+                                                                        <fragment>
+                                                                            <string key="content">Flycut developed by General Arcade (http://www.generalarcade.com/). Flycut is a fork of Jumpcut. Source code avilable on GitHub: http://github.com/TermiT/Flycut
+© General Arcade, 2011.
+
+</string>
+                                                                            <attributes>
+                                                                                <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <font key="NSFont" metaFont="user"/>
+                                                                                <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
+                                                                            </attributes>
+                                                                        </fragment>
+                                                                        <fragment>
+                                                                            <mutableString key="content" base64-UTF8="YES">
+FhZKdW1wY3V0IGlzIG9wZW4gc291cmNlIGNvZGUgYnVpbHQgd2l0aCBvcGVuIHNvdXJjZSBjb2RlLiBK
+dW1wY3V0IGluY29ycG9yYXRlcyB0aGUKZm9sbG93aW5nIGxpYnJhcmllcywgdXNlZCB3aXRoIGdyYXRp
+dHVkZToKCeKAoiBQVEhvdEtleSBieSBRdWVudGluIENhcm5pY2VsbGkgKDxodHRwOi8vcm9ndWVhbW9l
+YmEuY29tLz4pCgnigKIgU2hvcnRjdXRSZWNvcmRlciBieSBKZXNwZXIgZXQgYWwuICg8aHR0cDovL3dh
+ZmZsZXNvZnR3YXJlLm5ldC8+KQoJ4oCiIFNwYXJrbGUgYnkgQW5keSBNYXR1c2NoYWsgKDxodHRwOi8v
+d3d3LmFuZHltYXR1c2NoYWsub3JnLz4pCgnigKIgYSBtb2RpZmllZCB2ZXJzaW9uIG9mIFVLUHJlZnNQ
+YW5lbCBieSBVbGkgS3VzdGVyZXIgKDxodHRwOi8vd3d3LnphdGhyYXMuZGUvPikgCgpBZGRpdGlvbmFs
+bHksIG11Y2ggb2YgdGhlIG9yaWdpbmFsIGNvZGUgZm9yIEp1bXBjdXQgd2FzIGRlcml2ZWQgZnJvbSBC
+cmV0dCBTaW1tb25zJyAKVGlnZXJMYXVuY2ggKDxodHRwOi8vcmFuY2hlcm8uY29tL3RpZ2VybGF1bmNo
+Lz4pIGFuZCBjb25zdGFudCByZWZlcnJhbCB0byB0aGUgZXhhbXBsZXMgYW5kCmRpc2N1c3Npb24gYXQg
+Q29jb2FEZXYuY29tLgoKSnVtcGN1dCBpcyBzdWJqZWN0IHRvIHRoZSBNSVQgTGljZW5zZS4gU291cmNl
+IGNvZGUgYW5kIGxpY2Vuc2UgZGV0YWlscyBhcmUgYXZhaWxhYmxlIGF0IGl0cwpob21lcGFnZSwgKDxo
+dHRwOi8vanVtcGN1dC5zb3VyY2Vmb3JnZS5uZXQ+KS4gVW5sZXNzIG90aGVyd2lzZSBub3RlZCwgSnVt
+cGN1dCBpcyAKY29weXJpZ2h0IMKpIFN0ZXZlIENvb2ssIDIwMDIg4oCTIDIwMDguCg
+</mutableString>
+                                                                            <attributes>
+                                                                                <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <font key="NSFont" metaFont="user"/>
+                                                                            </attributes>
+                                                                        </fragment>
+                                                                        <fragment>
+                                                                            <string key="content">
+Thanks to Clare Bates Congdon, Joshua Davis, Brad Graham, David Jacobs, John Kenzie, Adam Rice, Finn Smith, Vera Tobin, and Andre Torrez for early and ongoing feedback, advice, and encouragement.</string>
+                                                                            <attributes>
+                                                                                <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <font key="NSFont" metaFont="user"/>
+                                                                                <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
+                                                                            </attributes>
+                                                                        </fragment>
+                                                                    </attributedString>
+                                                                    <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                                                    <size key="minSize" width="474" height="344"/>
+                                                                    <size key="maxSize" width="551" height="10000000"/>
+                                                                </textView>
+                                                            </subviews>
+                                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                        </clipView>
+                                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="0.99419729206963237" horizontal="YES" id="771">
+                                                            <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                                                            <autoresizingMask key="autoresizingMask"/>
+                                                        </scroller>
+                                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="0.4805194805194804" horizontal="NO" id="770">
+                                                            <rect key="frame" x="-100" y="-100" width="15" height="170"/>
+                                                            <autoresizingMask key="autoresizingMask"/>
+                                                        </scroller>
+                                                    </scrollView>
+                                                </subviews>
+                                            </view>
+                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </box>
+                                    </subviews>
+                                </view>
+                            </tabViewItem>
+                        </tabViewItems>
+                    </tabView>
+                </subviews>
+            </view>
+        </window>
+        <userDefaultsController representsSharedInstance="YES" id="264" userLabel="Shared Defaults"/>
+        <customObject id="503" userLabel="UKPrefsPanel" customClass="UKPrefsPanel">
+            <connections>
+                <outlet property="tabView" destination="345" id="504"/>
+            </connections>
+        </customObject>
+    </objects>
+</document>

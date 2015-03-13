@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6751" systemVersion="14C1510" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment version="1050" defaultVersion="1060" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <deployment version="1050" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6751"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -11,7 +11,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="Menu" id="206" userLabel="Menu Extra Menu">
             <items>
                 <menuItem isSeparatorItem="YES" id="209">
@@ -59,7 +59,7 @@
             </connections>
         </customObject>
         <userDefaultsController id="808" customClass="DBUserDefaultsController"/>
-        <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" wantsToBeColor="NO" visibleAtLaunch="NO" animationBehavior="default" id="218" userLabel="PrefsPanel" customClass="NSPanel">
+        <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="218" userLabel="PrefsPanel" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="542" y="303" width="507" height="471"/>
@@ -303,7 +303,7 @@
                             <tabViewItem label="Hotkeys" identifier="net.sf.jumpcut.preferences.hotkey.tiff" id="346">
                                 <view key="view" id="347">
                                     <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="348">
                                             <rect key="frame" x="0.0" y="227" width="555" height="125"/>
@@ -351,7 +351,7 @@
                             <tabViewItem label="Appearance" identifier="net.sf.jumpcut.preferences.appearance.tiff" id="498">
                                 <view key="view" id="499">
                                     <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="500" userLabel="Box - Box">
                                             <rect key="frame" x="-3" y="173" width="555" height="316"/>
@@ -535,7 +535,7 @@
                             <tabViewItem label="Acknowledgements" identifier="com.generalarcade.flycut.32.png" id="352">
                                 <view key="view" id="353">
                                     <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="354">
                                             <rect key="frame" x="-3" y="109" width="555" height="376"/>
@@ -549,7 +549,7 @@
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <clipView key="contentView" id="Yuw-af-7PF">
                                                             <rect key="frame" x="1" y="1" width="474" height="344"/>
-                                                            <autoresizingMask key="autoresizingMask"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textView editable="NO" importsGraphics="NO" richText="NO" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="357">
                                                                     <rect key="frame" x="0.0" y="0.0" width="398" height="406"/>
