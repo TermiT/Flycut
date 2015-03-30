@@ -456,10 +456,15 @@
 	if ( [clippingStore jcListCount] > 0 && [clippingStore jcListCount] > stackPosition ) {
 		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
 		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
-	} 
+	}
+	NSRect mainScreenRect = [NSScreen mainScreen].visibleFrame;
+	[bezel setFrame:NSMakeRect(mainScreenRect.origin.x + mainScreenRect.size.width/2 - bezel.frame.size.width/2,
+							   mainScreenRect.origin.y + mainScreenRect.size.height/2 - bezel.frame.size.height/2,
+							   bezel.frame.size.width,
+							   bezel.frame.size.height) display:YES];
 	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
 		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-	if ([[DBUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"]) 
+	if ([[DBUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"])
 		[bezel makeKeyAndOrderFrontWithPopEffect];
 	else [bezel makeKeyAndOrderFront:self];
 	isBezelDisplayed = YES;
