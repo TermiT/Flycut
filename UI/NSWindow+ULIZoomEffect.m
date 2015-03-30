@@ -199,11 +199,11 @@ typedef NSInteger	NSWindowAnimationBehavior;
 
 // Create a borderless window that shows and contains the given image:
 
--(NSWindow*)	uli_animationWindowForZoomEffectWithImage: (NSImage*)snapshotImage
+-(ULIQuicklyAnimatingWindow*)	uli_animationWindowForZoomEffectWithImage: (NSImage*)snapshotImage
 {
 	NSRect			myFrame = [self frame];
 	myFrame.size = [snapshotImage size];
-	NSWindow	*	animationWindow = [[ULIQuicklyAnimatingWindow alloc] initWithContentRect: myFrame styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: NO];
+	ULIQuicklyAnimatingWindow	*	animationWindow = [[ULIQuicklyAnimatingWindow alloc] initWithContentRect: myFrame styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: NO];
 	[animationWindow setOpaque: NO];
 	
 	if( [animationWindow respondsToSelector: @selector(setAnimationBehavior:)] )
@@ -241,7 +241,7 @@ typedef NSInteger	NSWindowAnimationBehavior;
 	NSRect			myFrame = [self frame];
 	NSRect			poppedFrame = NSInsetRect(myFrame, -20, -20);
 	myFrame.size = snapshotImage.size;
-	NSWindow	*	animationWindow = [self uli_animationWindowForZoomEffectWithImage: snapshotImage];
+	ULIQuicklyAnimatingWindow	*	animationWindow = [self uli_animationWindowForZoomEffectWithImage: snapshotImage];
 	[animationWindow setAnimationResizeTime: 0.025];
 	[animationWindow setFrame: myFrame display: YES];
 	[animationWindow orderFront: nil];
