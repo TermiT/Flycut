@@ -109,6 +109,7 @@
 		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
     }
 	[statusItem setMenu:jcMenu];
+    [jcMenu setDelegate:self];
     [statusItem setEnabled:YES];
 	
     // If our preferences indicate that we are saving, load the dictionary from the saved plist
@@ -139,6 +140,46 @@
 
      }];
 	[NSApp activateIgnoringOtherApps: YES];
+}
+
+-(void)menuWillOpen:(NSMenu *)menu
+{
+    NSEvent *event = [NSApp currentEvent];
+    if([event modifierFlags] & NSAlternateKeyMask) {
+        [menu cancelTracking];
+        if (disableStore)
+        {
+            // Update the pbCount so we don't enable and have it immediately copy the thing the user was trying to avoid.
+            // Code copied from pollPB, which is disabled at this point, so the "should be okay" should still be okay.
+            
+            // Reload pbCount with the current changeCount
+            // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
+            [pbCount release];
+            pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
+        }
+        disableStore = [self toggleMenuIconDisabled];
+    }
+}
+
+-(bool)toggleMenuIconDisabled
+{
+    // Toggles the "disabled" look of the menu icon.  Returns if the icon looks disabled or not, allowing the caller to decide if anything is actually being disabled or if they just wanted the icon to be a status display.
+    if (nil == statusItemText)
+    {
+        statusItemText = [statusItem title];
+        statusItemImage = [statusItem image];
+        [statusItem setTitle: @""];
+        [statusItem setImage: [NSImage imageNamed:@"com.generalarcade.flycut.disabled.16.png"]];
+        return true;
+    }
+    else
+    {
+        [statusItem setTitle: statusItemText];
+        [statusItem setImage: statusItemImage];
+        statusItemText = nil;
+        statusItemImage = nil;
+    }
+    return false;
 }
 
 -(IBAction) activateAndOrderFrontStandardAboutPanel:(id)sender
@@ -315,7 +356,7 @@
 -(void)pollPB:(NSTimer *)timer
 {
     NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-    if ( [pbCount intValue] != [jcPasteboard changeCount] ) {
+    if ( [pbCount intValue] != [jcPasteboard changeCount] && !disableStore ) {
         // Reload pbCount with the current changeCount
         // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
         [pbCount release];
