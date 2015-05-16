@@ -102,6 +102,10 @@ static const float lineHeight = 16;
 
 - (void)setText:(NSString *)newText
 {
+    // The Bezel gets slow when newText is huge.  Probably the retain.
+    // Since we can't see that much of it anyway, trim to 2000 characters.
+    if ([newText length] > 2000)
+        newText = [newText substringToIndex:2000];
 	[newText retain];
 	[bezelText release];
 	bezelText = newText;
