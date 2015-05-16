@@ -101,13 +101,7 @@
     statusItem = [[[NSStatusBar systemStatusBar]
             statusItemWithLength:NSVariableStatusItemLength] retain];
     [statusItem setHighlightMode:YES];
-	if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 1 ) {
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]]; 
-	} else if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 2 ) {
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
-	} else {
-		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
-    }
+    [self switchMenuIconTo: [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
 	[statusItem setMenu:jcMenu];
     [jcMenu setDelegate:self];
     [statusItem setEnabled:YES];
@@ -216,15 +210,23 @@
 
 -(IBAction) switchMenuIcon:(id)sender
 {
-	if ([sender indexOfSelectedItem] == 1 ) {
-		[statusItem setImage:nil];
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]]; 
-	} else if ( [sender indexOfSelectedItem] == 2 ) {
-		[statusItem setImage:nil];
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
-	} else {
-		[statusItem setTitle:@""];
-		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
+    [self switchMenuIconTo: [sender indexOfSelectedItem]];
+}
+
+-(void) switchMenuIconTo:(int)number
+{
+    if (number == 1 ) {
+        [statusItem setTitle:@""];
+        [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.black.16.png"]];
+    } else if (number == 2 ) {
+        [statusItem setImage:nil];
+        [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]];
+    } else if ( number == 3 ) {
+        [statusItem setImage:nil];
+        [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]];
+    } else {
+        [statusItem setTitle:@""];
+        [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
     }
 }
 
