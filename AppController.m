@@ -261,6 +261,38 @@
 	}
 }
 
+- (void)saveFromStack
+{
+    if ( [clippingStore jcListCount] > stackPosition ) {
+        // Get text from clipping store.
+        NSString *pbFullText = [self clippingStringWithCount:stackPosition];
+        pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
+        
+        // Get the Desktop directory:
+        NSArray *paths = NSSearchPathForDirectoriesInDomains
+        (NSDesktopDirectory, NSUserDomainMask, YES);
+        NSString *desktopDirectory = [paths objectAtIndex:0];
+        
+        // Get the timestamp string:
+        NSDate *currentDate = [NSDate date];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"YYYY-MM-dd 'at' HH.mm.ss"];
+        NSString *dateString = [dateFormatter stringFromDate:currentDate];
+        
+        // Make a file name to write the data to using the Desktop directory:
+        NSString *fileName = [NSString stringWithFormat:@"%@/Clipping %@.txt",
+                              desktopDirectory, dateString];
+        
+        // Save content to the file
+        [pbFullText writeToFile:fileName
+                  atomically:NO
+                    encoding:NSNonLossyASCIIStringEncoding
+                       error:nil];
+    }
+    
+    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+}
+
 - (void)changeStack
 {
 	if ( [clippingStore jcListCount] > stackPosition ) {
@@ -270,7 +302,6 @@
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 	}
 }
-
 
 - (void)pasteIndex:(int) position {
 	[self addClipToPasteboardFromCount:position];
@@ -422,6 +453,17 @@
 					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
 				}
 				break;
+            case 's': case 'S': // Save / Save-and-delete
+                if ([clippingStore jcListCount] == 0)
+                    return;
+
+                [self saveFromStack];
+                if ( modifiers & NSShiftKeyMask ) {
+                    [clippingStore clearItem:stackPosition];
+                    [self updateBezel];
+                    [self updateMenu];
+                }
+                break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				NSLog(@"PRESSED %d", pressed);
 				NSLog(@"CODE %ld", (long)[mainRecorder keyCombo].code);

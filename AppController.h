@@ -65,6 +65,7 @@
 -(void) setPBBlockCount:(NSNumber *)newPBBlockCount;
 -(void) hideApp;
 -(void) pasteFromStack;
+-(void) saveFromStack;
 -(void) fakeCommandV;
 -(void) stackUp;
 -(void) stackDown;
