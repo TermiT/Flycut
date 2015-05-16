@@ -395,22 +395,43 @@
         [pbCount release];
         pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         if ( type != nil ) {
-			NSString *contents = [jcPasteboard stringForType:type];
-			if ( contents == nil || ([jcPasteboard stringForType:@"PasswordPboardType"] && [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"]) ) {
-                NSLog(@"Contents: Empty");
-            } else {
-				if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
-					&&  ! [pbCount isEqualTo:pbBlockCount] ) {
-                    [clippingStore addClipping:contents
-										ofType:type	];
-//					The below tracks our position down down down... Maybe as an option?
-//					if ( [clippingStore jcListCount] > 1 ) stackPosition++;
-					stackPosition = 0;
-                    [self updateMenu];
-					if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
-                        [self saveEngine];
-                }
-            }
+			NSString *currRunningApp = @"";
+			for (NSRunningApplication *currApp in [[NSWorkspace sharedWorkspace] runningApplications])
+				if ([currApp isActive])
+					currRunningApp = [currApp localizedName];
+			bool largeCopyRisk = [currRunningApp rangeOfString:@"Remote Desktop Connection"].location != NSNotFound;
+
+			// Microsoft's Remote Desktop Connection has an issue with large copy actions, which appears to be in the time it takes to transer them over the network.  The copy starts being registered with OS X prior to completion of the transfer, and if the active application changes during the transfer the copy will be lost.  Indicate this time period by toggling the menu icon at the beginning of all RDC trasfers and back at the end.  Apple's Screen Sharing does not demonstrate this problem.
+			if (largeCopyRisk)
+				[self toggleMenuIconDisabled];
+
+			// In case we need to do a status visual, this will be dispatched out so our thread isn't blocked.
+			dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+			dispatch_async(queue, ^{
+
+				// This operation blocks until the transfer is complete, though it was was here before the RDC issue was discovered.  Convenient.
+                NSString *contents = [jcPasteboard stringForType:type];
+
+				// Toggle back if dealing with the RDC issue.
+				if (largeCopyRisk)
+					[self toggleMenuIconDisabled];
+
+				if ( contents == nil || ([jcPasteboard stringForType:@"PasswordPboardType"] && [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"]) ) {
+                   NSLog(@"Contents: Empty");
+               } else {
+					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
+						&&  ! [pbCount isEqualTo:pbBlockCount] ) {
+                       [clippingStore addClipping:contents
+											ofType:type	];
+//						The below tracks our position down down down... Maybe as an option?
+//						if ( [clippingStore jcListCount] > 1 ) stackPosition++;
+						stackPosition = 0;
+                        [self updateMenu];
+						if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
+                           [self saveEngine];
+                   }
+               }
+            });
         } 
     }
 }
