@@ -59,6 +59,10 @@
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */; };
+		8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */; };
+		8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png */; };
+		8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png */; };
 		AABE497C09FF9CD000A6A239 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = AABE497B09FF9CD000A6A239 /* AppController.m */; };
 		AAFAC85F0A1BD9DD00DC6025 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */; };
 		DB46BEEB143466ED0025EA0E /* DBUserDefaults.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; };
@@ -163,6 +167,10 @@
 		77A4F3AB139BD72300F39666 /* SGKeyCombo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGKeyCombo.h; sourceTree = "<group>"; };
 		77A4F3AC139BD72300F39666 /* SGKeyCombo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGKeyCombo.m; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
+		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
+		8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.disabled.16.png; path = Resources/com.generalarcade.flycut.disabled.16.png; sourceTree = "<group>"; };
+		8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.disabled.32.png; path = Resources/com.generalarcade.flycut.disabled.32.png; sourceTree = "<group>"; };
 		AABE497A09FF9CD000A6A239 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		AABE497B09FF9CD000A6A239 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
@@ -262,6 +270,10 @@
 				7794D3D6139BF2B10047E862 /* flycut.icns */,
 				7761C8CD139BE06B000FB3AB /* com.generalarcade.flycut.16.png */,
 				7761C8CE139BE06B000FB3AB /* com.generalarcade.flycut.32.png */,
+				8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */,
+				8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */,
+				8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png */,
+				8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png */,
 				7761C8D1139BE06B000FB3AB /* jumpcut.icns */,
 				7761C8EB139BE09D000FB3AB /* Info.plist */,
 				7761C8D2139BE06B000FB3AB /* net.sf.jumpcut.ghost_scissors_small.png */,
@@ -480,12 +492,16 @@
 				7761C8DB139BE06B000FB3AB /* com.generalarcade.flycut.16.png in Resources */,
 				7761C8DC139BE06B000FB3AB /* com.generalarcade.flycut.32.png in Resources */,
 				7761C8DF139BE06B000FB3AB /* jumpcut.icns in Resources */,
+				8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png in Resources */,
 				7761C8E0139BE06B000FB3AB /* net.sf.jumpcut.ghost_scissors_small.png in Resources */,
 				7761C8E1139BE06B000FB3AB /* net.sf.jumpcut.preferences.acknowledgements.tiff in Resources */,
+				8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */,
 				7761C8E2139BE06B000FB3AB /* net.sf.jumpcut.preferences.appearance.tiff in Resources */,
 				7761C8E3139BE06B000FB3AB /* net.sf.jumpcut.preferences.general.tiff in Resources */,
+				8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png in Resources */,
 				7761C8E4139BE06B000FB3AB /* net.sf.jumpcut.preferences.hotkey.tiff in Resources */,
 				7761C8E5139BE06B000FB3AB /* net.sf.jumpcut.scissors_bw16.png in Resources */,
+				8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */,
 				7761C8E6139BE06B000FB3AB /* RemoveShortcut.tif in Resources */,
 				7761C8E7139BE06B000FB3AB /* RemoveShortcutPressed.tif in Resources */,
 				7761C8E8139BE06B000FB3AB /* RemoveShortcutRollover.tif in Resources */,

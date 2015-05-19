@@ -101,14 +101,9 @@
     statusItem = [[[NSStatusBar systemStatusBar]
             statusItemWithLength:NSVariableStatusItemLength] retain];
     [statusItem setHighlightMode:YES];
-	if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 1 ) {
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]]; 
-	} else if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 2 ) {
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
-	} else {
-		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
-    }
+    [self switchMenuIconTo: [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
 	[statusItem setMenu:jcMenu];
+    [jcMenu setDelegate:self];
     [statusItem setEnabled:YES];
 	
     // If our preferences indicate that we are saving, load the dictionary from the saved plist
@@ -139,6 +134,46 @@
 
      }];
 	[NSApp activateIgnoringOtherApps: YES];
+}
+
+-(void)menuWillOpen:(NSMenu *)menu
+{
+    NSEvent *event = [NSApp currentEvent];
+    if([event modifierFlags] & NSAlternateKeyMask) {
+        [menu cancelTracking];
+        if (disableStore)
+        {
+            // Update the pbCount so we don't enable and have it immediately copy the thing the user was trying to avoid.
+            // Code copied from pollPB, which is disabled at this point, so the "should be okay" should still be okay.
+            
+            // Reload pbCount with the current changeCount
+            // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
+            [pbCount release];
+            pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
+        }
+        disableStore = [self toggleMenuIconDisabled];
+    }
+}
+
+-(bool)toggleMenuIconDisabled
+{
+    // Toggles the "disabled" look of the menu icon.  Returns if the icon looks disabled or not, allowing the caller to decide if anything is actually being disabled or if they just wanted the icon to be a status display.
+    if (nil == statusItemText)
+    {
+        statusItemText = [statusItem title];
+        statusItemImage = [statusItem image];
+        [statusItem setTitle: @""];
+        [statusItem setImage: [NSImage imageNamed:@"com.generalarcade.flycut.disabled.16.png"]];
+        return true;
+    }
+    else
+    {
+        [statusItem setTitle: statusItemText];
+        [statusItem setImage: statusItemImage];
+        statusItemText = nil;
+        statusItemImage = nil;
+    }
+    return false;
 }
 
 -(IBAction) activateAndOrderFrontStandardAboutPanel:(id)sender
@@ -175,15 +210,23 @@
 
 -(IBAction) switchMenuIcon:(id)sender
 {
-	if ([sender indexOfSelectedItem] == 1 ) {
-		[statusItem setImage:nil];
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]]; 
-	} else if ( [sender indexOfSelectedItem] == 2 ) {
-		[statusItem setImage:nil];
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
-	} else {
-		[statusItem setTitle:@""];
-		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
+    [self switchMenuIconTo: [sender indexOfSelectedItem]];
+}
+
+-(void) switchMenuIconTo:(int)number
+{
+    if (number == 1 ) {
+        [statusItem setTitle:@""];
+        [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.black.16.png"]];
+    } else if (number == 2 ) {
+        [statusItem setImage:nil];
+        [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]];
+    } else if ( number == 3 ) {
+        [statusItem setImage:nil];
+        [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]];
+    } else {
+        [statusItem setTitle:@""];
+        [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
     }
 }
 
@@ -315,7 +358,7 @@
 -(void)pollPB:(NSTimer *)timer
 {
     NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-    if ( [pbCount intValue] != [jcPasteboard changeCount] ) {
+    if ( [pbCount intValue] != [jcPasteboard changeCount] && !disableStore ) {
         // Reload pbCount with the current changeCount
         // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
         [pbCount release];

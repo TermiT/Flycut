@@ -17,7 +17,7 @@
 
 @class SGHotKey;
 
-@interface AppController : NSObject {
+@interface AppController : NSObject <NSMenuDelegate> {
     BezelWindow					*bezel;
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
@@ -35,6 +35,9 @@
 
     // Status item -- the little icon in the menu bar
     NSStatusItem *statusItem;
+    NSString *statusItemText;
+    NSImage *statusItemImage;
+    
     // The menu attatched to same
     IBOutlet NSMenu *jcMenu;
     IBOutlet NSSlider * heightSlider;
@@ -46,6 +49,7 @@
     NSPasteboard *jcPasteboard;
     // Track the clipboard count so we only act when its contents change
     NSNumber *pbCount;
+    BOOL disableStore;
     //stores PasteboardCount for internal Jumpcut pasteboard actions so they don't trigger any events
     NSNumber *pbBlockCount;
     //Preferences
