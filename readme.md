@@ -8,10 +8,12 @@ Every time you copy a code piece, Flycut stores it in history. Later, you can pa
 Developed by developers for developers.
 
 **Donation:**
-If you like Flycut, you can donate <a href='http://www.pledgie.com/campaigns/16338'>here</a>.
+If you like Flycut, you can donate [here](http://www.pledgie.com/campaigns/16338).
 
 **MacAppStore:**
-http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12
+Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12)
+
+Note: the App Store version is not up to date - if you want the latest version with all the features, you will have to compile Flycut yourself.
 
 **License:**
 MIT
