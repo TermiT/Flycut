@@ -55,6 +55,16 @@
         @"store",
         [NSNumber numberWithBool:YES],
         @"skipPasswordFields",
+		[NSNumber numberWithBool:YES],
+		@"skipPboardTypes",
+		@"PasswordPboardType",
+		@"skipPboardTypesList",
+		[NSNumber numberWithBool:NO],
+		@"skipPasswordLengths",
+		@"12, 20, 32",
+		@"skipPasswordLengthsList",
+		[NSNumber numberWithBool:NO],
+		@"revealPasteboardTypes",
         [NSNumber numberWithBool:NO],
         @"removeDuplicates",
         [NSNumber numberWithBool:YES],
@@ -427,6 +437,73 @@
     CFRelease(sourceRef);
 } 
 
+-(BOOL)shouldSkip:(NSString *)contents
+{
+	NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
+
+	// Check to see if we are skipping passwords based on length and characters.
+	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
+	{
+		// Check to see if they want a little help figuring out what types to enter.
+		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
+			[clippingStore addClipping:type ofType:type];
+
+		__block bool skipClipping = NO;
+
+		// Check the array of types to skip.
+		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
+		{
+			NSArray *typesArray = [[[[DBUserDefaults standardUserDefaults] stringForKey:@"skipPboardTypesList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+			[typesArray enumerateObjectsUsingBlock:^(id typeString, NSUInteger idx, BOOL *stop)
+			{
+				if ( [type isEqualToString:typeString] )
+				{
+					skipClipping = YES;
+					stop = YES;
+				}
+			}];
+		}
+		if (skipClipping)
+			return YES;
+
+		// Check the array of lengths to skip for suspicious strings.
+		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordLengths"] )
+		{
+			int contentsLength = [contents length];
+			NSArray *lengthsArray = [[[[DBUserDefaults standardUserDefaults] stringForKey:@"skipPasswordLengthsList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+			[lengthsArray enumerateObjectsUsingBlock:^(id lengthString, NSUInteger idx, BOOL *stop)
+			{
+				if ( [lengthString integerValue] == contentsLength )
+				{
+					NSRange uppercaseLetter = [contents rangeOfCharacterFromSet: [NSCharacterSet uppercaseLetterCharacterSet]];
+					NSRange lowercaseLetter = [contents rangeOfCharacterFromSet: [NSCharacterSet lowercaseLetterCharacterSet]];
+					NSRange decimalDigit = [contents rangeOfCharacterFromSet: [NSCharacterSet decimalDigitCharacterSet]];
+					NSRange punctuation = [contents rangeOfCharacterFromSet: [NSCharacterSet punctuationCharacterSet]];
+					NSRange symbol = [contents rangeOfCharacterFromSet: [NSCharacterSet symbolCharacterSet]];
+					NSRange control = [contents rangeOfCharacterFromSet: [NSCharacterSet controlCharacterSet]];
+					NSRange illegal = [contents rangeOfCharacterFromSet: [NSCharacterSet illegalCharacterSet]];
+					NSRange whitespaceAndNewline = [contents rangeOfCharacterFromSet: [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+					if ( NSNotFound == control.location
+						&& NSNotFound == illegal.location
+						&& NSNotFound == whitespaceAndNewline.location
+						&& NSNotFound != uppercaseLetter.location
+						&& NSNotFound != lowercaseLetter.location
+						&& NSNotFound != decimalDigit.location
+						&& ( NSNotFound != punctuation.location
+							|| NSNotFound != symbol.location ) )
+					{
+						skipClipping = YES;
+						stop = YES;
+					}
+				}
+			}];
+
+			if (skipClipping)
+				return YES;
+		}
+	}
+	return NO;
+}
 
 -(void)pollPB:(NSTimer *)timer
 {
@@ -458,8 +535,8 @@
 				if (largeCopyRisk)
 					[self toggleMenuIconDisabled];
 
-				if ( contents == nil || ([jcPasteboard stringForType:@"PasswordPboardType"] && [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"]) ) {
-                   NSLog(@"Contents: Empty");
+				if ( contents == nil || [self shouldSkip:contents] ) {
+                   NSLog(@"Contents: Empty or skipped");
                } else {
 					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
 						&&  ! [pbCount isEqualTo:pbBlockCount] ) {
