@@ -30,6 +30,8 @@
 		@"ShortcutRecorder mainHotkey",
 		[NSNumber numberWithInt:40],
 		@"rememberNum",
+        [NSNumber numberWithInt:40],
+        @"favoritesRememberNum",
 		[NSNumber numberWithInt:1],
 		@"savePreference",
 		[NSNumber numberWithInt:0],
@@ -76,6 +78,11 @@
 	clippingStore = [[JumpcutStore alloc] initRemembering:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
 											   displaying:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
 										withDisplayLength:_DISPLENGTH];
+    favoritesStore = [[JumpcutStore alloc] initRemembering:[[DBUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
+                                               displaying:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
+                                        withDisplayLength:_DISPLENGTH];
+    stashedStore = NULL;
+    [bezel setColor:NO];
     
     NSRect screenFrame = [[NSScreen mainScreen] frame];
     widthSlider.maxValue = screenFrame.size.width;
@@ -124,7 +131,7 @@
     [pollPBTimer fire];
 
 	// Stack position starts @ 0 by default
-	stackPosition = 0;
+	stackPosition = favoritesStackPosition = stashedStackPosition = 0;
 
     [[NSNotificationCenter defaultCenter] addObserverForName:@"DBSyncPromptUserDidCancelNotification" 
      object:nil queue:nil usingBlock:^(NSNotification *notification) {
@@ -261,6 +268,14 @@
 	[self updateMenu];
 }
 
+-(IBAction) setFavoritesRememberNumPref:(id)sender
+{
+    JumpcutStore *primary = clippingStore;
+    clippingStore = favoritesStore;
+    [self setRememberNumPref: sender];
+    clippingStore = primary;
+}
+
 -(IBAction) setDisplayNumPref:(id)sender
 {
 	[self updateMenu];
@@ -292,6 +307,17 @@
 	}
 }
 
+- (void)restoreStashedStore
+{
+    if (NULL != stashedStore)
+    {
+        clippingStore = stashedStore;
+        stashedStore = NULL;
+        favoritesStackPosition = stackPosition;
+        stackPosition = stashedStackPosition;
+        [bezel setColor:NO];
+    }
+}
 
 - (void)pasteFromStack
 {
@@ -302,6 +328,7 @@
 	} else {
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 	}
+    [self restoreStashedStore];
 }
 
 - (void)saveFromStack
@@ -331,6 +358,21 @@
                   atomically:NO
                     encoding:NSNonLossyASCIIStringEncoding
                        error:nil];
+    }
+    
+    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+    [self restoreStashedStore];
+}
+
+- (void)saveFromStackToFavorites
+{
+    if ( clippingStore != favoritesStore && [clippingStore jcListCount] > stackPosition ) {
+        // Get text from clipping store.
+        [favoritesStore addClipping:[clippingStore clippingContentsAtPosition:stackPosition]
+                            ofType:[clippingStore clippingTypeAtPosition:stackPosition]	];
+        [clippingStore clearItem:stackPosition];
+        [self updateBezel];
+        [self updateMenu];
     }
     
     [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
@@ -528,6 +570,23 @@
                     [self updateMenu];
                 }
                 break;
+            case 'f':
+                if (NULL != stashedStore)
+                    [self restoreStashedStore];
+                else
+                {
+                    stashedStore = clippingStore;
+                    clippingStore = favoritesStore;
+                    stashedStackPosition = stackPosition;
+                    stackPosition = favoritesStackPosition;
+                    [bezel setColor:YES];
+                }
+                [self hideBezel];
+                [self showBezel];
+                break;
+            case 'F':
+                [self saveFromStackToFavorites];
+                break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				NSLog(@"PRESSED %d", pressed);
 				NSLog(@"CODE %ld", (long)[mainRecorder keyCombo].code);
@@ -636,6 +695,7 @@
 	
     // on clear, zap the list and redraw the menu
     if ( choice == NSAlertDefaultReturn ) {
+        [self restoreStashedStore]; // Only clear the clipping store.  Never the favorites.
         [clippingStore clearList];
         [self updateMenu];
 		if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
@@ -754,6 +814,19 @@
             for( NSDictionary *aSavedClipping in toBeRestoredClips)
 				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
 									ofType:[aSavedClipping objectForKey:@"Type"]];
+            
+            // Now for the favorites, same thing.
+            savedJCList =[loadDict objectForKey:@"favoritesList"];
+            if ( [savedJCList isKindOfClass:[NSArray class]] ) {
+            rememberNumPref = [[DBUserDefaults standardUserDefaults]
+                               integerForKey:@"favoritesRememberNum"];
+            rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
+            loadRange = NSMakeRange(0, rangeCap);
+            toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
+            for( NSDictionary *aSavedClipping in toBeRestoredClips)
+                [favoritesStore addClipping:[aSavedClipping objectForKey:@"Contents"]
+                                    ofType:[aSavedClipping objectForKey:@"Type"]];
+            }
         } else NSLog(@"Not array");
         [self updateMenu];
         [loadDict release];
@@ -803,6 +876,8 @@
     [saveDict setObject:@"0.7" forKey:@"version"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
                  forKey:@"rememberNum"];
+    [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]]
+                 forKey:@"favoritesRememberNum"];
     [saveDict setObject:[NSNumber numberWithInt:_DISPLENGTH]
                  forKey:@"displayLen"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
@@ -813,6 +888,13 @@
                                 [clippingStore clippingTypeAtPosition:i], @"Type",
                                 [NSNumber numberWithInt:i], @"Position",nil]];
     [saveDict setObject:jcListArray forKey:@"jcList"];
+    jcListArray = [NSMutableArray array];
+    for (int i = 0 ; i < [favoritesStore jcListCount]; i++)
+        [jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
+                                [favoritesStore clippingContentsAtPosition:i], @"Contents",
+                                [favoritesStore clippingTypeAtPosition:i], @"Type",
+                                [NSNumber numberWithInt:i], @"Position",nil]];
+    [saveDict setObject:jcListArray forKey:@"favoritesList"];
     [[DBUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
     [[DBUserDefaults standardUserDefaults] synchronize];
 }

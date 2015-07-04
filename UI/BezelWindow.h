@@ -22,6 +22,7 @@
 	RoundRecTextField	*charField;
 	NSImageView			*iconView;
 	id					delegate;
+    Boolean             color;
 }
 
 - (NSColor *)roundedBackgroundWithRect:(NSRect)bgRect withRadius:(float)radius withAlpha:(float)alpha;
@@ -31,6 +32,7 @@
 - (void)setTitle:(NSString *)newTitle;
 - (NSString *)text;
 - (void)setText:(NSString *)newText;
+- (void)setColor:(BOOL)value;
 - (void)setCharString:(NSString *)newChar;
 - (void)setAlpha:(float)newValue;
 

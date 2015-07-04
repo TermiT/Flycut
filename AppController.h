@@ -27,12 +27,15 @@
 	BOOL						isBezelDisplayed;
 	BOOL						isBezelPinned; // Currently not used
 	NSString					*currentKeycodeCharacter;
-	int							stackPosition;
+    int							stackPosition;
+    int							favoritesStackPosition;
+    int							stashedStackPosition;
 	
 	// The below were pulled in from JumpcutController
-	JumpcutStore				*clippingStore;
-	
-
+    JumpcutStore				*clippingStore;
+    JumpcutStore				*favoritesStore;
+    JumpcutStore				*stashedStore;
+    
     // Status item -- the little icon in the menu bar
     NSStatusItem *statusItem;
     NSString *statusItemText;
@@ -104,6 +107,7 @@
 // Preference related
 -(IBAction) showPreferencePanel:(id)sender;
 -(IBAction) setRememberNumPref:(id)sender;
+-(IBAction) setFavoritesRememberNumPref:(id)sender;
 -(IBAction) setDisplayNumPref:(id)sender;
 -(IBAction) setBezelAlpha:(id)sender;
 -(IBAction) setBezelHeight:(id)sender;

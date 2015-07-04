@@ -292,6 +292,43 @@
                                                             <binding destination="808" name="value" keyPath="values.pasteMovesToTop" id="922"/>
                                                         </connections>
                                                     </button>
+                                                    <textField verticalHuggingPriority="750" id="Ubt-DS-zHf">
+                                                        <rect key="frame" x="280" y="113" width="62" height="14"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Favorites" id="2L6-OM-5rx">
+                                                            <font key="font" metaFont="smallSystem"/>
+                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" id="dM5-eN-Zvt">
+                                                        <rect key="frame" x="346" y="108" width="25" height="22"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="nes-6O-e5R">
+                                                            <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator="," id="aqt-p2-eya">
+                                                                <attributedString key="attributedStringForZero">
+                                                                    <fragment content="0"/>
+                                                                </attributedString>
+                                                                <decimal key="minimum" value="NaN"/>
+                                                                <decimal key="maximum" value="NaN"/>
+                                                            </numberFormatter>
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.rememberNum" id="887-jS-Kpn"/>
+                                                        </connections>
+                                                    </textField>
+                                                    <stepper toolTip="Controls how many clippings Jumpcut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="wZv-HJ-VdW">
+                                                        <rect key="frame" x="371" y="106" width="19" height="27"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="gUi-gl-RH6"/>
+                                                        <connections>
+                                                            <action selector="setFavoritesRememberNumPref:" target="213" id="rm7-TX-1af"/>
+                                                            <binding destination="808" name="value" keyPath="values.rememberNum" id="nUm-81-DgP"/>
+                                                        </connections>
+                                                    </stepper>
                                                 </subviews>
                                             </view>
                                             <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
