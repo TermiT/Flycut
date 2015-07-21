@@ -67,6 +67,10 @@
 		@"revealPasteboardTypes",
         [NSNumber numberWithBool:NO],
         @"removeDuplicates",
+        [NSNumber numberWithBool:NO],
+        @"saveForgottenClippings",
+        [NSNumber numberWithBool:YES],
+        @"saveForgottenFavorites",
         [NSNumber numberWithBool:YES],
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
@@ -317,6 +321,15 @@
 	}
 }
 
+-(void)switchToFavoritesStore
+{
+    stashedStore = clippingStore;
+    clippingStore = favoritesStore;
+    stashedStackPosition = stackPosition;
+    stackPosition = favoritesStackPosition;
+    [bezel setColor:YES];
+}
+
 - (void)restoreStashedStore
 {
     if (NULL != stashedStore)
@@ -343,6 +356,11 @@
 
 - (void)saveFromStack
 {
+    [self saveFromStackWithPrefix:@""];
+}
+
+- (void)saveFromStackWithPrefix:(NSString*) prefix
+{
     if ( [clippingStore jcListCount] > stackPosition ) {
         // Get text from clipping store.
         NSString *pbFullText = [self clippingStringWithCount:stackPosition];
@@ -360,8 +378,8 @@
         NSString *dateString = [dateFormatter stringFromDate:currentDate];
         
         // Make a file name to write the data to using the Desktop directory:
-        NSString *fileName = [NSString stringWithFormat:@"%@/Clipping %@.txt",
-                              desktopDirectory, dateString];
+        NSString *fileName = [NSString stringWithFormat:@"%@/%@%@Clipping %@.txt",
+                              desktopDirectory, prefix, clippingStore == favoritesStore ? @"Favorite " : @"", dateString];
         
         // Save content to the file
         [pbFullText writeToFile:fileName
@@ -377,6 +395,20 @@
 - (void)saveFromStackToFavorites
 {
     if ( clippingStore != favoritesStore && [clippingStore jcListCount] > stackPosition ) {
+        if ( [favoritesStore rememberNum] == [favoritesStore jcListCount]
+            && [[[DBUserDefaults standardUserDefaults] valueForKey:@"saveForgottenFavorites"] boolValue] )
+        {
+            // favoritesStore is full, so save the last entry before it gets lost.
+            [self switchToFavoritesStore];
+            
+            // Set to last item, save, and restore position.
+            stackPosition = [favoritesStore rememberNum]-1;
+            [self saveFromStackWithPrefix:@"Autosave "];
+            stackPosition = favoritesStackPosition;
+            
+            // Restore prior state.
+            [self restoreStashedStore];
+        }
         // Get text from clipping store.
         [favoritesStore addClipping:[clippingStore clippingContentsAtPosition:stackPosition]
                             ofType:[clippingStore clippingTypeAtPosition:stackPosition]	];
@@ -539,7 +571,19 @@
                    NSLog(@"Contents: Empty or skipped");
                } else {
 					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
-						&&  ! [pbCount isEqualTo:pbBlockCount] ) {
+                        &&  ! [pbCount isEqualTo:pbBlockCount] ) {
+                        
+                        if ( [clippingStore rememberNum] == [clippingStore jcListCount]
+                            && [[[DBUserDefaults standardUserDefaults] valueForKey:@"saveForgottenClippings"] boolValue] )
+                        {
+                            // clippingStore is full, so save the last entry before it gets lost.
+                            // Set to last item, save, and restore position.
+                            int savePosition = stackPosition;
+                            stackPosition = [clippingStore rememberNum]-1;
+                            [self saveFromStackWithPrefix:@"Autosave "];
+                            stackPosition = savePosition;
+                        }
+                        
                        [clippingStore addClipping:contents
 											ofType:type	];
 //						The below tracks our position down down down... Maybe as an option?
@@ -651,13 +695,7 @@
                 if (NULL != stashedStore)
                     [self restoreStashedStore];
                 else
-                {
-                    stashedStore = clippingStore;
-                    clippingStore = favoritesStore;
-                    stashedStackPosition = stackPosition;
-                    stackPosition = favoritesStackPosition;
-                    [bezel setColor:YES];
-                }
+                    [self switchToFavoritesStore];
                 [self hideBezel];
                 [self showBezel];
                 break;

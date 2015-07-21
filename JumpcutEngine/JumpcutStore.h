@@ -61,6 +61,7 @@
 -(void) setDisplayLen:(int)newDisplayLength;
 
 // Retrieve various values
+-(int) rememberNum;
 -(int) displayLen;
 -(int) jcListCount;
 -(NSString *) clippingContentsAtPosition:(int)index;

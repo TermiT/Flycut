@@ -133,6 +133,11 @@
     }
 }
 
+-(int) rememberNum
+{
+    return jcRememberNum;
+}
+
 -(int) displayLen
 {
     return jcDisplayLen;
