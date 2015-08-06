@@ -18,6 +18,9 @@ Note: the App Store version is not up to date - if you want the latest version w
 **License:**
 MIT
 
+**Documentation:**
+[Help File](help.md)
+
 **Todo:**
 
 * Big refactoring
