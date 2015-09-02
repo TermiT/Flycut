@@ -146,6 +146,21 @@
 
 	// Stack position starts @ 0 by default
 	stackPosition = favoritesStackPosition = stashedStackPosition = 0;
+    
+    
+    // The load-on-startup check can be really slow, so this will be dispatched out so our thread isn't blocked.
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(queue, ^{
+        // This can take five seconds, perhaps more, so do it in the background instead of holding up opening of the preference panel.
+        int checkLoginRegistry = [UKLoginItemRegistry indexForLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
+        if ( checkLoginRegistry >= 1 ) {
+            [[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+                                                     forKey:@"loadOnStartup"];
+        } else {
+            [[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+                                                     forKey:@"loadOnStartup"];
+        }
+    });
 
     [[NSNotificationCenter defaultCenter] addObserverForName:@"DBSyncPromptUserDidCancelNotification" 
      object:nil queue:nil usingBlock:^(NSNotification *notification) {
@@ -296,16 +311,7 @@
 }
 
 -(IBAction) showPreferencePanel:(id)sender
-{                                    
-	int checkLoginRegistry = [UKLoginItemRegistry indexForLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
-	if ( checkLoginRegistry >= 1 ) {
-		[[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
-												 forKey:@"loadOnStartup"];
-	} else {
-		[[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
-												 forKey:@"loadOnStartup"];
-	}
-	
+{
 	if ([prefsPanel respondsToSelector:@selector(setCollectionBehavior:)])
 		[prefsPanel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
 	[NSApp activateIgnoringOtherApps: YES];
