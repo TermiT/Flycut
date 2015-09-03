@@ -14,6 +14,49 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="Menu" id="206" userLabel="Menu Extra Menu">
             <items>
+                <menuItem title="Search..." keyEquivalent="f" id="YN8-VO-dct">
+                    <connections>
+                        <outlet property="view" destination="soE-fo-gFF" id="du3-U8-bG2"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Edit" hidden="YES" id="ii4-Z9-8og">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Edit" id="3f5-DI-WVu">
+                        <items>
+                            <menuItem title="Undo" keyEquivalent="z" id="0Gd-Qv-HpZ">
+                                <connections>
+                                    <action selector="undo:" target="-1" id="dBT-Cb-iuX"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Redo" keyEquivalent="Z" id="2sv-UX-v94">
+                                <connections>
+                                    <action selector="redo:" target="-1" id="4yK-ph-g5W"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="M45-rP-Dj8"/>
+                            <menuItem title="Cut" keyEquivalent="x" id="TBW-6l-rql">
+                                <connections>
+                                    <action selector="cut:" target="-1" id="C3r-gw-llQ"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Copy" keyEquivalent="c" id="qpd-cG-H6x">
+                                <connections>
+                                    <action selector="copy:" target="-1" id="uE3-X9-pUT"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Paste" keyEquivalent="v" id="CTW-Uq-n67">
+                                <connections>
+                                    <action selector="paste:" target="-1" id="POD-XK-heD"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Select All" keyEquivalent="a" id="bvi-xi-6Xs">
+                                <connections>
+                                    <action selector="selectAll:" target="-1" id="qHT-39-dV1"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem isSeparatorItem="YES" id="209">
                     <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                 </menuItem>
@@ -55,6 +98,7 @@
                 <outlet property="jcMenu" destination="206" id="215"/>
                 <outlet property="mainRecorder" destination="555" id="556"/>
                 <outlet property="prefsPanel" destination="218" id="220"/>
+                <outlet property="searchBox" destination="BYk-Gn-IDB" id="MpX-C1-cdn"/>
                 <outlet property="widthSlider" destination="776" id="807"/>
             </connections>
         </customObject>
@@ -765,5 +809,25 @@ Thanks to Clare Bates Congdon, Joshua Davis, Brad Graham, David Jacobs, John Ken
                 <outlet property="tabView" destination="345" id="504"/>
             </connections>
         </customObject>
+        <customView id="soE-fo-gFF">
+            <rect key="frame" x="-2" y="0.0" width="384" height="34"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <searchField verticalHuggingPriority="750" id="BYk-Gn-IDB">
+                    <rect key="frame" x="20" y="6" width="352" height="22"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" usesSingleLineMode="YES" bezelStyle="round" sendsSearchStringImmediately="YES" id="tUr-do-VsB">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </searchFieldCell>
+                    <connections>
+                        <action selector="searchItems:" target="213" id="9IB-LV-utg"/>
+                        <outlet property="delegate" destination="213" id="PRe-HH-Het"/>
+                    </connections>
+                </searchField>
+            </subviews>
+            <point key="canvasLocation" x="194" y="396"/>
+        </customView>
     </objects>
 </document>

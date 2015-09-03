@@ -125,6 +125,7 @@
     [self switchMenuIconTo: [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
 	[statusItem setMenu:jcMenu];
     [jcMenu setDelegate:self];
+    jcMenuBaseItemsCount = [[[[jcMenu itemArray] reverseObjectEnumerator] allObjects] count];
     [statusItem setEnabled:YES];
 	
     // If our preferences indicate that we are saving, load the dictionary from the saved plist
@@ -189,6 +190,53 @@
         }
         disableStore = [self toggleMenuIconDisabled];
     }
+    else
+    {
+        // We need to do a little trick to get the search box functional.  Figure out what is currently active.
+        NSString *currRunningApp = @"";
+        NSRunningApplication *currApp = nil;
+        for (currApp in [[NSWorkspace sharedWorkspace] runningApplications])
+            if ([currApp isActive])
+            {
+                currRunningApp = [currApp localizedName];
+                break;
+            }
+
+        if ( [currRunningApp rangeOfString:@"Flycut"].location == NSNotFound )
+        {
+            // We haven't activated Flycut yet.
+            currentRunningApplication = [currApp retain]; // Remember what app we came from.
+            menuOpenEvent = [event retain]; // So we can send it again to open the menu.
+            [menu cancelTracking]; // Prevent the menu from displaying, since activateIgnoringOtherApps would close it anyway.
+            [NSApp activateIgnoringOtherApps: YES]; // Required to make the search field firstResponder any good.
+            [self performSelector:@selector(reopenMenu) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]]; // Because we really do want the menu open.
+        }
+        else
+        {
+            // Flycut is now active, so set the first responder once the menu opens.
+            [self performSelector:@selector(activateSearchBox) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+        }
+    }
+}
+
+-(void)menuDidClose:(NSMenu *)menu
+{
+    // The method the menu triggers may clear currentRunningApplication, but that method won't be called until after the menu has closed.  Queue a call to the reactivate method that will come up after the method resulting from the menu.
+    [self performSelector:@selector(reactivateCurrentRunningApplication) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+}
+
+-(void)reactivateCurrentRunningApplication
+{
+    // Return focus to application that the menu search box stole from.
+    if ( nil != currentRunningApplication )
+    {
+        // But only if the bezel hasn't opened since the menu closed.  This happens if the bezel hotkey is pressed while the menu is open.  The bezel won't display until the menu closes, but will then display.
+        if (!isBezelDisplayed)
+            [currentRunningApplication activateWithOptions: NSApplicationActivateIgnoringOtherApps];
+        // Paste from the bezel in this scenario works fine, so release and forget this resource in both cases.
+        [currentRunningApplication release];
+        currentRunningApplication = nil;
+    }
 }
 
 -(bool)toggleMenuIconDisabled
@@ -212,8 +260,23 @@
     return false;
 }
 
+- (void)reopenMenu
+{
+    [NSApp sendEvent:menuOpenEvent];
+    [menuOpenEvent release];
+    menuOpenEvent = nil;
+}
+
+- (void)activateSearchBox
+{
+    menuFirstResponder = [[searchBox window] firstResponder]; // So we can return control to normal menu function if the user presses an arrow key.
+    [[searchBox window] makeFirstResponder:searchBox]; // So the search box works.
+}
+
 -(IBAction) activateAndOrderFrontStandardAboutPanel:(id)sender
 {
+    [currentRunningApplication release];
+    currentRunningApplication = nil; // So it doesn't get pulled foreground atop the about panel.
     [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
     [[NSApplication sharedApplication] orderFrontStandardAboutPanel:sender];
 }
@@ -312,6 +375,8 @@
 
 -(IBAction) showPreferencePanel:(id)sender
 {
+    [currentRunningApplication release];
+    currentRunningApplication = nil; // So it doesn't get pulled foreground atop the preference panel.
 	if ([prefsPanel respondsToSelector:@selector(setCollectionBehavior:)])
 		[prefsPanel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
 	[NSApp activateIgnoringOtherApps: YES];
@@ -437,12 +502,20 @@
 }
 
 - (void)pasteIndex:(int) position {
+    // If there is an active search, we need to map the menu index to the stack position.
+    NSString* search = [searchBox stringValue];
+    if ( nil != search && 0 != search.length )
+    {
+        NSArray *mapping = [clippingStore previousIndexes:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
+        position = [mapping[position] intValue];
+    }
+
 	[self addClipToPasteboardFromCount:position];
 
 	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"pasteMovesToTop"] ) {
 		[clippingStore clippingMoveToTop:position];
 		stackPosition = 0;
-		[self updateMenu];
+        [self updateMenu];
 	}
 }
 
@@ -453,9 +526,8 @@
 	}
 }
 
--(void)fakeCommandV
-	/*" +fakeCommandV synthesizes keyboard events for Cmd-v Paste 
-	shortcut. "*/ 
+-(void)fakeKey:(NSNumber*) keyCode withCommandFlag:(BOOL) setFlag
+	/*" +fakeKey synthesizes keyboard events. "*/
 {     
     CGEventSourceRef sourceRef = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
     if (!sourceRef)
@@ -463,17 +535,59 @@
         NSLog(@"No event source");
         return;
     }
-    NSNumber *keyCode = [srTransformer reverseTransformedValue:@"V"];                               
     CGKeyCode veeCode = (CGKeyCode)[keyCode intValue];
     CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, veeCode, true);
-    CGEventSetFlags(eventDown, kCGEventFlagMaskCommand|0x000008); // some apps want bit set for one of the command keys
+    if ( setFlag )
+        CGEventSetFlags(eventDown, kCGEventFlagMaskCommand|0x000008); // some apps want bit set for one of the command keys
     CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, veeCode, false);
     CGEventPost(kCGHIDEventTap, eventDown);
     CGEventPost(kCGHIDEventTap, eventUp);
     CFRelease(eventDown);
     CFRelease(eventUp);
     CFRelease(sourceRef);
-} 
+}
+
+/*" +fakeCommandV synthesizes keyboard events for Cmd-v Paste shortcut. "*/
+-(void)fakeCommandV { [self fakeKey:[srTransformer reverseTransformedValue:@"V"] withCommandFlag:TRUE]; }
+
+/*" +fakeDownArrow synthesizes keyboard events for the down-arrow key. "*/
+-(void)fakeDownArrow { [self fakeKey:@125 withCommandFlag:FALSE]; }
+
+/*" +fakeUpArrow synthesizes keyboard events for the up-arrow key. "*/
+-(void)fakeUpArrow { [self fakeKey:@126 withCommandFlag:FALSE]; }
+
+// Perform the search and display updated results when the user types.
+-(void)controlTextDidChange:(NSNotification *)aNotification
+{
+    NSString* search = [searchBox stringValue];
+    [self updateMenuContaining:search];
+}
+
+// Perform the search and display updated results when the search field performs its action.
+-(IBAction)searchItems:(id)sender
+{
+    NSString* search = [searchBox stringValue];
+    [self updateMenuContaining:search];
+}
+
+// Catch keystrokes in the search field and look for arrows.
+-(BOOL)control:(NSControl *)control textView:(NSTextView *)fieldEditor doCommandBySelector:(SEL)commandSelector
+{
+    if( commandSelector == @selector(moveUp:) )
+    {
+        [[searchBox window] makeFirstResponder:menuFirstResponder];
+        [self fakeUpArrow];
+        return YES;    // We handled this command; don't pass it on
+    }
+    if( commandSelector == @selector(moveDown:) )
+    {
+        [[searchBox window] makeFirstResponder:menuFirstResponder];
+        [self fakeDownArrow];
+        return YES;    // We handled this command; don't pass it on
+    }
+
+    return NO;    // Default handling of the command
+}
 
 -(BOOL)shouldSkip:(NSString *)contents
 {
@@ -832,35 +946,54 @@
 }
 
 - (void)updateMenu {
+    [self updateMenuContaining:nil];
+    // Clear the search box whenever the is reason for updateMenu to be called, since the nil call will produce non-searched results.
+    [searchBox setStringValue:@""];
+    [[[searchBox cell] cancelButtonCell] performClick:self];
+}
+
+- (void)updateMenuContaining:(NSString*)search {
+    [jcMenu setMenuChangedMessagesEnabled:NO];
     
-    NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]];
+    NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
     
     NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
     
     NSArray *clipStrings = [[returnedDisplayStrings reverseObjectEnumerator] allObjects];
 
-    int passedSeparator = 0;
-	
-    //remove clippings from menu
-    for (NSMenuItem *oldItem in menuItems) {
-		if( [oldItem isSeparatorItem]) {
-            passedSeparator++;
-        } else if ( passedSeparator == 2 ) {
-            [jcMenu removeItem:oldItem];
-        }     
+    // Figure out if the number of menu items is changing and add or remove entries as necessary.
+    // If we remove all of them and add all new ones, the menu won't redraw if the count is unchanged, so just reuse them by changing their title.
+    int oldItems = [menuItems count]-jcMenuBaseItemsCount;
+    int newItems = [clipStrings count];
+
+    if ( oldItems > newItems )
+    {
+        for ( int i = newItems; i < oldItems; i++ )
+            [jcMenu removeItemAtIndex:0];
+    }
+    else if ( newItems > oldItems )
+    {
+        for ( int i = oldItems; i < newItems; i++ )
+        {
+            NSMenuItem *item;
+            item = [[NSMenuItem alloc] initWithTitle:@"foo"
+                                              action:@selector(processMenuClippingSelection:)
+                                       keyEquivalent:@""];
+            [item setTarget:self];
+            [item setEnabled:YES];
+            [jcMenu insertItem:item atIndex:0];
+            // Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
+            [item release];
+        }
     }
 	
+    // Now set the correct titles for each menu item.
     for(NSString *pbMenuTitle in clipStrings) {
-        NSMenuItem *item;
-        item = [[NSMenuItem alloc] initWithTitle:pbMenuTitle
-										  action:@selector(processMenuClippingSelection:)
-								   keyEquivalent:@""];
-        [item setTarget:self];
-        [item setEnabled:YES];
-        [jcMenu insertItem:item atIndex:0];
-        // Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
-        [item release];
-	} 
+        newItems--;
+        NSMenuItem *item = [jcMenu itemAtIndex:newItems];
+        item.title = pbMenuTitle;
+        [jcMenu itemChanged: item];
+	}
 }
 
 -(IBAction)processMenuClippingSelection:(id)sender

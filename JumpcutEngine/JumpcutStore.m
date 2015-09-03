@@ -193,11 +193,34 @@
 
 -(NSArray *) previousDisplayStrings:(int)howMany
 {
+    return [self previousDisplayStrings:howMany containing:nil];
+}
+
+-(NSArray *) previousDisplayStrings:(int)howMany containing:(NSString*)search
+{
     NSRange theRange;
     NSArray *subArray;
     NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
     NSEnumerator *enumerator;
     JumpcutClipping *aClipping;
+
+    // If we have a search, do that.  Pretty much a mix of the other two paths below, but separated out to avoid extra processing.
+    if (nil != search && search.length > 0) {
+        subArray = [jcList copy];
+        enumerator = [subArray objectEnumerator];
+        int index = 0;
+        while ( aClipping = [enumerator nextObject] ) { // Forward enumerator so we find the most recent N matches
+            if ([[self clippingContentsAtPosition:index] rangeOfString:search].location != NSNotFound) {
+                [returnArray insertObject:[aClipping displayString] atIndex:0];
+                howMany--;
+                if (0 == howMany)
+                    break;
+            }
+            index++;
+        }
+        return [[returnArray reverseObjectEnumerator] allObjects]; // Reverse the results since the caller expects the most recent to be last.
+    }
+
     theRange.location = 0;
     theRange.length = howMany;
     if ( howMany > [jcList count] ) {
@@ -208,6 +231,36 @@
     enumerator = [subArray reverseObjectEnumerator];
     while ( aClipping = [enumerator nextObject] ) {
         [returnArray insertObject:[aClipping displayString] atIndex:0];
+    }
+    return returnArray;
+}
+
+-(NSArray *) previousIndexes:(int)howMany containing:(NSString*)search // This method is in newest-first order.
+{
+    NSArray *subArray;
+    NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
+    NSEnumerator *enumerator;
+    JumpcutClipping *aClipping;
+
+    // If we have a search, do that.
+    if (nil != search && search.length > 0) {
+        subArray = [jcList copy];
+        enumerator = [subArray objectEnumerator];
+        int index = 0;
+        while ( aClipping = [enumerator nextObject] ) { // Forward enumerator so we find the most recent N matches
+            if ([[self clippingContentsAtPosition:index] rangeOfString:search].location != NSNotFound) {
+                [returnArray addObject:[NSNumber numberWithInt:index]];
+                howMany--;
+                if (0 == howMany)
+                    break;
+            }
+            index++;
+        }
+    }
+    else
+    {
+        for ( int i = 0 ; i < howMany ; i++ )
+            [returnArray addObject:[NSNumber numberWithInt:i]];
     }
     return returnArray;
 }

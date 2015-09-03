@@ -43,6 +43,11 @@
     
     // The menu attatched to same
     IBOutlet NSMenu *jcMenu;
+    int jcMenuBaseItemsCount;
+    IBOutlet NSSearchField *searchBox;
+    NSResponder *menuFirstResponder;
+    NSRunningApplication *currentRunningApplication;
+    NSEvent *menuOpenEvent;
     IBOutlet NSSlider * heightSlider;
     IBOutlet NSSlider * widthSlider;
     // A timer which will let us check the pasteboard;
@@ -78,6 +83,9 @@
 -(void) stackDown;
 -(IBAction)clearClippingList:(id)sender;
 -(IBAction)mergeClippingList:(id)sender;
+-(void)controlTextDidChange:(NSNotification *)aNotification;
+-(BOOL)control:(NSControl *)control textView:(NSTextView *)fieldEditor doCommandBySelector:(SEL)commandSelector;
+-(IBAction)searchItems:(id)sender;
 
 // Stack related
 -(BOOL) isValidClippingNumber:(NSNumber *)number;
