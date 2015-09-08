@@ -27,12 +27,15 @@
 	BOOL						isBezelDisplayed;
 	BOOL						isBezelPinned; // Currently not used
 	NSString					*currentKeycodeCharacter;
-	int							stackPosition;
+    int							stackPosition;
+    int							favoritesStackPosition;
+    int							stashedStackPosition;
 	
 	// The below were pulled in from JumpcutController
-	JumpcutStore				*clippingStore;
-	
-
+    JumpcutStore				*clippingStore;
+    JumpcutStore				*favoritesStore;
+    JumpcutStore				*stashedStore;
+    
     // Status item -- the little icon in the menu bar
     NSStatusItem *statusItem;
     NSString *statusItemText;
@@ -40,6 +43,11 @@
     
     // The menu attatched to same
     IBOutlet NSMenu *jcMenu;
+    int jcMenuBaseItemsCount;
+    IBOutlet NSSearchField *searchBox;
+    NSResponder *menuFirstResponder;
+    NSRunningApplication *currentRunningApplication;
+    NSEvent *menuOpenEvent;
     IBOutlet NSSlider * heightSlider;
     IBOutlet NSSlider * widthSlider;
     // A timer which will let us check the pasteboard;
@@ -75,6 +83,9 @@
 -(void) stackDown;
 -(IBAction)clearClippingList:(id)sender;
 -(IBAction)mergeClippingList:(id)sender;
+-(void)controlTextDidChange:(NSNotification *)aNotification;
+-(BOOL)control:(NSControl *)control textView:(NSTextView *)fieldEditor doCommandBySelector:(SEL)commandSelector;
+-(IBAction)searchItems:(id)sender;
 
 // Stack related
 -(BOOL) isValidClippingNumber:(NSNumber *)number;
@@ -104,6 +115,7 @@
 // Preference related
 -(IBAction) showPreferencePanel:(id)sender;
 -(IBAction) setRememberNumPref:(id)sender;
+-(IBAction) setFavoritesRememberNumPref:(id)sender;
 -(IBAction) setDisplayNumPref:(id)sender;
 -(IBAction) setBezelAlpha:(id)sender;
 -(IBAction) setBezelHeight:(id)sender;

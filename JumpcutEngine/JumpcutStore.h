@@ -61,6 +61,7 @@
 -(void) setDisplayLen:(int)newDisplayLength;
 
 // Retrieve various values
+-(int) rememberNum;
 -(int) displayLen;
 -(int) jcListCount;
 -(NSString *) clippingContentsAtPosition:(int)index;
@@ -68,6 +69,8 @@
 -(NSString *) clippingTypeAtPosition:(int)index;
 -(NSArray *) previousContents:(int)howMany;
 -(NSArray *) previousDisplayStrings:(int)howMany;
+-(NSArray *) previousDisplayStrings:(int)howMany containing:(NSString*)search;
+-(NSArray *) previousIndexes:(int)howMany containing:(NSString*)search; // This method is in newest-first order.
 
 // Add a clipping
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type;
