@@ -30,6 +30,8 @@
 		@"ShortcutRecorder mainHotkey",
 		[NSNumber numberWithInt:40],
 		@"rememberNum",
+        [NSNumber numberWithInt:40],
+        @"favoritesRememberNum",
 		[NSNumber numberWithInt:1],
 		@"savePreference",
 		[NSNumber numberWithInt:0],
@@ -53,8 +55,22 @@
         @"store",
         [NSNumber numberWithBool:YES],
         @"skipPasswordFields",
+		[NSNumber numberWithBool:YES],
+		@"skipPboardTypes",
+		@"PasswordPboardType",
+		@"skipPboardTypesList",
+		[NSNumber numberWithBool:NO],
+		@"skipPasswordLengths",
+		@"12, 20, 32",
+		@"skipPasswordLengthsList",
+		[NSNumber numberWithBool:NO],
+		@"revealPasteboardTypes",
         [NSNumber numberWithBool:NO],
         @"removeDuplicates",
+        [NSNumber numberWithBool:NO],
+        @"saveForgottenClippings",
+        [NSNumber numberWithBool:YES],
+        @"saveForgottenFavorites",
         [NSNumber numberWithBool:YES],
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
@@ -87,6 +103,11 @@
 	clippingStore = [[JumpcutStore alloc] initRemembering:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
 											   displaying:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
 										withDisplayLength:_DISPLENGTH];
+    favoritesStore = [[JumpcutStore alloc] initRemembering:[[DBUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
+                                               displaying:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
+                                        withDisplayLength:_DISPLENGTH];
+    stashedStore = NULL;
+    [bezel setColor:NO];
     
     NSRect screenFrame = [[NSScreen mainScreen] frame];
     widthSlider.maxValue = screenFrame.size.width;
@@ -130,7 +151,22 @@
     [pollPBTimer fire];
 
 	// Stack position starts @ 0 by default
-	stackPosition = 0;
+	stackPosition = favoritesStackPosition = stashedStackPosition = 0;
+    
+    
+    // The load-on-startup check can be really slow, so this will be dispatched out so our thread isn't blocked.
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(queue, ^{
+        // This can take five seconds, perhaps more, so do it in the background instead of holding up opening of the preference panel.
+        int checkLoginRegistry = [UKLoginItemRegistry indexForLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
+        if ( checkLoginRegistry >= 1 ) {
+            [[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+                                                     forKey:@"loadOnStartup"];
+        } else {
+            [[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+                                                     forKey:@"loadOnStartup"];
+        }
+    });
 
     [[NSNotificationCenter defaultCenter] addObserverForName:@"DBSyncPromptUserDidCancelNotification" 
      object:nil queue:nil usingBlock:^(NSNotification *notification) {
@@ -142,8 +178,110 @@
 	[NSApp activateIgnoringOtherApps: YES];
 }
 
+-(void)menuWillOpen:(NSMenu *)menu
+{
+    NSEvent *event = [NSApp currentEvent];
+    if([event modifierFlags] & NSAlternateKeyMask) {
+        [menu cancelTracking];
+        if (disableStore)
+        {
+            // Update the pbCount so we don't enable and have it immediately copy the thing the user was trying to avoid.
+            // Code copied from pollPB, which is disabled at this point, so the "should be okay" should still be okay.
+            
+            // Reload pbCount with the current changeCount
+            // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
+            [pbCount release];
+            pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
+        }
+        disableStore = [self toggleMenuIconDisabled];
+    }
+    else
+    {
+        // We need to do a little trick to get the search box functional.  Figure out what is currently active.
+        NSString *currRunningApp = @"";
+        NSRunningApplication *currApp = nil;
+        for (currApp in [[NSWorkspace sharedWorkspace] runningApplications])
+            if ([currApp isActive])
+            {
+                currRunningApp = [currApp localizedName];
+                break;
+            }
+
+        if ( [currRunningApp rangeOfString:@"Flycut"].location == NSNotFound )
+        {
+            // We haven't activated Flycut yet.
+            currentRunningApplication = [currApp retain]; // Remember what app we came from.
+            menuOpenEvent = [event retain]; // So we can send it again to open the menu.
+            [menu cancelTracking]; // Prevent the menu from displaying, since activateIgnoringOtherApps would close it anyway.
+            [NSApp activateIgnoringOtherApps: YES]; // Required to make the search field firstResponder any good.
+            [self performSelector:@selector(reopenMenu) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]]; // Because we really do want the menu open.
+        }
+        else
+        {
+            // Flycut is now active, so set the first responder once the menu opens.
+            [self performSelector:@selector(activateSearchBox) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+        }
+    }
+}
+
+-(void)menuDidClose:(NSMenu *)menu
+{
+    // The method the menu triggers may clear currentRunningApplication, but that method won't be called until after the menu has closed.  Queue a call to the reactivate method that will come up after the method resulting from the menu.
+    [self performSelector:@selector(reactivateCurrentRunningApplication) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+}
+
+-(void)reactivateCurrentRunningApplication
+{
+    // Return focus to application that the menu search box stole from.
+    if ( nil != currentRunningApplication )
+    {
+        // But only if the bezel hasn't opened since the menu closed.  This happens if the bezel hotkey is pressed while the menu is open.  The bezel won't display until the menu closes, but will then display.
+        if (!isBezelDisplayed)
+            [currentRunningApplication activateWithOptions: NSApplicationActivateIgnoringOtherApps];
+        // Paste from the bezel in this scenario works fine, so release and forget this resource in both cases.
+        [currentRunningApplication release];
+        currentRunningApplication = nil;
+    }
+}
+
+-(bool)toggleMenuIconDisabled
+{
+    // Toggles the "disabled" look of the menu icon.  Returns if the icon looks disabled or not, allowing the caller to decide if anything is actually being disabled or if they just wanted the icon to be a status display.
+    if (nil == statusItemText)
+    {
+        statusItemText = [statusItem title];
+        statusItemImage = [statusItem image];
+        [statusItem setTitle: @""];
+        [statusItem setImage: [NSImage imageNamed:@"com.generalarcade.flycut.disabled.16.png"]];
+        return true;
+    }
+    else
+    {
+        [statusItem setTitle: statusItemText];
+        [statusItem setImage: statusItemImage];
+        statusItemText = nil;
+        statusItemImage = nil;
+    }
+    return false;
+}
+
+- (void)reopenMenu
+{
+    [NSApp sendEvent:menuOpenEvent];
+    [menuOpenEvent release];
+    menuOpenEvent = nil;
+}
+
+- (void)activateSearchBox
+{
+    menuFirstResponder = [[searchBox window] firstResponder]; // So we can return control to normal menu function if the user presses an arrow key.
+    [[searchBox window] makeFirstResponder:searchBox]; // So the search box works.
+}
+
 -(IBAction) activateAndOrderFrontStandardAboutPanel:(id)sender
 {
+    [currentRunningApplication release];
+    currentRunningApplication = nil; // So it doesn't get pulled foreground atop the about panel.
     [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
     [[NSApplication sharedApplication] orderFrontStandardAboutPanel:sender];
 }
@@ -176,15 +314,23 @@
 
 -(IBAction) switchMenuIcon:(id)sender
 {
-	if ([sender indexOfSelectedItem] == 1 ) {
-		[statusItem setImage:nil];
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]]; 
-	} else if ( [sender indexOfSelectedItem] == 2 ) {
-		[statusItem setImage:nil];
-		[statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]]; 
-	} else {
-		[statusItem setTitle:@""];
-		[statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
+    [self switchMenuIconTo: [sender indexOfSelectedItem]];
+}
+
+-(void) switchMenuIconTo:(int)number
+{
+    if (number == 1 ) {
+        [statusItem setTitle:@""];
+        [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.black.16.png"]];
+    } else if (number == 2 ) {
+        [statusItem setImage:nil];
+        [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]];
+    } else if ( number == 3 ) {
+        [statusItem setImage:nil];
+        [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]];
+    } else {
+        [statusItem setTitle:@""];
+        [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
     }
 }
 
@@ -219,22 +365,23 @@
 	[self updateMenu];
 }
 
+-(IBAction) setFavoritesRememberNumPref:(id)sender
+{
+    JumpcutStore *primary = clippingStore;
+    clippingStore = favoritesStore;
+    [self setRememberNumPref: sender];
+    clippingStore = primary;
+}
+
 -(IBAction) setDisplayNumPref:(id)sender
 {
 	[self updateMenu];
 }
 
 -(IBAction) showPreferencePanel:(id)sender
-{                                    
-	int checkLoginRegistry = [UKLoginItemRegistry indexForLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
-	if ( checkLoginRegistry >= 1 ) {
-		[[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
-												 forKey:@"loadOnStartup"];
-	} else {
-		[[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
-												 forKey:@"loadOnStartup"];
-	}
-	
+{
+    [currentRunningApplication release];
+    currentRunningApplication = nil; // So it doesn't get pulled foreground atop the preference panel.
 	if ([prefsPanel respondsToSelector:@selector(setCollectionBehavior:)])
 		[prefsPanel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
 	[NSApp activateIgnoringOtherApps: YES];
@@ -250,6 +397,26 @@
 	}
 }
 
+-(void)switchToFavoritesStore
+{
+    stashedStore = clippingStore;
+    clippingStore = favoritesStore;
+    stashedStackPosition = stackPosition;
+    stackPosition = favoritesStackPosition;
+    [bezel setColor:YES];
+}
+
+- (void)restoreStashedStore
+{
+    if (NULL != stashedStore)
+    {
+        clippingStore = stashedStore;
+        stashedStore = NULL;
+        favoritesStackPosition = stackPosition;
+        stackPosition = stashedStackPosition;
+        [bezel setColor:NO];
+    }
+}
 
 - (void)pasteFromStack
 {
@@ -260,6 +427,73 @@
 	} else {
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 	}
+    [self restoreStashedStore];
+}
+
+- (void)saveFromStack
+{
+    [self saveFromStackWithPrefix:@""];
+}
+
+- (void)saveFromStackWithPrefix:(NSString*) prefix
+{
+    if ( [clippingStore jcListCount] > stackPosition ) {
+        // Get text from clipping store.
+        NSString *pbFullText = [self clippingStringWithCount:stackPosition];
+        pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
+        
+        // Get the Desktop directory:
+        NSArray *paths = NSSearchPathForDirectoriesInDomains
+        (NSDesktopDirectory, NSUserDomainMask, YES);
+        NSString *desktopDirectory = [paths objectAtIndex:0];
+        
+        // Get the timestamp string:
+        NSDate *currentDate = [NSDate date];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"YYYY-MM-dd 'at' HH.mm.ss"];
+        NSString *dateString = [dateFormatter stringFromDate:currentDate];
+        
+        // Make a file name to write the data to using the Desktop directory:
+        NSString *fileName = [NSString stringWithFormat:@"%@/%@%@Clipping %@.txt",
+                              desktopDirectory, prefix, clippingStore == favoritesStore ? @"Favorite " : @"", dateString];
+        
+        // Save content to the file
+        [pbFullText writeToFile:fileName
+                  atomically:NO
+                    encoding:NSNonLossyASCIIStringEncoding
+                       error:nil];
+    }
+    
+    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+    [self restoreStashedStore];
+}
+
+- (void)saveFromStackToFavorites
+{
+    if ( clippingStore != favoritesStore && [clippingStore jcListCount] > stackPosition ) {
+        if ( [favoritesStore rememberNum] == [favoritesStore jcListCount]
+            && [[[DBUserDefaults standardUserDefaults] valueForKey:@"saveForgottenFavorites"] boolValue] )
+        {
+            // favoritesStore is full, so save the last entry before it gets lost.
+            [self switchToFavoritesStore];
+            
+            // Set to last item, save, and restore position.
+            stackPosition = [favoritesStore rememberNum]-1;
+            [self saveFromStackWithPrefix:@"Autosave "];
+            stackPosition = favoritesStackPosition;
+            
+            // Restore prior state.
+            [self restoreStashedStore];
+        }
+        // Get text from clipping store.
+        [favoritesStore addClipping:[clippingStore clippingContentsAtPosition:stackPosition]
+                            ofType:[clippingStore clippingTypeAtPosition:stackPosition]	];
+        [clippingStore clearItem:stackPosition];
+        [self updateBezel];
+        [self updateMenu];
+    }
+    
+    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 }
 
 - (void)changeStack
@@ -272,14 +506,21 @@
 	}
 }
 
-
 - (void)pasteIndex:(int) position {
+    // If there is an active search, we need to map the menu index to the stack position.
+    NSString* search = [searchBox stringValue];
+    if ( nil != search && 0 != search.length )
+    {
+        NSArray *mapping = [clippingStore previousIndexes:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
+        position = [mapping[position] intValue];
+    }
+
 	[self addClipToPasteboardFromCount:position];
 
 	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"pasteMovesToTop"] ) {
 		[clippingStore clippingMoveToTop:position];
 		stackPosition = 0;
-		[self updateMenu];
+        [self updateMenu];
 	}
 }
 
@@ -295,9 +536,8 @@
     [self showPreferencePanel:sender];
 }
 
--(void)fakeCommandV
-	/*" +fakeCommandV synthesizes keyboard events for Cmd-v Paste 
-	shortcut. "*/ 
+-(void)fakeKey:(NSNumber*) keyCode withCommandFlag:(BOOL) setFlag
+	/*" +fakeKey synthesizes keyboard events. "*/
 {     
     CGEventSourceRef sourceRef = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
     if (!sourceRef)
@@ -305,44 +545,186 @@
         NSLog(@"No event source");
         return;
     }
-    NSNumber *keyCode = [srTransformer reverseTransformedValue:@"V"];                               
     CGKeyCode veeCode = (CGKeyCode)[keyCode intValue];
     CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, veeCode, true);
-    CGEventSetFlags(eventDown, kCGEventFlagMaskCommand|0x000008); // some apps want bit set for one of the command keys
+    if ( setFlag )
+        CGEventSetFlags(eventDown, kCGEventFlagMaskCommand|0x000008); // some apps want bit set for one of the command keys
     CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, veeCode, false);
     CGEventPost(kCGHIDEventTap, eventDown);
     CGEventPost(kCGHIDEventTap, eventUp);
     CFRelease(eventDown);
     CFRelease(eventUp);
     CFRelease(sourceRef);
-} 
+}
 
+/*" +fakeCommandV synthesizes keyboard events for Cmd-v Paste shortcut. "*/
+-(void)fakeCommandV { [self fakeKey:[srTransformer reverseTransformedValue:@"V"] withCommandFlag:TRUE]; }
+
+/*" +fakeDownArrow synthesizes keyboard events for the down-arrow key. "*/
+-(void)fakeDownArrow { [self fakeKey:@125 withCommandFlag:FALSE]; }
+
+/*" +fakeUpArrow synthesizes keyboard events for the up-arrow key. "*/
+-(void)fakeUpArrow { [self fakeKey:@126 withCommandFlag:FALSE]; }
+
+// Perform the search and display updated results when the user types.
+-(void)controlTextDidChange:(NSNotification *)aNotification
+{
+    NSString* search = [searchBox stringValue];
+    [self updateMenuContaining:search];
+}
+
+// Perform the search and display updated results when the search field performs its action.
+-(IBAction)searchItems:(id)sender
+{
+    NSString* search = [searchBox stringValue];
+    [self updateMenuContaining:search];
+}
+
+// Catch keystrokes in the search field and look for arrows.
+-(BOOL)control:(NSControl *)control textView:(NSTextView *)fieldEditor doCommandBySelector:(SEL)commandSelector
+{
+    if( commandSelector == @selector(moveUp:) )
+    {
+        [[searchBox window] makeFirstResponder:menuFirstResponder];
+        [self fakeUpArrow];
+        return YES;    // We handled this command; don't pass it on
+    }
+    if( commandSelector == @selector(moveDown:) )
+    {
+        [[searchBox window] makeFirstResponder:menuFirstResponder];
+        [self fakeDownArrow];
+        return YES;    // We handled this command; don't pass it on
+    }
+
+    return NO;    // Default handling of the command
+}
+
+-(BOOL)shouldSkip:(NSString *)contents
+{
+	NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
+
+	// Check to see if we are skipping passwords based on length and characters.
+	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
+	{
+		// Check to see if they want a little help figuring out what types to enter.
+		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
+			[clippingStore addClipping:type ofType:type];
+
+		__block bool skipClipping = NO;
+
+		// Check the array of types to skip.
+		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
+		{
+			NSArray *typesArray = [[[[DBUserDefaults standardUserDefaults] stringForKey:@"skipPboardTypesList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+			[typesArray enumerateObjectsUsingBlock:^(id typeString, NSUInteger idx, BOOL *stop)
+			{
+				if ( [type isEqualToString:typeString] )
+				{
+					skipClipping = YES;
+					stop = YES;
+				}
+			}];
+		}
+		if (skipClipping)
+			return YES;
+
+		// Check the array of lengths to skip for suspicious strings.
+		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordLengths"] )
+		{
+			int contentsLength = [contents length];
+			NSArray *lengthsArray = [[[[DBUserDefaults standardUserDefaults] stringForKey:@"skipPasswordLengthsList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+			[lengthsArray enumerateObjectsUsingBlock:^(id lengthString, NSUInteger idx, BOOL *stop)
+			{
+				if ( [lengthString integerValue] == contentsLength )
+				{
+					NSRange uppercaseLetter = [contents rangeOfCharacterFromSet: [NSCharacterSet uppercaseLetterCharacterSet]];
+					NSRange lowercaseLetter = [contents rangeOfCharacterFromSet: [NSCharacterSet lowercaseLetterCharacterSet]];
+					NSRange decimalDigit = [contents rangeOfCharacterFromSet: [NSCharacterSet decimalDigitCharacterSet]];
+					NSRange punctuation = [contents rangeOfCharacterFromSet: [NSCharacterSet punctuationCharacterSet]];
+					NSRange symbol = [contents rangeOfCharacterFromSet: [NSCharacterSet symbolCharacterSet]];
+					NSRange control = [contents rangeOfCharacterFromSet: [NSCharacterSet controlCharacterSet]];
+					NSRange illegal = [contents rangeOfCharacterFromSet: [NSCharacterSet illegalCharacterSet]];
+					NSRange whitespaceAndNewline = [contents rangeOfCharacterFromSet: [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+					if ( NSNotFound == control.location
+						&& NSNotFound == illegal.location
+						&& NSNotFound == whitespaceAndNewline.location
+						&& NSNotFound != uppercaseLetter.location
+						&& NSNotFound != lowercaseLetter.location
+						&& NSNotFound != decimalDigit.location
+						&& ( NSNotFound != punctuation.location
+							|| NSNotFound != symbol.location ) )
+					{
+						skipClipping = YES;
+						stop = YES;
+					}
+				}
+			}];
+
+			if (skipClipping)
+				return YES;
+		}
+	}
+	return NO;
+}
 
 -(void)pollPB:(NSTimer *)timer
 {
     NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-    if ( [pbCount intValue] != [jcPasteboard changeCount] ) {
+    if ( [pbCount intValue] != [jcPasteboard changeCount] && !disableStore ) {
         // Reload pbCount with the current changeCount
         // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
         [pbCount release];
         pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         if ( type != nil ) {
-			NSString *contents = [jcPasteboard stringForType:type];
-			if ( contents == nil || ([jcPasteboard stringForType:@"PasswordPboardType"] && [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"]) ) {
-                NSLog(@"Contents: Empty");
-            } else {
-				if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
-					&&  ! [pbCount isEqualTo:pbBlockCount] ) {
-                    [clippingStore addClipping:contents
-										ofType:type	];
-//					The below tracks our position down down down... Maybe as an option?
-//					if ( [clippingStore jcListCount] > 1 ) stackPosition++;
-					stackPosition = 0;
-                    [self updateMenu];
-					if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
-                        [self saveEngine];
-                }
-            }
+			NSString *currRunningApp = @"";
+			for (NSRunningApplication *currApp in [[NSWorkspace sharedWorkspace] runningApplications])
+				if ([currApp isActive])
+					currRunningApp = [currApp localizedName];
+			bool largeCopyRisk = [currRunningApp rangeOfString:@"Remote Desktop Connection"].location != NSNotFound;
+
+			// Microsoft's Remote Desktop Connection has an issue with large copy actions, which appears to be in the time it takes to transer them over the network.  The copy starts being registered with OS X prior to completion of the transfer, and if the active application changes during the transfer the copy will be lost.  Indicate this time period by toggling the menu icon at the beginning of all RDC trasfers and back at the end.  Apple's Screen Sharing does not demonstrate this problem.
+			if (largeCopyRisk)
+				[self toggleMenuIconDisabled];
+
+			// In case we need to do a status visual, this will be dispatched out so our thread isn't blocked.
+			dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+			dispatch_async(queue, ^{
+
+				// This operation blocks until the transfer is complete, though it was was here before the RDC issue was discovered.  Convenient.
+                NSString *contents = [jcPasteboard stringForType:type];
+
+				// Toggle back if dealing with the RDC issue.
+				if (largeCopyRisk)
+					[self toggleMenuIconDisabled];
+
+				if ( contents == nil || [self shouldSkip:contents] ) {
+                   NSLog(@"Contents: Empty or skipped");
+               } else {
+					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
+                        &&  ! [pbCount isEqualTo:pbBlockCount] ) {
+                        
+                        if ( [clippingStore rememberNum] == [clippingStore jcListCount]
+                            && [[[DBUserDefaults standardUserDefaults] valueForKey:@"saveForgottenClippings"] boolValue] )
+                        {
+                            // clippingStore is full, so save the last entry before it gets lost.
+                            // Set to last item, save, and restore position.
+                            int savePosition = stackPosition;
+                            stackPosition = [clippingStore rememberNum]-1;
+                            [self saveFromStackWithPrefix:@"Autosave "];
+                            stackPosition = savePosition;
+                        }
+                        
+                       [clippingStore addClipping:contents
+											ofType:type	];
+//						The below tracks our position down down down... Maybe as an option?
+//						if ( [clippingStore jcListCount] > 1 ) stackPosition++;
+						stackPosition = 0;
+                        [self updateMenu];
+						if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
+                           [self saveEngine];
+                   }
+               }
+            });
         } 
     }
 }
@@ -428,6 +810,28 @@
 					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
 				}
 				break;
+            case 's': case 'S': // Save / Save-and-delete
+                if ([clippingStore jcListCount] == 0)
+                    return;
+
+                [self saveFromStack];
+                if ( modifiers & NSShiftKeyMask ) {
+                    [clippingStore clearItem:stackPosition];
+                    [self updateBezel];
+                    [self updateMenu];
+                }
+                break;
+            case 'f':
+                if (NULL != stashedStore)
+                    [self restoreStashedStore];
+                else
+                    [self switchToFavoritesStore];
+                [self hideBezel];
+                [self showBezel];
+                break;
+            case 'F':
+                [self saveFromStackToFavorites];
+                break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				NSLog(@"PRESSED %d", pressed);
 				NSLog(@"CODE %ld", (long)[mainRecorder keyCombo].code);
@@ -462,10 +866,15 @@
 	if ( [clippingStore jcListCount] > 0 && [clippingStore jcListCount] > stackPosition ) {
 		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
 		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
-	} 
+	}
+	NSRect mainScreenRect = [NSScreen mainScreen].visibleFrame;
+	[bezel setFrame:NSMakeRect(mainScreenRect.origin.x + mainScreenRect.size.width/2 - bezel.frame.size.width/2,
+							   mainScreenRect.origin.y + mainScreenRect.size.height/2 - bezel.frame.size.height/2,
+							   bezel.frame.size.width,
+							   bezel.frame.size.height) display:YES];
 	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
 		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-	if ([[DBUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"]) 
+	if ([[DBUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"])
 		[bezel makeKeyAndOrderFrontWithPopEffect];
 	else [bezel makeKeyAndOrderFront:self];
 	isBezelDisplayed = YES;
@@ -531,6 +940,7 @@
 	
     // on clear, zap the list and redraw the menu
     if ( choice == NSAlertDefaultReturn ) {
+        [self restoreStashedStore]; // Only clear the clipping store.  Never the favorites.
         [clippingStore clearList];
         [self updateMenu];
 		if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
@@ -546,35 +956,54 @@
 }
 
 - (void)updateMenu {
+    [self updateMenuContaining:nil];
+    // Clear the search box whenever the is reason for updateMenu to be called, since the nil call will produce non-searched results.
+    [searchBox setStringValue:@""];
+    [[[searchBox cell] cancelButtonCell] performClick:self];
+}
+
+- (void)updateMenuContaining:(NSString*)search {
+    [jcMenu setMenuChangedMessagesEnabled:NO];
     
-    NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]];
+    NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
     
     NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
     
     NSArray *clipStrings = [[returnedDisplayStrings reverseObjectEnumerator] allObjects];
 
-    int passedSeparator = 0;
-	
-    //remove clippings from menu
-    for (NSMenuItem *oldItem in menuItems) {
-		if( [oldItem isSeparatorItem]) {
-            passedSeparator++;
-        } else if ( passedSeparator == 2 ) {
-            [jcMenu removeItem:oldItem];
-        }     
+    // Figure out if the number of menu items is changing and add or remove entries as necessary.
+    // If we remove all of them and add all new ones, the menu won't redraw if the count is unchanged, so just reuse them by changing their title.
+    int oldItems = [menuItems count]-jcMenuBaseItemsCount;
+    int newItems = [clipStrings count];
+
+    if ( oldItems > newItems )
+    {
+        for ( int i = newItems; i < oldItems; i++ )
+            [jcMenu removeItemAtIndex:0];
+    }
+    else if ( newItems > oldItems )
+    {
+        for ( int i = oldItems; i < newItems; i++ )
+        {
+            NSMenuItem *item;
+            item = [[NSMenuItem alloc] initWithTitle:@"foo"
+                                              action:@selector(processMenuClippingSelection:)
+                                       keyEquivalent:@""];
+            [item setTarget:self];
+            [item setEnabled:YES];
+            [jcMenu insertItem:item atIndex:0];
+            // Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
+            [item release];
+        }
     }
 	
+    // Now set the correct titles for each menu item.
     for(NSString *pbMenuTitle in clipStrings) {
-        NSMenuItem *item;
-        item = [[NSMenuItem alloc] initWithTitle:pbMenuTitle
-										  action:@selector(processMenuClippingSelection:)
-								   keyEquivalent:@""];
-        [item setTarget:self];
-        [item setEnabled:YES];
-        [jcMenu insertItem:item atIndex:0];
-        // Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
-        [item release];
-	} 
+        newItems--;
+        NSMenuItem *item = [jcMenu itemAtIndex:newItems];
+        item.title = pbMenuTitle;
+        [jcMenu itemChanged: item];
+	}
 }
 
 -(IBAction)processMenuClippingSelection:(id)sender
@@ -649,6 +1078,19 @@
             for( NSDictionary *aSavedClipping in toBeRestoredClips)
 				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
 									ofType:[aSavedClipping objectForKey:@"Type"]];
+            
+            // Now for the favorites, same thing.
+            savedJCList =[loadDict objectForKey:@"favoritesList"];
+            if ( [savedJCList isKindOfClass:[NSArray class]] ) {
+            rememberNumPref = [[DBUserDefaults standardUserDefaults]
+                               integerForKey:@"favoritesRememberNum"];
+            rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
+            loadRange = NSMakeRange(0, rangeCap);
+            toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
+            for( NSDictionary *aSavedClipping in toBeRestoredClips)
+                [favoritesStore addClipping:[aSavedClipping objectForKey:@"Contents"]
+                                    ofType:[aSavedClipping objectForKey:@"Type"]];
+            }
         } else NSLog(@"Not array");
         [self updateMenu];
         [loadDict release];
@@ -698,6 +1140,8 @@
     [saveDict setObject:@"0.7" forKey:@"version"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
                  forKey:@"rememberNum"];
+    [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]]
+                 forKey:@"favoritesRememberNum"];
     [saveDict setObject:[NSNumber numberWithInt:_DISPLENGTH]
                  forKey:@"displayLen"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
@@ -708,6 +1152,13 @@
                                 [clippingStore clippingTypeAtPosition:i], @"Type",
                                 [NSNumber numberWithInt:i], @"Position",nil]];
     [saveDict setObject:jcListArray forKey:@"jcList"];
+    jcListArray = [NSMutableArray array];
+    for (int i = 0 ; i < [favoritesStore jcListCount]; i++)
+        [jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
+                                [favoritesStore clippingContentsAtPosition:i], @"Contents",
+                                [favoritesStore clippingTypeAtPosition:i], @"Type",
+                                [NSNumber numberWithInt:i], @"Position",nil]];
+    [saveDict setObject:jcListArray forKey:@"favoritesList"];
     [[DBUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
     [[DBUserDefaults standardUserDefaults] synchronize];
 }
@@ -791,16 +1242,12 @@
         statusItem = nil;
     } else if (!hidden && statusItem == nil) {
         statusItem = [[[NSStatusBar systemStatusBar]
-                statusItemWithLength:NSVariableStatusItemLength] retain];
+            statusItemWithLength:NSVariableStatusItemLength] retain];
         [statusItem setHighlightMode:YES];
-        if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 1 ) {
-            [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2704]];
-        } else if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"] == 2 ) {
-            [statusItem setTitle:[NSString stringWithFormat:@"%C",0x2702]];
-        } else {
-            [statusItem setImage:[NSImage imageNamed:@"com.generalarcade.flycut.16.png"]];
-        }
-        [statusItem setMenu:jcMenu];
+        [self switchMenuIconTo: [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
+    	[statusItem setMenu:jcMenu];
+        [jcMenu setDelegate:self];
+        jcMenuBaseItemsCount = [[[[jcMenu itemArray] reverseObjectEnumerator] allObjects] count];
         [statusItem setEnabled:YES];
     }
 }

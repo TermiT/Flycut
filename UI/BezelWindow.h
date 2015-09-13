@@ -22,6 +22,7 @@
 	RoundRecTextField	*charField;
 	NSImageView			*iconView;
 	id					delegate;
+    Boolean             color;
 }
 
 @property (nonatomic, retain, readonly) NSButton * preferencesBtn;
@@ -33,6 +34,7 @@
 - (void)setTitle:(NSString *)newTitle;
 - (NSString *)text;
 - (void)setText:(NSString *)newText;
+- (void)setColor:(BOOL)value;
 - (void)setCharString:(NSString *)newChar;
 - (void)setAlpha:(float)newValue;
 

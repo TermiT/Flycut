@@ -31,6 +31,7 @@ static const float lineHeight = 16;
 		[self setOpaque:NO];
 		[self setHasShadow:NO];
 		[self setMovableByWindowBackground:NO];
+        [self setColor:NO];
 		[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
 		NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
 		textField = [[RoundRecTextField alloc] initWithFrame:textFrame];
@@ -107,10 +108,19 @@ static const float lineHeight = 16;
 
 - (void)setText:(NSString *)newText
 {
+    // The Bezel gets slow when newText is huge.  Probably the retain.
+    // Since we can't see that much of it anyway, trim to 2000 characters.
+    if ([newText length] > 2000)
+        newText = [newText substringToIndex:2000];
 	[newText retain];
 	[bezelText release];
 	bezelText = newText;
 	[textField setStringValue:bezelText];
+}
+
+- (void)setColor:(BOOL)value
+{
+    color=value;
 }
 
 
@@ -121,7 +131,10 @@ static const float lineHeight = 16;
 	// I'm not at all clear why this seems to work
 	NSRect dummyRect = NSMakeRect(0, 0, [bg size].width, [bg size].height);
 	NSBezierPath *roundedRec = [NSBezierPath bezierPathWithRoundRectInRect:dummyRect radius:radius];
-	[[NSColor colorWithCalibratedWhite:0.1 alpha:alpha] set];
+    if (color)
+        [[NSColor colorWithCalibratedRed:0.6 green:0.6 blue:0 alpha:alpha ] set];
+    else
+        [[NSColor colorWithCalibratedWhite:0.1 alpha:alpha] set];
     [roundedRec fill];
 	[bg unlockFocus];
 	return [NSColor colorWithPatternImage:[bg autorelease]];
