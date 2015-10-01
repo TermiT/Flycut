@@ -10,7 +10,9 @@ Press the Main Hotkey (Shift-Command-v, by default) to access your clipboard his
 
 **The Bezel**
 
-The Bezel is what you see when you press the Main Hotkey.  It's the semi-transparent box that appears in the middle of your screen, showing you your clipboard history.  To get started, just use the up and down arrow keys to step through your history.  When you find something you want to paste, press Return and it is pasted while the Bezel closes automatically.  If you don't want to paste, just press the Esc key.
+The Bezel is what you see when you press the Main Hotkey.  It's the semi-transparent box that appears in the middle of your screen, showing you your clipboard history.  To get started, just use the up and down arrow keys while holding the command key to step through your history. 
+
+If "sticky bezel" option is enabled, there is no need to hold the command key. When you find something you want to paste, press Return and it is pasted while the Bezel closes automatically.  If you don't want to paste, just press the Esc key.
 
 **Bezel Keystrokes**
 
