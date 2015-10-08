@@ -75,7 +75,18 @@
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
         @"pasteMovesToTop",
+        [NSNumber numberWithBool:NO],
+        @"hideMenuItem",
         nil]];
+    
+	[[NSNotificationCenter defaultCenter]
+		addObserverForName:DBUserDefaultsDidChangeNotification
+		object:nil
+		queue:nil
+		usingBlock:^(NSNotification *notification) {
+			[self setStatusItemHidden:[[DBUserDefaults standardUserDefaults] boolForKey:@"hideMenuItem"]];
+		}];
+	
 	return [super init];
 }
 
@@ -110,6 +121,7 @@
 										   styleMask:NSBorderlessWindowMask
 											 backing:NSBackingStoreBuffered
 											   defer:NO];
+    [bezel.preferencesBtn setAction:@selector(onBezelPreferencesBtnAction:)];
     [bezel trueCenter];
 	[bezel setDelegate:self];
 
@@ -119,14 +131,7 @@
     pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
 
 	// Build the statusbar menu
-    statusItem = [[[NSStatusBar systemStatusBar]
-            statusItemWithLength:NSVariableStatusItemLength] retain];
-    [statusItem setHighlightMode:YES];
-    [self switchMenuIconTo: [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
-	[statusItem setMenu:jcMenu];
-    [jcMenu setDelegate:self];
-    jcMenuBaseItemsCount = [[[[jcMenu itemArray] reverseObjectEnumerator] allObjects] count];
-    [statusItem setEnabled:YES];
+    [self setStatusItemHidden:[[DBUserDefaults standardUserDefaults] boolForKey:@"hideMenuItem"]];
 	
     // If our preferences indicate that we are saving, load the dictionary from the saved plist
     // and use it to get everything set up.
@@ -524,6 +529,11 @@
 	if ( ! isBezelPinned ) {
 		[self pasteFromStack];
 	}
+}
+
+-(void)onBezelPreferencesBtnAction:(id)sender {
+    [self hideBezel];
+    [self showPreferencePanel:sender];
 }
 
 -(void)fakeKey:(NSNumber*) keyCode withCommandFlag:(BOOL) setFlag
@@ -1222,6 +1232,23 @@
     } else {
         [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
         [dropboxCheckbox setState:NSOffState];   
+    }
+}
+
+-(void)setStatusItemHidden:(BOOL)hidden {
+    if (hidden && statusItem != nil) {
+        [[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
+        [statusItem release];
+        statusItem = nil;
+    } else if (!hidden && statusItem == nil) {
+        statusItem = [[[NSStatusBar systemStatusBar]
+            statusItemWithLength:NSVariableStatusItemLength] retain];
+        [statusItem setHighlightMode:YES];
+        [self switchMenuIconTo: [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
+    	[statusItem setMenu:jcMenu];
+        [jcMenu setDelegate:self];
+        jcMenuBaseItemsCount = [[[[jcMenu itemArray] reverseObjectEnumerator] allObjects] count];
+        [statusItem setEnabled:YES];
     }
 }
 

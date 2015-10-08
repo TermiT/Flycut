@@ -103,6 +103,7 @@
 -(void) hideBezel;
 -(void) processBezelKeyDown:(NSEvent *)theEvent;
 -(void) metaKeysReleased;
+-(void) onBezelPreferencesBtnAction:(id)sender;
 
 // Menu related
 -(void) updateMenu;
@@ -111,6 +112,9 @@
 
 -(BOOL) dropboxSync;
 -(void)setDropboxSync:(BOOL)enable;
+
+// Status item related
+-(void)setStatusItemHidden:(BOOL)hidden;
 
 // Preference related
 -(IBAction) showPreferencePanel:(id)sender;

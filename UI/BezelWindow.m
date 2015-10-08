@@ -53,7 +53,12 @@ static const float lineHeight = 16;
 		[charField setDrawsBackground:YES];
 		[charField setBordered:NO];
 		[charField setAlignment:NSCenterTextAlignment];
-		[self setInitialFirstResponder:textField];         
+		_preferencesBtn = [[[NSButton alloc] initWithFrame:NSMakeRect(self.frame.size.width - 36, 10, 16, 16)] retain];
+		[self.preferencesBtn setImage:[NSImage imageNamed:@"preferences"]];
+		[self.preferencesBtn setBordered:NO];
+		[self.preferencesBtn setButtonType:NSMomentaryChangeButton];
+		[[self contentView] addSubview:self.preferencesBtn];
+		[self setInitialFirstResponder:textField];
 		return self;
 	}
 	return nil;
@@ -67,7 +72,7 @@ static const float lineHeight = 16;
     [textField setFrame:textFrame];
     NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
     [charField setFrame:charFrame];
-    
+    [self.preferencesBtn setFrame:NSMakeRect(self.frame.size.width - 36, 10, 16, 16)];
 }
 
 - (void) setAlpha:(float)newValue

@@ -107,7 +107,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="542" y="303" width="507" height="471"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1418"/>
             <value key="minSize" type="size" width="213" height="107"/>
             <view key="contentView" id="219">
                 <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
@@ -334,6 +334,17 @@
                                                         </buttonCell>
                                                         <connections>
                                                             <binding destination="808" name="value" keyPath="values.pasteMovesToTop" id="922"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button id="rWl-br-MaM">
+                                                        <rect key="frame" x="14" y="16" width="230" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <buttonCell key="cell" type="check" title="Hide menu item" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="rIk-W1-y7b">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.hideMenuItem" id="Ksh-Km-iSz"/>
                                                         </connections>
                                                     </button>
                                                     <button id="LLh-vf-2Q3">
