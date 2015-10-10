@@ -247,7 +247,7 @@
         statusItemText = [statusItem title];
         statusItemImage = [statusItem image];
         [statusItem setTitle: @""];
-        [statusItem setImage: [NSImage imageNamed:@"com.generalarcade.flycut.disabled.16.png"]];
+        [statusItem setImage: [NSImage imageNamed:@"com.generalarcade.flycut.xout.16.png"]];
         return true;
     }
     else
