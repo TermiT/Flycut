@@ -31,12 +31,15 @@
 -(id) init
 {
     [self initWithContents:@""
-          withType:@""
-          withDisplayLength:40];
+                  withType:@""
+         withDisplayLength:40
+      withAppLocalizedName:@""
+          withAppBundleURL:nil
+             withTimestamp:0];
     return self;
 }
 
--(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength
+-(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength withAppLocalizedName:(NSString *)localizedName withAppBundleURL:(NSString*)bundleURL withTimestamp:(int)timestamp
 {
     [super init];
     clipContents = [[[NSString alloc] init] retain];
@@ -45,6 +48,9 @@
 
     [self setContents:contents setDisplayLength:displayLength];
     [self setType:type];
+    [self setAppLocalizedName:localizedName];
+    [self setAppBundleURL:bundleURL];
+    [self setTimestamp:timestamp];
     [self setHasName:false];
     
     return self;
@@ -116,6 +122,27 @@
     }
 }
 
+-(void) setAppLocalizedName:(NSString *)new
+{
+    id old = appLocalizedName;
+    [new retain];
+    appLocalizedName = new;
+    [old release];
+}
+
+-(void) setAppBundleURL:(NSString *)new
+{
+    id old = appBundleURL;
+    [new retain];
+    appBundleURL = new;
+    [old release];
+}
+
+-(void) setTimestamp:(NSString *)newTimestamp
+{
+    clipTimestamp = newTimestamp;
+}
+
 -(void) setHasName:(BOOL)newHasName
 {
         clipHasName = newHasName;
@@ -163,6 +190,21 @@
     return clipContents;
 }
 
+-(NSString *) appLocalizedName
+{
+    return appLocalizedName;
+}
+
+-(NSString *) appBundleURL
+{
+    return appBundleURL;
+}
+
+-(int) timestamp
+{
+    return clipTimestamp;
+}
+
 -(int) displayLength
 {
     return clipDisplayLength;
@@ -206,6 +248,8 @@
 {
     [clipContents release];
     [clipType release];
+    [appLocalizedName release];
+    [appBundleURL release];
     clipDisplayLength = 0;
     [clipDisplayString release];
     clipHasName = 0;

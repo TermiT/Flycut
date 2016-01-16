@@ -597,7 +597,7 @@
 	{
 		// Check to see if they want a little help figuring out what types to enter.
 		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
-			[clippingStore addClipping:type ofType:type];
+			[clippingStore addClipping:type ofType:type fromAppLocalizedName:@"Flycut" fromAppBundleURL:nil atTimestamp:0];
 
 		__block bool skipClipping = NO;
 
@@ -665,11 +665,11 @@
         [pbCount release];
         pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         if ( type != nil ) {
-			NSString *currRunningApp = @"";
+			NSRunningApplication *currRunningApp = nil;
 			for (NSRunningApplication *currApp in [[NSWorkspace sharedWorkspace] runningApplications])
 				if ([currApp isActive])
-					currRunningApp = [currApp localizedName];
-			bool largeCopyRisk = [currRunningApp rangeOfString:@"Remote Desktop Connection"].location != NSNotFound;
+					currRunningApp = currApp;
+			bool largeCopyRisk = nil != currRunningApp && [[currRunningApp localizedName] rangeOfString:@"Remote Desktop Connection"].location != NSNotFound;
 
 			// Microsoft's Remote Desktop Connection has an issue with large copy actions, which appears to be in the time it takes to transer them over the network.  The copy starts being registered with OS X prior to completion of the transfer, and if the active application changes during the transfer the copy will be lost.  Indicate this time period by toggling the menu icon at the beginning of all RDC trasfers and back at the end.  Apple's Screen Sharing does not demonstrate this problem.
 			if (largeCopyRisk)
@@ -704,7 +704,10 @@
                         }
                         
                        [clippingStore addClipping:contents
-											ofType:type	];
+										   ofType:type
+									   fromAppLocalizedName:[currRunningApp localizedName]
+									   fromAppBundleURL:currRunningApp.bundleURL.path
+									  atTimestamp:[[NSDate date] timeIntervalSince1970]];
 //						The below tracks our position down down down... Maybe as an option?
 //						if ( [clippingStore jcListCount] > 1 ) stackPosition++;
 						stackPosition = 0;
@@ -1063,7 +1066,10 @@
             NSArray *toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
             for( NSDictionary *aSavedClipping in toBeRestoredClips)
 				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-									ofType:[aSavedClipping objectForKey:@"Type"]];
+									ofType:[aSavedClipping objectForKey:@"Type"]
+					  fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
+						  fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
+							   atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
             
             // Now for the favorites, same thing.
             savedJCList =[loadDict objectForKey:@"favoritesList"];
@@ -1075,7 +1081,10 @@
             toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
             for( NSDictionary *aSavedClipping in toBeRestoredClips)
                 [favoritesStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-                                    ofType:[aSavedClipping objectForKey:@"Type"]];
+                                     ofType:[aSavedClipping objectForKey:@"Type"]
+                       fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
+                           fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
+                                atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
             }
         } else NSLog(@"Not array");
         [self updateMenu];
@@ -1102,7 +1111,7 @@
 -(void) fillBezel
 {
     JumpcutClipping* clipping = [clippingStore clippingAtPosition:stackPosition];
-    [bezel setText:[clipping source]];
+    [bezel setText:[NSString stringWithFormat:@"%@ - %@\n%@" , [clipping source],[NSDate dateWithTimeIntervalSince1970: [clipping timestamp]], [clipping contents]]];
     [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
 }
 
@@ -1122,9 +1131,35 @@
 	}
 }
 
+- (void)saveStore:(JumpcutStore *)store toKey:(NSString *)key onDict:(NSMutableDictionary *)saveDict {
+    NSMutableArray *jcListArray = [NSMutableArray array];
+    for ( int i = 0 ; i < [store jcListCount] ; i++ )
+    {
+        JumpcutClipping *clipping = [store clippingAtPosition:i];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                     [clipping contents], @"Contents",
+                                     [clipping type], @"Type",
+                                     [NSNumber numberWithInt:i], @"Position",nil];
+
+        NSString *val = [clipping appLocalizedName];
+        if ( nil != val )
+            [dict setObject:val forKey:@"AppLocalizedName"];
+
+        val = [clipping appBundleURL];
+        if ( nil != val )
+            [dict setObject:val forKey:@"AppBundleURL"];
+
+        int timestamp = [clipping timestamp];
+        if ( timestamp > 0 )
+            [dict setObject:[NSNumber numberWithInt:timestamp] forKey:@"Timestamp"];
+
+        [jcListArray addObject:dict];
+    }
+    [saveDict setObject:jcListArray forKey:key];
+}
+
 -(void) saveEngine {
     NSMutableDictionary *saveDict;
-    NSMutableArray *jcListArray = [NSMutableArray array];
     saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
     [saveDict setObject:@"0.7" forKey:@"version"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
@@ -1135,25 +1170,10 @@
                  forKey:@"displayLen"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
                  forKey:@"displayNum"];
-    for (int i = 0 ; i < [clippingStore jcListCount]; i++)
-    {
-        JumpcutClipping* clipping = [clippingStore clippingAtPosition:i];
-		[jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                [clipping contents], @"Contents",
-                                [clipping type], @"Type",
-                                [NSNumber numberWithInt:i], @"Position",nil]];
-    }
-    [saveDict setObject:jcListArray forKey:@"jcList"];
-    jcListArray = [NSMutableArray array];
-    for (int i = 0 ; i < [favoritesStore jcListCount]; i++)
-    {
-        JumpcutClipping* clipping = [favoritesStore clippingAtPosition:i];
-        [jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                [clipping contents], @"Contents",
-                                [clipping type], @"Type",
-                                [NSNumber numberWithInt:i], @"Position",nil]];
-    }
-    [saveDict setObject:jcListArray forKey:@"favoritesList"];
+
+    [self saveStore:clippingStore toKey:@"jcList" onDict:saveDict];
+    [self saveStore:favoritesStore toKey:@"favoritesList" onDict:saveDict];
+
     [[DBUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
     [[DBUserDefaults standardUserDefaults] synchronize];
 }

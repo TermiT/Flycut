@@ -50,7 +50,7 @@
 }
 
 // Add a clipping
--(void) addClipping:(NSString *)clipping ofType:(NSString *)type{
+-(void) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp{
     if ([clipping length] == 0) {
         return;
     }
@@ -59,7 +59,10 @@
 	// Create clipping
     newClipping = [[JumpcutClipping alloc] initWithContents:clipping
 												   withType:type
-										  withDisplayLength:[self displayLen]];
+										  withDisplayLength:[self displayLen]
+									   withAppLocalizedName:appLocalizedName
+										   withAppBundleURL:bundleURL
+											  withTimestamp:timestamp];
 	
 	[self addClipping:newClipping];
 	
@@ -80,7 +83,7 @@
 
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type withPBCount:(int *)pbCount
 {
-    [self addClipping:clipping ofType:type];
+    [self addClipping:clipping ofType:type fromAppLocalizedName:@"PBCount" fromAppBundleURL:nil atTimestamp:0];
 }
 
 // Clear remembered and listed
@@ -93,7 +96,7 @@
 
 -(void) mergeList {
     NSString *merge = [[[[jcList reverseObjectEnumerator] allObjects] valueForKey:@"clipContents"] componentsJoinedByString:@"\n"];
-    [self addClipping:merge ofType:NSStringFromClass([merge class])];
+    [self addClipping:merge ofType:NSStringFromClass([merge class]) fromAppLocalizedName:@"Merge" fromAppBundleURL:nil atTimestamp:0];
 }
 
 -(void) clearItem:(int)index
