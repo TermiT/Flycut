@@ -150,6 +150,11 @@
     return description;
 }
 
+-(JumpcutClipping *) clipping
+{
+    return self;
+}
+
 -(NSString *) contents
 {
 //    NSString *returnClipContents;

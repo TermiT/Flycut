@@ -60,18 +60,22 @@
     newClipping = [[JumpcutClipping alloc] initWithContents:clipping
 												   withType:type
 										  withDisplayLength:[self displayLen]];
+	
+	[self addClipping:newClipping];
+	
+	[newClipping release];
+}
 
-    if ([jcList containsObject:newClipping] && [[[DBUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
-        [jcList removeObject:newClipping];
+-(void) addClipping:(JumpcutClipping*) clipping{
+    if ([jcList containsObject:clipping] && [[[DBUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
+        [jcList removeObject:clipping];
     }
     // Push it onto our recent clippings stack
-	[jcList insertObject:newClipping atIndex:0];
+	[jcList insertObject:clipping atIndex:0];
 	// Delete clippings older than jcRememberNum
 	while ( [jcList count] > jcRememberNum ) {
 		[jcList removeObjectAtIndex:jcRememberNum];
 	}
-
-    [newClipping release];
 }
 
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type withPBCount:(int *)pbCount
@@ -146,6 +150,15 @@
 -(int) jcListCount
 {
     return [jcList count];
+}
+
+-(JumpcutClipping *) clippingAtPosition:(int)index
+{
+    if ( index >= [jcList count] ) {
+        return nil;
+    } else {
+        return [[jcList objectAtIndex:index] clipping];
+    }
 }
 
 -(NSString *) clippingContentsAtPosition:(int)index

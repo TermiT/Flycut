@@ -481,8 +481,7 @@
             [self restoreStashedStore];
         }
         // Get text from clipping store.
-        [favoritesStore addClipping:[clippingStore clippingContentsAtPosition:stackPosition]
-                            ofType:[clippingStore clippingTypeAtPosition:stackPosition]	];
+        [favoritesStore addClipping:[clippingStore clippingAtPosition:stackPosition] ];
         [clippingStore clearItem:stackPosition];
         [self updateBezel];
         [self updateMenu];
@@ -796,8 +795,7 @@
 				newStackPosition = pressed == 0x30 ? 9 : [[NSString stringWithCharacters:&pressed length:1] intValue] - 1;
 				if ( [clippingStore jcListCount] >= newStackPosition ) {
 					stackPosition = newStackPosition;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+					[self fillBezel];
 				}
 				break;
             case 's': case 'S': // Save / Save-and-delete
@@ -846,16 +844,14 @@
 		[bezel setCharString:@"Empty"];
 	}
 	else { // normal
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
-		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+		[self fillBezel];
 	}
 }
 
 - (void) showBezel
 {
 	if ( [clippingStore jcListCount] > 0 && [clippingStore jcListCount] > stackPosition ) {
-		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+		[self fillBezel];
 	}
 	NSRect mainScreenRect = [NSScreen mainScreen].visibleFrame;
 	[bezel setFrame:NSMakeRect(mainScreenRect.origin.x + mainScreenRect.size.width/2 - bezel.frame.size.width/2,
@@ -1092,17 +1088,22 @@
 {
 	stackPosition++;
 	if ( [clippingStore jcListCount] > stackPosition ) {
-		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+		[self fillBezel];
 	} else {
 		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
 			stackPosition = 0;
-			[bezel setCharString:[NSString stringWithFormat:@"%d of %d", 1, [clippingStore jcListCount]]];
-			[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+			[self fillBezel];
 		} else {
 			stackPosition--;
 		}
 	}
+}
+
+-(void) fillBezel
+{
+    JumpcutClipping* clipping = [clippingStore clippingAtPosition:stackPosition];
+    [bezel setText:[clipping source]];
+    [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
 }
 
 -(void) stackUp
@@ -1111,15 +1112,13 @@
 	if ( stackPosition < 0 ) {
 		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
 			stackPosition = [clippingStore jcListCount] - 1;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-			[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+			[self fillBezel];
 		} else {
 			stackPosition = 0;
 		}
 	}
 	if ( [clippingStore jcListCount] > stackPosition ) {
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+		[self fillBezel];
 	}
 }
 
@@ -1137,17 +1136,23 @@
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
                  forKey:@"displayNum"];
     for (int i = 0 ; i < [clippingStore jcListCount]; i++)
+    {
+        JumpcutClipping* clipping = [clippingStore clippingAtPosition:i];
 		[jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                [clippingStore clippingContentsAtPosition:i], @"Contents",
-                                [clippingStore clippingTypeAtPosition:i], @"Type",
+                                [clipping contents], @"Contents",
+                                [clipping type], @"Type",
                                 [NSNumber numberWithInt:i], @"Position",nil]];
+    }
     [saveDict setObject:jcListArray forKey:@"jcList"];
     jcListArray = [NSMutableArray array];
     for (int i = 0 ; i < [favoritesStore jcListCount]; i++)
+    {
+        JumpcutClipping* clipping = [favoritesStore clippingAtPosition:i];
         [jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                [favoritesStore clippingContentsAtPosition:i], @"Contents",
-                                [favoritesStore clippingTypeAtPosition:i], @"Type",
+                                [clipping contents], @"Contents",
+                                [clipping type], @"Type",
                                 [NSNumber numberWithInt:i], @"Position",nil]];
+    }
     [saveDict setObject:jcListArray forKey:@"favoritesList"];
     [[DBUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
     [[DBUserDefaults standardUserDefaults] synchronize];

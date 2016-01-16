@@ -53,6 +53,7 @@
 -(void) setHasName:(BOOL)newHasName;
 
 // Retrieve values
+-(JumpcutClipping *) clipping;
 -(NSString *) contents;
 -(int) displayLength;
 -(NSString *) displayString;
