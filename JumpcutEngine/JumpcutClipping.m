@@ -93,17 +93,19 @@
 
 -(void) setContents:(NSString *)newContents
 {
+    id old = clipContents;
     [newContents retain];
-    [clipContents release];
     clipContents = newContents;
+    [old release];
     [self resetDisplayString];
 }
 
 -(void) setType:(NSString *)newType
 {
+    id old = clipType;
     [newType retain];
-    [clipType release];
     clipType = newType;
+    [old release];
 }
 
 -(void) setDisplayLength:(int)newDisplayLength
