@@ -32,8 +32,9 @@ static const float lineHeight = 16;
 		[self setHasShadow:NO];
 		[self setMovableByWindowBackground:NO];
         [self setColor:NO];
-		[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
-		NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
+		[self setBackgroundColor:[self backgroundColor]];
+
+		NSRect textFrame = [self textFrame];
 		textField = [[RoundRecTextField alloc] initWithFrame:textFrame];
 		[[self contentView] addSubview:textField];
 		[textField setEditable:NO];
@@ -44,7 +45,8 @@ static const float lineHeight = 16;
 		[textField setDrawsBackground:YES];
 		[textField setBordered:NO];
 		[textField setAlignment:NSLeftTextAlignment];
-		NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
+
+		NSRect charFrame = [self charFrame];
 		charField = [[RoundRecTextField alloc] initWithFrame:charFrame];
 		[[self contentView] addSubview:charField];
 		[charField setEditable:NO];
@@ -62,17 +64,32 @@ static const float lineHeight = 16;
 
 - (void) update  {
     [super update];
-    [self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
-    NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
+    [self setBackgroundColor:[self backgroundColor]];
+    NSRect textFrame = [self textFrame];
     [textField setFrame:textFrame];
-    NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
+    NSRect charFrame = [self charFrame];
     [charField setFrame:charFrame];
     
 }
 
+-(NSRect) textFrame
+{
+    return NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
+}
+
+-(NSRect) charFrame
+{
+    return NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
+}
+
+-(NSColor*) backgroundColor
+{
+    return [self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]];
+}
+
 - (void) setAlpha:(float)newValue
 {
-	[self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
+	[self setBackgroundColor:[self backgroundColor]];
 	[[self contentView] setNeedsDisplay:YES];
 }
 
