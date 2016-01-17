@@ -109,9 +109,15 @@
 	bezel = [[BezelWindow alloc] initWithContentRect:windowFrame
 										   styleMask:NSBorderlessWindowMask
 											 backing:NSBackingStoreBuffered
-											   defer:NO];
+											   defer:NO
+										  showSource:YES];
     [bezel trueCenter];
 	[bezel setDelegate:self];
+
+	// Set up the bezel date formatter
+	dateFormat = [[NSDateFormatter alloc] init];
+	[dateFormat setDateFormat:@"EEEE, MMMM dd 'at' h:mm a"];
+
 
 	// Create our pasteboard interface
     jcPasteboard = [NSPasteboard generalPasteboard];
@@ -1111,8 +1117,20 @@
 -(void) fillBezel
 {
     JumpcutClipping* clipping = [clippingStore clippingAtPosition:stackPosition];
-    [bezel setText:[NSString stringWithFormat:@"%@ - %@\n%@" , [clipping source],[NSDate dateWithTimeIntervalSince1970: [clipping timestamp]], [clipping contents]]];
+    [bezel setText:[NSString stringWithFormat:@"%@", [clipping contents]]];
     [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+    NSString *localizedName = [clipping appLocalizedName];
+    if ( nil == localizedName )
+        localizedName = @"";
+    NSString* dateString = @"";
+    if ( [clipping timestamp] > 0)
+        dateString = [dateFormat stringFromDate:[NSDate dateWithTimeIntervalSince1970: [clipping timestamp]]];
+    NSImage* icon = nil;
+    if (nil != [clipping appBundleURL])
+        icon = [[NSWorkspace sharedWorkspace] iconForFile:[clipping appBundleURL]];
+    [bezel setSource:localizedName];
+    [bezel setDate:dateString];
+    [bezel setSourceIcon:icon];
 }
 
 -(void) stackUp
