@@ -71,7 +71,7 @@
         @"saveForgottenClippings",
         [NSNumber numberWithBool:YES],
         @"saveForgottenFavorites",
-        [NSNumber numberWithBool:YES],
+        [NSNumber numberWithBool:(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9)],
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
         @"pasteMovesToTop",
