@@ -81,6 +81,7 @@
 
 - (void)awakeFromNib
 {
+	[self buildAppearancesPreferencePanel];
 
 	// We no longer get autosave from ShortcutRecorder, so let's set the recorder by hand
 	if ( [[DBUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] ) {
@@ -97,10 +98,6 @@
                                         withDisplayLength:_DISPLENGTH];
     stashedStore = NULL;
     [bezel setColor:NO];
-    
-    NSRect screenFrame = [[NSScreen mainScreen] frame];
-    widthSlider.maxValue = screenFrame.size.width;
-    heightSlider.maxValue = screenFrame.size.height;
     
 	// Set up the bezel window
 	NSRect windowFrame = NSMakeRect(0, 0,
@@ -377,6 +374,175 @@
 -(IBAction) setDisplayNumPref:(id)sender
 {
 	[self updateMenu];
+}
+
+-(NSTextField*) preferencePanelSliderLabelForText:(NSString*)text aligned:(NSTextAlignment)alignment andFrame:(NSRect)frame
+{
+	NSTextField *newLabel = [[NSTextField alloc] initWithFrame:frame];
+	newLabel.editable = NO;
+	[newLabel setAlignment:alignment];
+	[newLabel setBordered:NO];
+	[newLabel setDrawsBackground:NO];
+	[newLabel setFont:[NSFont labelFontOfSize:10]];
+	[newLabel setStringValue:text];
+	return newLabel;
+}
+
+-(NSBox*) preferencePanelSliderRowForText:(NSString*)title withTicks:(int)ticks minText:(NSString*)minText maxText:(NSString*)maxText minValue:(double)min maxValue:(double)max frameMaxY:(int)frameMaxY binding:(NSString*)keyPath action:(SEL)action
+{
+	NSRect panelFrame = [appearancePanel frame];
+
+	if ( frameMaxY < 0 )
+		frameMaxY = panelFrame.size.height-8;
+
+	int height = 63;
+
+	NSBox *newRow = [[NSBox alloc] initWithFrame:NSMakeRect(0, frameMaxY-height, panelFrame.size.width-10, height)];
+	[newRow setTitlePosition:NSNoTitle];
+	[newRow setBorderType:NSNoBorder];
+
+	[newRow addSubview:[self preferencePanelSliderLabelForText:title aligned:NSNaturalTextAlignment andFrame:NSMakeRect(8, 25, 100, 25)]];
+
+	[newRow addSubview:[self preferencePanelSliderLabelForText:minText aligned:NSLeftTextAlignment andFrame:NSMakeRect(113, 0, 151, 25)]];
+	[newRow addSubview:[self preferencePanelSliderLabelForText:maxText aligned:NSRightTextAlignment andFrame:NSMakeRect(109+310-151-4, 0, 151, 25)]];
+
+	NSSlider *newControl = [[NSSlider alloc] initWithFrame:NSMakeRect(109, 29, 310, 25)];
+
+	newControl.numberOfTickMarks=ticks;
+	[newControl setMinValue:min];
+	[newControl setMaxValue:max];
+
+	[self setBinding:@"value" forKey:keyPath andOrAction:action on:newControl];
+
+	[newRow addSubview:newControl];
+
+	return newRow;
+}
+
+-(NSBox*) preferencePanelPopUpRowForText:(NSString*)title items:(NSArray*)items frameMaxY:(int)frameMaxY binding:(NSString*)keyPath action:(SEL)action
+{
+	NSRect panelFrame = [appearancePanel frame];
+
+	if ( frameMaxY < 0 )
+		frameMaxY = panelFrame.size.height-8;
+
+	int height = 40;
+
+	NSBox *newRow = [[NSBox alloc] initWithFrame:NSMakeRect(0, frameMaxY-height+5, panelFrame.size.width-10, height)];
+	[newRow setTitlePosition:NSNoTitle];
+	[newRow setBorderType:NSNoBorder];
+
+	[newRow addSubview:[self preferencePanelSliderLabelForText:title aligned:NSNaturalTextAlignment andFrame:NSMakeRect(8, -2, 100, 25)]];
+
+	NSPopUpButton *newControl = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(109, 4, 150, 25) pullsDown:NO];
+
+	[newControl addItemsWithTitles:items];
+
+	[self setBinding:@"selectedIndex" forKey:keyPath andOrAction:action on:newControl];
+
+	[newRow addSubview:newControl];
+
+	return newRow;
+}
+
+-(NSBox*) preferencePanelCheckboxRowForText:(NSString*)title frameMaxY:(int)frameMaxY binding:(NSString*)keyPath action:(SEL)action
+{
+	NSRect panelFrame = [appearancePanel frame];
+
+	if ( frameMaxY < 0 )
+		frameMaxY = panelFrame.size.height-8;
+
+	int height = 40;
+
+	NSBox *newRow = [[NSBox alloc] initWithFrame:NSMakeRect(0, frameMaxY-height+5, panelFrame.size.width-10, height)];
+	[newRow setTitlePosition:NSNoTitle];
+	[newRow setBorderType:NSNoBorder];
+
+	NSButton *newControl = [[NSButton alloc] initWithFrame:NSMakeRect(8, 4, panelFrame.size.width-20, 25)];
+
+	[newControl setButtonType:NSSwitchButton];
+	[newControl setTitle:title];
+
+	[self setBinding:@"value" forKey:keyPath andOrAction:action on:newControl];
+
+	[newRow addSubview:newControl];
+
+	return newRow;
+}
+
+-(void)setBinding:(NSString*)binding forKey:(NSString*)keyPath andOrAction:(SEL)action on:(NSControl*)newControl
+{
+	[newControl bind:binding
+			toObject:[DBUserDefaults standardUserDefaults]
+		 withKeyPath:keyPath
+			 options:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
+												 forKey:@"NSContinuouslyUpdatesValue"]];
+	if ( nil != action )
+	{
+		[newControl setTarget:self];
+		[newControl setAction:action];
+	}
+}
+
+-(void) buildAppearancesPreferencePanel
+{
+	NSRect screenFrame = [[NSScreen mainScreen] frame];
+
+	int nextYMax = -1;
+	NSView *row = [self preferencePanelSliderRowForText:@"Bezel transparency"
+											 withTicks:16
+											   minText:@"Lighter"
+											   maxText:@"Darker"
+											  minValue:0.1
+											  maxValue:0.9
+											 frameMaxY:nextYMax
+											   binding:@"bezelAlpha"
+												action:@selector(setBezelAlpha:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelSliderRowForText:@"Bezel width"
+									  withTicks:50
+										minText:@"Smaller"
+										maxText:@"Bigger"
+									   minValue:200
+									   maxValue:screenFrame.size.width
+									  frameMaxY:nextYMax
+										binding:@"bezelWidth"
+										 action:@selector(setBezelWidth:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelSliderRowForText:@"Bezel height"
+									  withTicks:50
+										minText:@"Smaller"
+										maxText:@"Bigger"
+									   minValue:200
+									   maxValue:screenFrame.size.height
+									  frameMaxY:nextYMax
+										binding:@"bezelHeight"
+										 action:@selector(setBezelHeight:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelPopUpRowForText:@"Menu item icon"
+										 items:[NSArray arrayWithObjects:
+												@"Flycut icon",
+												@"Black Flycut icon",
+												@"White scissors",
+												@"Black scissors",nil]
+									 frameMaxY:nextYMax
+									   binding:@"menuIcon"
+										action:@selector(switchMenuIcon:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelCheckboxRowForText:@"Animate bezel appearance"
+										frameMaxY:nextYMax
+										  binding:@"popUpAnimation"
+										   action:nil];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
 }
 
 -(IBAction) showPreferencePanel:(id)sender

@@ -22,6 +22,7 @@
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
 	IBOutlet NSPanel			*prefsPanel;
+	IBOutlet NSBox			  *appearancePanel;
 	int							mainHotkeyModifiers;
 	SRKeyCodeTransformer        *srTransformer;
 	BOOL						isBezelDisplayed;
