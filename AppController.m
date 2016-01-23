@@ -75,6 +75,8 @@
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
         @"pasteMovesToTop",
+        [NSNumber numberWithBool:YES],
+        @"displayClippingSource",
         nil]];
 	return [super init];
 }
@@ -100,16 +102,7 @@
     [bezel setColor:NO];
     
 	// Set up the bezel window
-	NSRect windowFrame = NSMakeRect(0, 0,
-                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelWidth"],
-                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelHeight"]);
-	bezel = [[BezelWindow alloc] initWithContentRect:windowFrame
-										   styleMask:NSBorderlessWindowMask
-											 backing:NSBackingStoreBuffered
-											   defer:NO
-										  showSource:YES];
-    [bezel trueCenter];
-	[bezel setDelegate:self];
+	[self setupBezel:nil];
 
 	// Set up the bezel date formatter
 	dateFormat = [[NSDateFormatter alloc] init];
@@ -309,6 +302,20 @@
     [bezel trueCenter];
 }
 
+-(IBAction) setupBezel:(id)sender
+{
+    NSRect windowFrame = NSMakeRect(0, 0,
+                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelWidth"],
+                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelHeight"]);
+    bezel = [[BezelWindow alloc] initWithContentRect:windowFrame
+                                           styleMask:NSBorderlessWindowMask
+                                             backing:NSBackingStoreBuffered
+                                               defer:NO
+                                          showSource:[[DBUserDefaults standardUserDefaults] boolForKey:@"displayClippingSource"]];
+
+    [bezel trueCenter];
+    [bezel setDelegate:self];
+}
 
 -(IBAction) switchMenuIcon:(id)sender
 {
@@ -543,6 +550,13 @@
 										   action:nil];
 	[appearancePanel addSubview:row];
 	nextYMax = row.frame.origin.y;
+
+    row = [self preferencePanelCheckboxRowForText:@"Show clipping source app and time"
+                                        frameMaxY:nextYMax
+                                          binding:@"displayClippingSource"
+                                           action:@selector(setupBezel:)];
+    [appearancePanel addSubview:row];
+    nextYMax = row.frame.origin.y;
 }
 
 -(IBAction) showPreferencePanel:(id)sender
