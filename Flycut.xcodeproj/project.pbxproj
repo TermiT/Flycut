@@ -429,6 +429,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Flycut" */;
 			buildPhases = (
+				8D60A1BA1BC8399900A26CBF /* ShellScript */,
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				AAECDE440A03E75C007D377A /* CopyFiles */,
@@ -510,6 +511,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8D60A1BA1BC8399900A26CBF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Sets the build number to identify, to some extent, the git version of the code.\n# Combines the hash of the origin commit, number of commits of divergence, local HEAD commit, local uncommitted lines of change, and year/month of build.\n# Eliminates all except for the origin commit if there are no local changes, since that can be easily tracked.\n# e.g. 1.b690b47.1.1.cb73ce6.35.1510 from origin b690b47, one and one different, locally at commit cb73ce6, with a further 35 lines of change, built in 2015 in the tenth month.  Day numbers are excluded for brevity, as there is already much uncertainty in the local changes and this field is only to indicate a rough level of freshness.  Build numer starts with \"1.\" to avoid strange compile errors.\ncd \"${SOURCE_ROOT}\"\nORIGIN=$(git rev-parse --short remotes/origin/master)\nOFFSET=\".$(git status|sed -n '1,/^# *$/ p'|grep \"[0-9]\"|head -1|sed 's/^[^0-9]*//;s/[^0-9]*$//'|sed 's/[^0-9][^0-9]*/./')\"\nLOCAL=\".$(git rev-parse --short HEAD)\"\nUNCOMMITTED=\".$(git diff -b -w HEAD|grep \"^[+\\-]\"|grep -v \"^[+\\-][+\\-][+\\-] [ab]\"|wc -l|sed 's/[^0-9]//g')\"\nBUILD_YEAR_MONTH=\".$(date +\"%y%m\")\"\nif [ \".$ORIGIN\" == \"$LOCAL\" ]\nthen\n    OFFSET=\"\"\n    LOCAL=\"\"\n    if [ \".0\" == \"$UNCOMMITTED\" ]\n    then\n        UNCOMMITTED=\"\"\n        BUILD_YEAR_MONTH=\"\"\n    fi\nfi\nNEWVERSIONSTRING=\"1.$ORIGIN$OFFSET$LOCAL$UNCOMMITTED$BUILD_YEAR_MONTH\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $NEWVERSIONSTRING\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D11072C0486CEB800E47090 /* Sources */ = {
