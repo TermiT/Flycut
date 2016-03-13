@@ -44,7 +44,7 @@ static const float lineHeight = 16;
 		[textField setDrawsBackground:YES];
 		[textField setBordered:NO];
 		[textField setAlignment:NSLeftTextAlignment];
-		NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
+		NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 8 * lineHeight, 1.2 * lineHeight);
 		charField = [[RoundRecTextField alloc] initWithFrame:charFrame];
 		[[self contentView] addSubview:charField];
 		[charField setEditable:NO];
@@ -65,7 +65,7 @@ static const float lineHeight = 16;
     [self setBackgroundColor:[self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]]];
     NSRect textFrame = NSMakeRect(12, 36, self.frame.size.width - 24, self.frame.size.height - 50);
     [textField setFrame:textFrame];
-    NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
+    NSRect charFrame = NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 8 * lineHeight, 1.2 * lineHeight);
     [charField setFrame:charFrame];
     
 }
