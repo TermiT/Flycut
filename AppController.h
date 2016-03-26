@@ -22,6 +22,7 @@
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
 	IBOutlet NSPanel			*prefsPanel;
+	IBOutlet NSBox			  *appearancePanel;
 	int							mainHotkeyModifiers;
 	SRKeyCodeTransformer        *srTransformer;
 	BOOL						isBezelDisplayed;
@@ -30,6 +31,7 @@
     int							stackPosition;
     int							favoritesStackPosition;
     int							stashedStackPosition;
+    NSDateFormatter*            dateFormat;
 	
 	// The below were pulled in from JumpcutController
     JumpcutStore				*clippingStore;

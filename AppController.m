@@ -71,16 +71,19 @@
         @"saveForgottenClippings",
         [NSNumber numberWithBool:YES],
         @"saveForgottenFavorites",
-        [NSNumber numberWithBool:YES],
+        [NSNumber numberWithBool:(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9)],
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
         @"pasteMovesToTop",
+        [NSNumber numberWithBool:YES],
+        @"displayClippingSource",
         nil]];
 	return [super init];
 }
 
 - (void)awakeFromNib
 {
+	[self buildAppearancesPreferencePanel];
 
 	// We no longer get autosave from ShortcutRecorder, so let's set the recorder by hand
 	if ( [[DBUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] ) {
@@ -98,20 +101,13 @@
     stashedStore = NULL;
     [bezel setColor:NO];
     
-    NSRect screenFrame = [[NSScreen mainScreen] frame];
-    widthSlider.maxValue = screenFrame.size.width;
-    heightSlider.maxValue = screenFrame.size.height;
-    
 	// Set up the bezel window
-	NSRect windowFrame = NSMakeRect(0, 0,
-                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelWidth"],
-                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelHeight"]);
-	bezel = [[BezelWindow alloc] initWithContentRect:windowFrame
-										   styleMask:NSBorderlessWindowMask
-											 backing:NSBackingStoreBuffered
-											   defer:NO];
-    [bezel trueCenter];
-	[bezel setDelegate:self];
+	[self setupBezel:nil];
+
+	// Set up the bezel date formatter
+	dateFormat = [[NSDateFormatter alloc] init];
+	[dateFormat setDateFormat:@"EEEE, MMMM dd 'at' h:mm a"];
+
 
 	// Create our pasteboard interface
     jcPasteboard = [NSPasteboard generalPasteboard];
@@ -247,7 +243,7 @@
         statusItemText = [statusItem title];
         statusItemImage = [statusItem image];
         [statusItem setTitle: @""];
-        [statusItem setImage: [NSImage imageNamed:@"com.generalarcade.flycut.disabled.16.png"]];
+        [statusItem setImage: [NSImage imageNamed:@"com.generalarcade.flycut.xout.16.png"]];
         return true;
     }
     else
@@ -306,6 +302,20 @@
     [bezel trueCenter];
 }
 
+-(IBAction) setupBezel:(id)sender
+{
+    NSRect windowFrame = NSMakeRect(0, 0,
+                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelWidth"],
+                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelHeight"]);
+    bezel = [[BezelWindow alloc] initWithContentRect:windowFrame
+                                           styleMask:NSBorderlessWindowMask
+                                             backing:NSBackingStoreBuffered
+                                               defer:NO
+                                          showSource:[[DBUserDefaults standardUserDefaults] boolForKey:@"displayClippingSource"]];
+
+    [bezel trueCenter];
+    [bezel setDelegate:self];
+}
 
 -(IBAction) switchMenuIcon:(id)sender
 {
@@ -371,6 +381,182 @@
 -(IBAction) setDisplayNumPref:(id)sender
 {
 	[self updateMenu];
+}
+
+-(NSTextField*) preferencePanelSliderLabelForText:(NSString*)text aligned:(NSTextAlignment)alignment andFrame:(NSRect)frame
+{
+	NSTextField *newLabel = [[NSTextField alloc] initWithFrame:frame];
+	newLabel.editable = NO;
+	[newLabel setAlignment:alignment];
+	[newLabel setBordered:NO];
+	[newLabel setDrawsBackground:NO];
+	[newLabel setFont:[NSFont labelFontOfSize:10]];
+	[newLabel setStringValue:text];
+	return newLabel;
+}
+
+-(NSBox*) preferencePanelSliderRowForText:(NSString*)title withTicks:(int)ticks minText:(NSString*)minText maxText:(NSString*)maxText minValue:(double)min maxValue:(double)max frameMaxY:(int)frameMaxY binding:(NSString*)keyPath action:(SEL)action
+{
+	NSRect panelFrame = [appearancePanel frame];
+
+	if ( frameMaxY < 0 )
+		frameMaxY = panelFrame.size.height-8;
+
+	int height = 63;
+
+	NSBox *newRow = [[NSBox alloc] initWithFrame:NSMakeRect(0, frameMaxY-height, panelFrame.size.width-10, height)];
+	[newRow setTitlePosition:NSNoTitle];
+	[newRow setBorderType:NSNoBorder];
+
+	[newRow addSubview:[self preferencePanelSliderLabelForText:title aligned:NSNaturalTextAlignment andFrame:NSMakeRect(8, 25, 100, 25)]];
+
+	[newRow addSubview:[self preferencePanelSliderLabelForText:minText aligned:NSLeftTextAlignment andFrame:NSMakeRect(113, 0, 151, 25)]];
+	[newRow addSubview:[self preferencePanelSliderLabelForText:maxText aligned:NSRightTextAlignment andFrame:NSMakeRect(109+310-151-4, 0, 151, 25)]];
+
+	NSSlider *newControl = [[NSSlider alloc] initWithFrame:NSMakeRect(109, 29, 310, 25)];
+
+	newControl.numberOfTickMarks=ticks;
+	[newControl setMinValue:min];
+	[newControl setMaxValue:max];
+
+	[self setBinding:@"value" forKey:keyPath andOrAction:action on:newControl];
+
+	[newRow addSubview:newControl];
+
+	return newRow;
+}
+
+-(NSBox*) preferencePanelPopUpRowForText:(NSString*)title items:(NSArray*)items frameMaxY:(int)frameMaxY binding:(NSString*)keyPath action:(SEL)action
+{
+	NSRect panelFrame = [appearancePanel frame];
+
+	if ( frameMaxY < 0 )
+		frameMaxY = panelFrame.size.height-8;
+
+	int height = 40;
+
+	NSBox *newRow = [[NSBox alloc] initWithFrame:NSMakeRect(0, frameMaxY-height+5, panelFrame.size.width-10, height)];
+	[newRow setTitlePosition:NSNoTitle];
+	[newRow setBorderType:NSNoBorder];
+
+	[newRow addSubview:[self preferencePanelSliderLabelForText:title aligned:NSNaturalTextAlignment andFrame:NSMakeRect(8, -2, 100, 25)]];
+
+	NSPopUpButton *newControl = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(109, 4, 150, 25) pullsDown:NO];
+
+	[newControl addItemsWithTitles:items];
+
+	[self setBinding:@"selectedIndex" forKey:keyPath andOrAction:action on:newControl];
+
+	[newRow addSubview:newControl];
+
+	return newRow;
+}
+
+-(NSBox*) preferencePanelCheckboxRowForText:(NSString*)title frameMaxY:(int)frameMaxY binding:(NSString*)keyPath action:(SEL)action
+{
+	NSRect panelFrame = [appearancePanel frame];
+
+	if ( frameMaxY < 0 )
+		frameMaxY = panelFrame.size.height-8;
+
+	int height = 40;
+
+	NSBox *newRow = [[NSBox alloc] initWithFrame:NSMakeRect(0, frameMaxY-height+5, panelFrame.size.width-10, height)];
+	[newRow setTitlePosition:NSNoTitle];
+	[newRow setBorderType:NSNoBorder];
+
+	NSButton *newControl = [[NSButton alloc] initWithFrame:NSMakeRect(8, 4, panelFrame.size.width-20, 25)];
+
+	[newControl setButtonType:NSSwitchButton];
+	[newControl setTitle:title];
+
+	[self setBinding:@"value" forKey:keyPath andOrAction:action on:newControl];
+
+	[newRow addSubview:newControl];
+
+	return newRow;
+}
+
+-(void)setBinding:(NSString*)binding forKey:(NSString*)keyPath andOrAction:(SEL)action on:(NSControl*)newControl
+{
+	[newControl bind:binding
+			toObject:[DBUserDefaults standardUserDefaults]
+		 withKeyPath:keyPath
+			 options:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
+												 forKey:@"NSContinuouslyUpdatesValue"]];
+	if ( nil != action )
+	{
+		[newControl setTarget:self];
+		[newControl setAction:action];
+	}
+}
+
+-(void) buildAppearancesPreferencePanel
+{
+	NSRect screenFrame = [[NSScreen mainScreen] frame];
+
+	int nextYMax = -1;
+	NSView *row = [self preferencePanelSliderRowForText:@"Bezel transparency"
+											 withTicks:16
+											   minText:@"Lighter"
+											   maxText:@"Darker"
+											  minValue:0.1
+											  maxValue:0.9
+											 frameMaxY:nextYMax
+											   binding:@"bezelAlpha"
+												action:@selector(setBezelAlpha:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelSliderRowForText:@"Bezel width"
+									  withTicks:50
+										minText:@"Smaller"
+										maxText:@"Bigger"
+									   minValue:200
+									   maxValue:screenFrame.size.width
+									  frameMaxY:nextYMax
+										binding:@"bezelWidth"
+										 action:@selector(setBezelWidth:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelSliderRowForText:@"Bezel height"
+									  withTicks:50
+										minText:@"Smaller"
+										maxText:@"Bigger"
+									   minValue:200
+									   maxValue:screenFrame.size.height
+									  frameMaxY:nextYMax
+										binding:@"bezelHeight"
+										 action:@selector(setBezelHeight:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelPopUpRowForText:@"Menu item icon"
+										 items:[NSArray arrayWithObjects:
+												@"Flycut icon",
+												@"Black Flycut icon",
+												@"White scissors",
+												@"Black scissors",nil]
+									 frameMaxY:nextYMax
+									   binding:@"menuIcon"
+										action:@selector(switchMenuIcon:)];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+	row = [self preferencePanelCheckboxRowForText:@"Animate bezel appearance"
+										frameMaxY:nextYMax
+										  binding:@"popUpAnimation"
+										   action:nil];
+	[appearancePanel addSubview:row];
+	nextYMax = row.frame.origin.y;
+
+    row = [self preferencePanelCheckboxRowForText:@"Show clipping source app and time"
+                                        frameMaxY:nextYMax
+                                          binding:@"displayClippingSource"
+                                           action:@selector(setupBezel:)];
+    [appearancePanel addSubview:row];
+    nextYMax = row.frame.origin.y;
 }
 
 -(IBAction) showPreferencePanel:(id)sender
@@ -481,8 +667,7 @@
             [self restoreStashedStore];
         }
         // Get text from clipping store.
-        [favoritesStore addClipping:[clippingStore clippingContentsAtPosition:stackPosition]
-                            ofType:[clippingStore clippingTypeAtPosition:stackPosition]	];
+        [favoritesStore addClipping:[clippingStore clippingAtPosition:stackPosition] ];
         [clippingStore clearItem:stackPosition];
         [self updateBezel];
         [self updateMenu];
@@ -598,7 +783,7 @@
 	{
 		// Check to see if they want a little help figuring out what types to enter.
 		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
-			[clippingStore addClipping:type ofType:type];
+			[clippingStore addClipping:type ofType:type fromAppLocalizedName:@"Flycut" fromAppBundleURL:nil atTimestamp:0];
 
 		__block bool skipClipping = NO;
 
@@ -666,11 +851,11 @@
         [pbCount release];
         pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         if ( type != nil ) {
-			NSString *currRunningApp = @"";
+			NSRunningApplication *currRunningApp = nil;
 			for (NSRunningApplication *currApp in [[NSWorkspace sharedWorkspace] runningApplications])
 				if ([currApp isActive])
-					currRunningApp = [currApp localizedName];
-			bool largeCopyRisk = [currRunningApp rangeOfString:@"Remote Desktop Connection"].location != NSNotFound;
+					currRunningApp = currApp;
+			bool largeCopyRisk = nil != currRunningApp && [[currRunningApp localizedName] rangeOfString:@"Remote Desktop Connection"].location != NSNotFound;
 
 			// Microsoft's Remote Desktop Connection has an issue with large copy actions, which appears to be in the time it takes to transer them over the network.  The copy starts being registered with OS X prior to completion of the transfer, and if the active application changes during the transfer the copy will be lost.  Indicate this time period by toggling the menu icon at the beginning of all RDC trasfers and back at the end.  Apple's Screen Sharing does not demonstrate this problem.
 			if (largeCopyRisk)
@@ -705,7 +890,10 @@
                         }
                         
                        [clippingStore addClipping:contents
-											ofType:type	];
+										   ofType:type
+									   fromAppLocalizedName:[currRunningApp localizedName]
+									   fromAppBundleURL:currRunningApp.bundleURL.path
+									  atTimestamp:[[NSDate date] timeIntervalSince1970]];
 //						The below tracks our position down down down... Maybe as an option?
 //						if ( [clippingStore jcListCount] > 1 ) stackPosition++;
 						stackPosition = 0;
@@ -796,8 +984,7 @@
 				newStackPosition = pressed == 0x30 ? 9 : [[NSString stringWithCharacters:&pressed length:1] intValue] - 1;
 				if ( [clippingStore jcListCount] >= newStackPosition ) {
 					stackPosition = newStackPosition;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-					[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+					[self fillBezel];
 				}
 				break;
             case 's': case 'S': // Save / Save-and-delete
@@ -846,16 +1033,14 @@
 		[bezel setCharString:@"Empty"];
 	}
 	else { // normal
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
-		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+		[self fillBezel];
 	}
 }
 
 - (void) showBezel
 {
 	if ( [clippingStore jcListCount] > 0 && [clippingStore jcListCount] > stackPosition ) {
-		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+		[self fillBezel];
 	}
 	NSRect mainScreenRect = [NSScreen mainScreen].visibleFrame;
 	[bezel setFrame:NSMakeRect(mainScreenRect.origin.x + mainScreenRect.size.width/2 - bezel.frame.size.width/2,
@@ -1067,7 +1252,10 @@
             NSArray *toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
             for( NSDictionary *aSavedClipping in toBeRestoredClips)
 				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-									ofType:[aSavedClipping objectForKey:@"Type"]];
+									ofType:[aSavedClipping objectForKey:@"Type"]
+					  fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
+						  fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
+							   atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
             
             // Now for the favorites, same thing.
             savedJCList =[loadDict objectForKey:@"favoritesList"];
@@ -1079,7 +1267,10 @@
             toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
             for( NSDictionary *aSavedClipping in toBeRestoredClips)
                 [favoritesStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-                                    ofType:[aSavedClipping objectForKey:@"Type"]];
+                                     ofType:[aSavedClipping objectForKey:@"Type"]
+                       fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
+                           fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
+                                atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
             }
         } else NSLog(@"Not array");
         [self updateMenu];
@@ -1092,17 +1283,34 @@
 {
 	stackPosition++;
 	if ( [clippingStore jcListCount] > stackPosition ) {
-		[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+		[self fillBezel];
 	} else {
 		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
 			stackPosition = 0;
-			[bezel setCharString:[NSString stringWithFormat:@"%d of %d", 1, [clippingStore jcListCount]]];
-			[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+			[self fillBezel];
 		} else {
 			stackPosition--;
 		}
 	}
+}
+
+-(void) fillBezel
+{
+    JumpcutClipping* clipping = [clippingStore clippingAtPosition:stackPosition];
+    [bezel setText:[NSString stringWithFormat:@"%@", [clipping contents]]];
+    [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+    NSString *localizedName = [clipping appLocalizedName];
+    if ( nil == localizedName )
+        localizedName = @"";
+    NSString* dateString = @"";
+    if ( [clipping timestamp] > 0)
+        dateString = [dateFormat stringFromDate:[NSDate dateWithTimeIntervalSince1970: [clipping timestamp]]];
+    NSImage* icon = nil;
+    if (nil != [clipping appBundleURL])
+        icon = [[NSWorkspace sharedWorkspace] iconForFile:[clipping appBundleURL]];
+    [bezel setSource:localizedName];
+    [bezel setDate:dateString];
+    [bezel setSourceIcon:icon];
 }
 
 -(void) stackUp
@@ -1111,21 +1319,45 @@
 	if ( stackPosition < 0 ) {
 		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
 			stackPosition = [clippingStore jcListCount] - 1;
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-			[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+			[self fillBezel];
 		} else {
 			stackPosition = 0;
 		}
 	}
 	if ( [clippingStore jcListCount] > stackPosition ) {
-					[bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
-		[bezel setText:[clippingStore clippingContentsAtPosition:stackPosition]];
+		[self fillBezel];
 	}
+}
+
+- (void)saveStore:(JumpcutStore *)store toKey:(NSString *)key onDict:(NSMutableDictionary *)saveDict {
+    NSMutableArray *jcListArray = [NSMutableArray array];
+    for ( int i = 0 ; i < [store jcListCount] ; i++ )
+    {
+        JumpcutClipping *clipping = [store clippingAtPosition:i];
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                     [clipping contents], @"Contents",
+                                     [clipping type], @"Type",
+                                     [NSNumber numberWithInt:i], @"Position",nil];
+
+        NSString *val = [clipping appLocalizedName];
+        if ( nil != val )
+            [dict setObject:val forKey:@"AppLocalizedName"];
+
+        val = [clipping appBundleURL];
+        if ( nil != val )
+            [dict setObject:val forKey:@"AppBundleURL"];
+
+        int timestamp = [clipping timestamp];
+        if ( timestamp > 0 )
+            [dict setObject:[NSNumber numberWithInt:timestamp] forKey:@"Timestamp"];
+
+        [jcListArray addObject:dict];
+    }
+    [saveDict setObject:jcListArray forKey:key];
 }
 
 -(void) saveEngine {
     NSMutableDictionary *saveDict;
-    NSMutableArray *jcListArray = [NSMutableArray array];
     saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
     [saveDict setObject:@"0.7" forKey:@"version"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
@@ -1136,19 +1368,10 @@
                  forKey:@"displayLen"];
     [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
                  forKey:@"displayNum"];
-    for (int i = 0 ; i < [clippingStore jcListCount]; i++)
-		[jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                [clippingStore clippingContentsAtPosition:i], @"Contents",
-                                [clippingStore clippingTypeAtPosition:i], @"Type",
-                                [NSNumber numberWithInt:i], @"Position",nil]];
-    [saveDict setObject:jcListArray forKey:@"jcList"];
-    jcListArray = [NSMutableArray array];
-    for (int i = 0 ; i < [favoritesStore jcListCount]; i++)
-        [jcListArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                [favoritesStore clippingContentsAtPosition:i], @"Contents",
-                                [favoritesStore clippingTypeAtPosition:i], @"Type",
-                                [NSNumber numberWithInt:i], @"Position",nil]];
-    [saveDict setObject:jcListArray forKey:@"favoritesList"];
+
+    [self saveStore:clippingStore toKey:@"jcList" onDict:saveDict];
+    [self saveStore:favoritesStore toKey:@"favoritesList" onDict:saveDict];
+
     [[DBUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
     [[DBUserDefaults standardUserDefaults] synchronize];
 }

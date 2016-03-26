@@ -34,6 +34,7 @@
 // In Jumpcut 0.5, I should go through and fiddle with the nomenclature.
 
 #import <Foundation/Foundation.h>
+#import "JumpcutClipping.h"
 
 @interface JumpcutStore : NSObject {
 
@@ -64,6 +65,7 @@
 -(int) rememberNum;
 -(int) displayLen;
 -(int) jcListCount;
+-(JumpcutClipping *) clippingAtPosition:(int)index;
 -(NSString *) clippingContentsAtPosition:(int)index;
 -(NSString *) clippingDisplayStringAtPosition:(int)index;
 -(NSString *) clippingTypeAtPosition:(int)index;
@@ -73,7 +75,8 @@
 -(NSArray *) previousIndexes:(int)howMany containing:(NSString*)search; // This method is in newest-first order.
 
 // Add a clipping
--(void) addClipping:(NSString *)clipping ofType:(NSString *)type;
+-(void) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp;
+-(void) addClipping:(JumpcutClipping*) clipping;
 
 // Delete a clipping
 -(void) clearItem:(int)index;

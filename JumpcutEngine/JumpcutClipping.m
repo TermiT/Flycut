@@ -31,12 +31,15 @@
 -(id) init
 {
     [self initWithContents:@""
-          withType:@""
-          withDisplayLength:40];
+                  withType:@""
+         withDisplayLength:40
+      withAppLocalizedName:@""
+          withAppBundleURL:nil
+             withTimestamp:0];
     return self;
 }
 
--(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength
+-(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength withAppLocalizedName:(NSString *)localizedName withAppBundleURL:(NSString*)bundleURL withTimestamp:(int)timestamp
 {
     [super init];
     clipContents = [[[NSString alloc] init] retain];
@@ -45,6 +48,9 @@
 
     [self setContents:contents setDisplayLength:displayLength];
     [self setType:type];
+    [self setAppLocalizedName:localizedName];
+    [self setAppBundleURL:bundleURL];
+    [self setTimestamp:timestamp];
     [self setHasName:false];
     
     return self;
@@ -93,17 +99,19 @@
 
 -(void) setContents:(NSString *)newContents
 {
+    id old = clipContents;
     [newContents retain];
-    [clipContents release];
     clipContents = newContents;
+    [old release];
     [self resetDisplayString];
 }
 
 -(void) setType:(NSString *)newType
 {
+    id old = clipType;
     [newType retain];
-    [clipType release];
     clipType = newType;
+    [old release];
 }
 
 -(void) setDisplayLength:(int)newDisplayLength
@@ -112,6 +120,27 @@
         clipDisplayLength = newDisplayLength;
         [self resetDisplayString];
     }
+}
+
+-(void) setAppLocalizedName:(NSString *)new
+{
+    id old = appLocalizedName;
+    [new retain];
+    appLocalizedName = new;
+    [old release];
+}
+
+-(void) setAppBundleURL:(NSString *)new
+{
+    id old = appBundleURL;
+    [new retain];
+    appBundleURL = new;
+    [old release];
+}
+
+-(void) setTimestamp:(NSString *)newTimestamp
+{
+    clipTimestamp = newTimestamp;
 }
 
 -(void) setHasName:(BOOL)newHasName
@@ -148,12 +177,32 @@
     return description;
 }
 
+-(JumpcutClipping *) clipping
+{
+    return self;
+}
+
 -(NSString *) contents
 {
 //    NSString *returnClipContents;
 //    returnClipContents = [NSString stringWithString:clipContents];
 //    return returnClipContents;
     return clipContents;
+}
+
+-(NSString *) appLocalizedName
+{
+    return appLocalizedName;
+}
+
+-(NSString *) appBundleURL
+{
+    return appBundleURL;
+}
+
+-(int) timestamp
+{
+    return clipTimestamp;
 }
 
 -(int) displayLength
@@ -199,6 +248,8 @@
 {
     [clipContents release];
     [clipType release];
+    [appLocalizedName release];
+    [appBundleURL release];
     clipDisplayLength = 0;
     [clipDisplayString release];
     clipHasName = 0;

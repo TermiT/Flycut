@@ -61,8 +61,8 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */; };
 		8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */; };
-		8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png */; };
-		8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png */; };
+		8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */; };
+		8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png */; };
 		AABE497C09FF9CD000A6A239 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = AABE497B09FF9CD000A6A239 /* AppController.m */; };
 		AAFAC85F0A1BD9DD00DC6025 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */; };
 		DB46BEEB143466ED0025EA0E /* DBUserDefaults.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; };
@@ -169,8 +169,8 @@
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
 		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
-		8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.disabled.16.png; path = Resources/com.generalarcade.flycut.disabled.16.png; sourceTree = "<group>"; };
-		8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.disabled.32.png; path = Resources/com.generalarcade.flycut.disabled.32.png; sourceTree = "<group>"; };
+		8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.xout.16.png; path = Resources/com.generalarcade.flycut.xout.16.png; sourceTree = "<group>"; };
+		8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.xout.32.png; path = Resources/com.generalarcade.flycut.xout.32.png; sourceTree = "<group>"; };
 		AABE497A09FF9CD000A6A239 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		AABE497B09FF9CD000A6A239 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
@@ -272,8 +272,8 @@
 				7761C8CE139BE06B000FB3AB /* com.generalarcade.flycut.32.png */,
 				8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */,
 				8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */,
-				8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png */,
-				8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png */,
+				8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */,
+				8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png */,
 				7761C8D1139BE06B000FB3AB /* jumpcut.icns */,
 				7761C8EB139BE09D000FB3AB /* Info.plist */,
 				7761C8D2139BE06B000FB3AB /* net.sf.jumpcut.ghost_scissors_small.png */,
@@ -429,6 +429,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Flycut" */;
 			buildPhases = (
+				8D60A1BA1BC8399900A26CBF /* ShellScript */,
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				AAECDE440A03E75C007D377A /* CopyFiles */,
@@ -492,13 +493,13 @@
 				7761C8DB139BE06B000FB3AB /* com.generalarcade.flycut.16.png in Resources */,
 				7761C8DC139BE06B000FB3AB /* com.generalarcade.flycut.32.png in Resources */,
 				7761C8DF139BE06B000FB3AB /* jumpcut.icns in Resources */,
-				8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.disabled.32.png in Resources */,
+				8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png in Resources */,
 				7761C8E0139BE06B000FB3AB /* net.sf.jumpcut.ghost_scissors_small.png in Resources */,
 				7761C8E1139BE06B000FB3AB /* net.sf.jumpcut.preferences.acknowledgements.tiff in Resources */,
 				8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */,
 				7761C8E2139BE06B000FB3AB /* net.sf.jumpcut.preferences.appearance.tiff in Resources */,
 				7761C8E3139BE06B000FB3AB /* net.sf.jumpcut.preferences.general.tiff in Resources */,
-				8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.disabled.16.png in Resources */,
+				8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png in Resources */,
 				7761C8E4139BE06B000FB3AB /* net.sf.jumpcut.preferences.hotkey.tiff in Resources */,
 				7761C8E5139BE06B000FB3AB /* net.sf.jumpcut.scissors_bw16.png in Resources */,
 				8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */,
@@ -510,6 +511,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8D60A1BA1BC8399900A26CBF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Sets the build number to identify, to some extent, the git version of the code.\n# Combines the hash of the origin commit, number of commits of divergence, local HEAD commit, local uncommitted lines of change, and year/month of build.\n# Eliminates all except for the origin commit if there are no local changes, since that can be easily tracked.\n# e.g. 1.b690b47.1.1.cb73ce6.35.1510 from origin b690b47, one and one different, locally at commit cb73ce6, with a further 35 lines of change, built in 2015 in the tenth month.  Day numbers are excluded for brevity, as there is already much uncertainty in the local changes and this field is only to indicate a rough level of freshness.  Build numer starts with \"1.\" to avoid strange compile errors.\ncd \"${SOURCE_ROOT}\"\nORIGIN=$(git rev-parse --short remotes/origin/master)\nOFFSET=\".$(git status|sed -n '1,/^# *$/ p'|grep \"[0-9]\"|head -1|sed 's/^[^0-9]*//;s/[^0-9]*$//'|sed 's/[^0-9][^0-9]*/./')\"\nLOCAL=\".$(git rev-parse --short HEAD)\"\nUNCOMMITTED=\".$(git diff -b -w HEAD|grep \"^[+\\-]\"|grep -v \"^[+\\-][+\\-][+\\-] [ab]\"|wc -l|sed 's/[^0-9]//g')\"\nBUILD_YEAR_MONTH=\".$(date +\"%y%m\")\"\nif [ \".$ORIGIN\" == \"$LOCAL\" ]\nthen\n    OFFSET=\"\"\n    LOCAL=\"\"\n    if [ \".0\" == \"$UNCOMMITTED\" ]\n    then\n        UNCOMMITTED=\"\"\n        BUILD_YEAR_MONTH=\"\"\n    fi\nfi\nNEWVERSIONSTRING=\"1.$ORIGIN$OFFSET$LOCAL$UNCOMMITTED$BUILD_YEAR_MONTH\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $NEWVERSIONSTRING\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D11072C0486CEB800E47090 /* Sources */ = {

@@ -38,9 +38,15 @@
     NSString * clipDisplayString;
 // Does it have a name?
     BOOL clipHasName;
+// The app name it came from
+    NSString * appLocalizedName;
+// The the bunle URL of the app it came from
+    NSString * appBundleURL;
+// The time
+    int clipTimestamp;
 }
 
--(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength;
+-(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength withAppLocalizedName:(NSString *)localizedName withAppBundleURL:(NSString *)bundleURL withTimestamp:(int)timestamp;
 /* -(id) initWithCoder:(NSCoder *)coder;
 -(void) decodeWithCoder:(NSCoder *)coder; */
 -(NSString *) description;
@@ -53,10 +59,14 @@
 -(void) setHasName:(BOOL)newHasName;
 
 // Retrieve values
+-(JumpcutClipping *) clipping;
 -(NSString *) contents;
 -(int) displayLength;
 -(NSString *) displayString;
 -(NSString *) type;
+-(NSString *) appLocalizedName;
+-(NSString *) appBundleURL;
+-(int) timestamp;
 -(BOOL) hasName;
 
 // Additional functions
