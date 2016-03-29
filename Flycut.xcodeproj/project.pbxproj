@@ -68,7 +68,7 @@
 		DB46BEEB143466ED0025EA0E /* DBUserDefaults.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; };
 		DB46BEEF14346A7C0025EA0E /* DBUserDefaultsController.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEED14346A7C0025EA0E /* DBUserDefaultsController.h */; };
 		DB46BEF014346A7C0025EA0E /* DBUserDefaultsController.m in Sources */ = {isa = PBXBuildFile; fileRef = DB46BEEE14346A7C0025EA0E /* DBUserDefaultsController.m */; };
-		DB46BEF114346B2F0025EA0E /* DBUserDefaults.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; };
+		DB46BEF114346B2F0025EA0E /* DBUserDefaults.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB46BEEA143466ED0025EA0E /* DBUserDefaults.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DB46BEF314346C660025EA0E /* DBSyncPromptDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEF214346C660025EA0E /* DBSyncPromptDelegate.h */; };
 		DB46BEF514346C6D0025EA0E /* DBUserDefaults.h in Headers */ = {isa = PBXBuildFile; fileRef = DB46BEF414346C6D0025EA0E /* DBUserDefaults.h */; };
 		DBEB0C9C1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h in Headers */ = {isa = PBXBuildFile; fileRef = DBEB0C9A1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h */; };
@@ -457,6 +457,7 @@
 				LastUpgradeCheck = 0500;
 				TargetAttributes = {
 					8D1107260486CEB800E47090 = {
+						DevelopmentTeam = S8JLSG5ES7;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
 								enabled = 1;
@@ -576,7 +577,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer: Gennady Potapov (25MP9WMKUA)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -590,6 +591,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = Flycut;
+				PROVISIONING_PROFILE = "3abf5364-dfb4-4792-a5a0-377a74572bcb";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
 			};
@@ -599,7 +601,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer: Gennady Potapov (25MP9WMKUA)";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(FRAMEWORK_SEARCH_PATHS)",
@@ -611,6 +613,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = Flycut;
+				PROVISIONING_PROFILE = "3abf5364-dfb4-4792-a5a0-377a74572bcb";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};

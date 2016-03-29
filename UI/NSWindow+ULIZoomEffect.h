@@ -26,13 +26,13 @@
 //
 
 /*
- This category implements a transition effect where a small thumbnail of the
- window flies from the given rectangle to where the window is then shown,
- like when opening a folder window in Finder, plus a reverse variant for
- ordering out a window.
- 
- It also implements another effect where the window just "pops", i.e. seems to
- grow larger for a moment, like the highlight when you use the "Find" command.
+	This category implements a transition effect where a small thumbnail of the
+	window flies from the given rectangle to where the window is then shown,
+	like when opening a folder window in Finder, plus a reverse variant for
+	ordering out a window.
+	
+	It also implements another effect where the window just "pops", i.e. seems to
+	grow larger for a moment, like the highlight when you use the "Find" command.
  */
 
 #import <AppKit/AppKit.h>
