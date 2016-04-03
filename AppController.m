@@ -1008,7 +1008,19 @@
 				DLog(@"CODE %ld", (long)[mainRecorder keyCombo].code);
 				break;
 		}		
-	}
+    }
+}
+
+-(void) processBezelMouseEvents:(NSEvent *)theEvent {
+    if (theEvent.type == NSScrollWheel) {
+        if (theEvent.deltaY > 0.0f) {
+            [self stackUp];
+        } else if (theEvent.deltaY < 0.0f) {
+            [self stackDown];
+        }
+    } else if (theEvent.type == NSLeftMouseUp && theEvent.clickCount == 2) {
+        [self pasteFromStack];
+    }
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
@@ -1048,7 +1060,8 @@
 		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
 //	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"])
 //		[bezel makeKeyAndOrderFrontWithPopEffect];
-	else [bezel makeKeyAndOrderFront:self];
+//	else
+    [bezel makeKeyAndOrderFront:self];
 	isBezelDisplayed = YES;
 }
 

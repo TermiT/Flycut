@@ -98,6 +98,7 @@
 -(void) showBezel;
 -(void) hideBezel;
 -(void) processBezelKeyDown:(NSEvent *)theEvent;
+-(void) processBezelMouseEvents:(NSEvent *)theEvent;
 -(void) metaKeysReleased;
 
 // Menu related
