@@ -577,6 +577,7 @@
     stashedStackPosition = stackPosition;
     stackPosition = favoritesStackPosition;
     [bezel setColor:YES];
+    [self updateBezel];
 }
 
 - (void)restoreStashedStore
@@ -588,6 +589,7 @@
         favoritesStackPosition = stackPosition;
         stackPosition = stashedStackPosition;
         [bezel setColor:NO];
+        [self updateBezel];
     }
 }
 
@@ -1023,6 +1025,9 @@
 	if (stackPosition == 0 && [clippingStore jcListCount] == 0) { // empty
 		[bezel setText:@""];
 		[bezel setCharString:@"Empty"];
+        [bezel setSource:@""];
+        [bezel setDate:@""];
+        [bezel setSourceIcon:nil];
 	}
 	else { // normal
 		[self fillBezel];
@@ -1050,7 +1055,7 @@
 - (void) hideBezel
 {
 	[bezel orderOut:nil];
-	[bezel setCharString:@""];
+	[bezel setCharString:@"Empty"];
 	isBezelDisplayed = NO;
 }
 

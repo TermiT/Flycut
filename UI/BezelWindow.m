@@ -62,7 +62,7 @@ static const float lineHeight = 16;
             [textParagraph setLineSpacing:100.0];
 
             NSDictionary *attrDic = [NSDictionary dictionaryWithObjectsAndKeys:textParagraph, NSParagraphStyleAttributeName, nil];
-            NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:@"foo" attributes:attrDic];
+            NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:@"" attributes:attrDic];
             [sourceFieldApp setAllowsEditingTextAttributes:YES];
             [sourceFieldApp setAttributedStringValue:attrString];
 
@@ -104,6 +104,7 @@ static const float lineHeight = 16;
 		[charField setDrawsBackground:YES];
 		[charField setBordered:NO];
 		[charField setAlignment:NSCenterTextAlignment];
+        [charField setStringValue:@"Empty"];
 
 		[self setInitialFirstResponder:textField];         
 		return self;
