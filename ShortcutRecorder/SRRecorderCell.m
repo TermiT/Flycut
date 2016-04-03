@@ -15,7 +15,6 @@
 #import "SRRecorderControl.h"
 #import "SRKeyCodeTransformer.h"
 #import "SRValidator.h"
-#import "DBUserDefaultsController.h"
 
 @interface SRRecorderCell (Private)
 - (void)_privateInit;
@@ -1186,7 +1185,7 @@
 
 	if (defaultsKey != nil && [defaultsKey length])
 	{
-		id values = [[DBUserDefaultsController sharedUserDefaultsController] values];
+		id values = [[NSUserDefaultsController sharedUserDefaultsController] values];
 		
 		NSDictionary *defaultsValue = [NSDictionary dictionaryWithObjectsAndKeys:
 			[NSNumber numberWithShort: keyCombo.code], @"keyCode",
@@ -1213,7 +1212,7 @@
 
 	if (defaultsKey != nil && [defaultsKey length])
 	{
-		id values = [[DBUserDefaultsController sharedUserDefaultsController] values];
+		id values = [[NSUserDefaultsController sharedUserDefaultsController] values];
 		NSDictionary *savedCombo = [values valueForKey: [self _defaultsKeyForAutosaveName: defaultsKey]];
 		
 		NSInteger keyCode = [[savedCombo valueForKey: @"keyCode"] shortValue];

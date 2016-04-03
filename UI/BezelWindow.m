@@ -9,7 +9,6 @@
 //  at <http://jumpcut.sourceforge.net/> for details.
 
 #import "BezelWindow.h"
-#import "DBUserDefaults.h"
 
 static const float lineHeight = 16;
 
@@ -184,7 +183,7 @@ static const float lineHeight = 16;
 
 -(NSColor*) backgroundColor
 {
-    return [self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[DBUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]];
+    return [self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]];
 }
 
 - (void) setAlpha:(float)newValue

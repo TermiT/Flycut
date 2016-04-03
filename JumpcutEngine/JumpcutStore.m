@@ -26,7 +26,6 @@
 
 #import "JumpcutStore.h"
 #import "JumpcutClipping.h"
-#import "DBUserDefaults.h"
 
 @implementation JumpcutStore
 
@@ -70,7 +69,7 @@
 }
 
 -(void) addClipping:(JumpcutClipping*) clipping{
-    if ([jcList containsObject:clipping] && [[[DBUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
+    if ([jcList containsObject:clipping] && [[[NSUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
         [jcList removeObject:clipping];
     }
     // Push it onto our recent clippings stack

@@ -15,7 +15,6 @@
 #import "UKLoginItemRegistry.h"
 #import "NSWindow+TrueCenter.h"
 #import "NSWindow+ULIZoomEffect.h"
-#import "DBUserDefaults.h"
 
 #define _DISPLENGTH 40
 
@@ -23,7 +22,7 @@
 
 - (id)init
 {
-	[[DBUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
+	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithInt:10],
 		@"displayNum",
 		[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:9],[NSNumber numberWithLong:1179648],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]],
@@ -86,17 +85,17 @@
 	[self buildAppearancesPreferencePanel];
 
 	// We no longer get autosave from ShortcutRecorder, so let's set the recorder by hand
-	if ( [[DBUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] ) {
-		[mainRecorder setKeyCombo:SRMakeKeyCombo([[[[DBUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] objectForKey:@"keyCode"] intValue],
-												 [[[[DBUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] objectForKey:@"modifierFlags"] intValue] )
+	if ( [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] ) {
+		[mainRecorder setKeyCombo:SRMakeKeyCombo([[[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] objectForKey:@"keyCode"] intValue],
+												 [[[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] objectForKey:@"modifierFlags"] intValue] )
 		];
 	};
 	// Initialize the JumpcutStore
-	clippingStore = [[JumpcutStore alloc] initRemembering:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
-											   displaying:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
+	clippingStore = [[JumpcutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
+											   displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
 										withDisplayLength:_DISPLENGTH];
-    favoritesStore = [[JumpcutStore alloc] initRemembering:[[DBUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
-                                               displaying:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
+    favoritesStore = [[JumpcutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
+                                               displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
                                         withDisplayLength:_DISPLENGTH];
     stashedStore = NULL;
     [bezel setColor:NO];
@@ -118,7 +117,7 @@
     statusItem = [[[NSStatusBar systemStatusBar]
             statusItemWithLength:NSVariableStatusItemLength] retain];
     [statusItem setHighlightMode:YES];
-    [self switchMenuIconTo: [[DBUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
+    [self switchMenuIconTo: [[NSUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
 	[statusItem setMenu:jcMenu];
     [jcMenu setDelegate:self];
     jcMenuBaseItemsCount = [[[[jcMenu itemArray] reverseObjectEnumerator] allObjects] count];
@@ -126,7 +125,7 @@
 	
     // If our preferences indicate that we are saving, load the dictionary from the saved plist
     // and use it to get everything set up.
-	if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
+	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
 		[self loadEngineFromPList];
 	}
 	// Build our listener timer
@@ -151,22 +150,15 @@
         // This can take five seconds, perhaps more, so do it in the background instead of holding up opening of the preference panel.
         int checkLoginRegistry = [UKLoginItemRegistry indexForLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
         if ( checkLoginRegistry >= 1 ) {
-            [[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+            [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
                                                      forKey:@"loadOnStartup"];
         } else {
-            [[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+            [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
                                                      forKey:@"loadOnStartup"];
         }
     });
 
-    [[NSNotificationCenter defaultCenter] addObserverForName:@"DBSyncPromptUserDidCancelNotification" 
-     object:nil queue:nil usingBlock:^(NSNotification *notification) {
-                  [self setDropboxSync:NO];
-
-         //[[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
-
-     }];
-	[NSApp activateIgnoringOtherApps: YES];
+    [NSApp activateIgnoringOtherApps: YES];
 }
 
 -(void)menuWillOpen:(NSMenu *)menu
@@ -305,13 +297,13 @@
 -(IBAction) setupBezel:(id)sender
 {
     NSRect windowFrame = NSMakeRect(0, 0,
-                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelWidth"],
-                                    [[DBUserDefaults standardUserDefaults] floatForKey:@"bezelHeight"]);
+                                    [[NSUserDefaults standardUserDefaults] floatForKey:@"bezelWidth"],
+                                    [[NSUserDefaults standardUserDefaults] floatForKey:@"bezelHeight"]);
     bezel = [[BezelWindow alloc] initWithContentRect:windowFrame
                                            styleMask:NSBorderlessWindowMask
                                              backing:NSBackingStoreBuffered
                                                defer:NO
-                                          showSource:[[DBUserDefaults standardUserDefaults] boolForKey:@"displayClippingSource"]];
+                                          showSource:[[NSUserDefaults standardUserDefaults] boolForKey:@"displayClippingSource"]];
 
     [bezel trueCenter];
     [bezel setDelegate:self];
@@ -345,25 +337,25 @@
 	int newRemember = [sender intValue];
 	if ( newRemember < [clippingStore jcListCount] &&
 		 ! issuedRememberResizeWarning &&
-		 ! [[DBUserDefaults standardUserDefaults] boolForKey:@"stifleRememberResizeWarning"]
+		 ! [[NSUserDefaults standardUserDefaults] boolForKey:@"stifleRememberResizeWarning"]
 		 ) {
 		choice = NSRunAlertPanel(@"Resize Stack", 
 								 @"Resizing the stack to a value below its present size will cause clippings to be lost.",
 								 @"Resize", @"Cancel", @"Don't Warn Me Again");
 		if ( choice == NSAlertAlternateReturn ) {
-			[[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:[clippingStore jcListCount]]
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:[clippingStore jcListCount]]
 													 forKey:@"rememberNum"];
 			[self updateMenu];
 			return;
 		} else if ( choice == NSAlertOtherReturn ) {
-			[[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
 													 forKey:@"stifleRememberResizeWarning"];
 		} else {
 			issuedRememberResizeWarning = YES;
 		}
 	}
-	if ( newRemember < [[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"] ) {
-		[[DBUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
+	if ( newRemember < [[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] ) {
+		[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
 												 forKey:@"displayNum"];
 	}
 	[clippingStore setRememberNum:newRemember];
@@ -480,7 +472,7 @@
 -(void)setBinding:(NSString*)binding forKey:(NSString*)keyPath andOrAction:(SEL)action on:(NSControl*)newControl
 {
 	[newControl bind:binding
-			toObject:[DBUserDefaults standardUserDefaults]
+			toObject:[NSUserDefaults standardUserDefaults]
 		 withKeyPath:keyPath
 			 options:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
 												 forKey:@"NSContinuouslyUpdatesValue"]];
@@ -571,7 +563,7 @@
 }
 
 -(IBAction)toggleLoadOnStartup:(id)sender {
-	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"loadOnStartup"] ) {
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"loadOnStartup"] ) {
 		[UKLoginItemRegistry addLoginItemWithPath:[[NSBundle mainBundle] bundlePath] hideIt:NO];
 	} else {
 		[UKLoginItemRegistry removeLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
@@ -653,7 +645,7 @@
 {
     if ( clippingStore != favoritesStore && [clippingStore jcListCount] > stackPosition ) {
         if ( [favoritesStore rememberNum] == [favoritesStore jcListCount]
-            && [[[DBUserDefaults standardUserDefaults] valueForKey:@"saveForgottenFavorites"] boolValue] )
+            && [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenFavorites"] boolValue] )
         {
             // favoritesStore is full, so save the last entry before it gets lost.
             [self switchToFavoritesStore];
@@ -691,13 +683,13 @@
     NSString* search = [searchBox stringValue];
     if ( nil != search && 0 != search.length )
     {
-        NSArray *mapping = [clippingStore previousIndexes:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
+        NSArray *mapping = [clippingStore previousIndexes:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
         position = [mapping[position] intValue];
     }
 
 	[self addClipToPasteboardFromCount:position];
 
-	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"pasteMovesToTop"] ) {
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"pasteMovesToTop"] ) {
 		[clippingStore clippingMoveToTop:position];
 		stackPosition = 0;
         [self updateMenu];
@@ -779,18 +771,18 @@
 	NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
 
 	// Check to see if we are skipping passwords based on length and characters.
-	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
 	{
 		// Check to see if they want a little help figuring out what types to enter.
-		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
+		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
 			[clippingStore addClipping:type ofType:type fromAppLocalizedName:@"Flycut" fromAppBundleURL:nil atTimestamp:0];
 
 		__block bool skipClipping = NO;
 
 		// Check the array of types to skip.
-		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
+		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
 		{
-			NSArray *typesArray = [[[[DBUserDefaults standardUserDefaults] stringForKey:@"skipPboardTypesList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+			NSArray *typesArray = [[[[NSUserDefaults standardUserDefaults] stringForKey:@"skipPboardTypesList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
 			[typesArray enumerateObjectsUsingBlock:^(id typeString, NSUInteger idx, BOOL *stop)
 			{
 				if ( [type isEqualToString:typeString] )
@@ -804,10 +796,10 @@
 			return YES;
 
 		// Check the array of lengths to skip for suspicious strings.
-		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"skipPasswordLengths"] )
+		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordLengths"] )
 		{
 			int contentsLength = [contents length];
-			NSArray *lengthsArray = [[[[DBUserDefaults standardUserDefaults] stringForKey:@"skipPasswordLengthsList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+			NSArray *lengthsArray = [[[[NSUserDefaults standardUserDefaults] stringForKey:@"skipPasswordLengthsList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
 			[lengthsArray enumerateObjectsUsingBlock:^(id lengthString, NSUInteger idx, BOOL *stop)
 			{
 				if ( [lengthString integerValue] == contentsLength )
@@ -879,7 +871,7 @@
                         &&  ! [pbCount isEqualTo:pbBlockCount] ) {
                         
                         if ( [clippingStore rememberNum] == [clippingStore jcListCount]
-                            && [[[DBUserDefaults standardUserDefaults] valueForKey:@"saveForgottenClippings"] boolValue] )
+                            && [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenClippings"] boolValue] )
                         {
                             // clippingStore is full, so save the last entry before it gets lost.
                             // Set to last item, save, and restore position.
@@ -898,7 +890,7 @@
 //						if ( [clippingStore jcListCount] > 1 ) stackPosition++;
 						stackPosition = 0;
                         [self updateMenu];
-						if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
+						if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
                            [self saveEngine];
                    }
                }
@@ -1049,7 +1041,7 @@
 							   bezel.frame.size.height) display:YES];
 	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
 		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-	if ([[DBUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"])
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"])
 		[bezel makeKeyAndOrderFrontWithPopEffect];
 	else [bezel makeKeyAndOrderFront:self];
 	isBezelDisplayed = YES;
@@ -1079,7 +1071,7 @@
 {
 	if ( ! isBezelDisplayed ) {
 		[NSApp activateIgnoringOtherApps:YES];
-		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"stickyBezel"] ) {
+		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"stickyBezel"] ) {
 			isBezelPinned = YES;
 		}
 		[self showBezel];
@@ -1118,7 +1110,7 @@
         [self restoreStashedStore]; // Only clear the clipping store.  Never the favorites.
         [clippingStore clearList];
         [self updateMenu];
-		if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
+		if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
 			[self saveEngine];
 		}
 		[bezel setText:@""];
@@ -1140,7 +1132,7 @@
 - (void)updateMenuContaining:(NSString*)search {
     [jcMenu setMenuChangedMessagesEnabled:NO];
     
-    NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
+    NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
     
     NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
     
@@ -1186,7 +1178,7 @@
 	int index=[[sender menu] indexOfItem:sender];
 	[self pasteIndex:index];
 
-	if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"menuSelectionPastes"] ) {
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"menuSelectionPastes"] ) {
 		[self performSelector:@selector(hideApp) withObject:nil];
 		[self performSelector:@selector(fakeCommandV) withObject:nil afterDelay:0.2];
 	}
@@ -1233,7 +1225,7 @@
 
 -(void) loadEngineFromPList
 {
-    NSDictionary *loadDict = [[[DBUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];   
+    NSDictionary *loadDict = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];   
     NSArray *savedJCList;
 	NSRange loadRange;
 	
@@ -1244,7 +1236,7 @@
         savedJCList = [loadDict objectForKey:@"jcList"];
         
         if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-            int rememberNumPref = [[DBUserDefaults standardUserDefaults] 
+            int rememberNumPref = [[NSUserDefaults standardUserDefaults] 
                                    integerForKey:@"rememberNum"];
             // There's probably a nicer way to prevent the range from going out of bounds, but this works.
 			rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
@@ -1260,7 +1252,7 @@
             // Now for the favorites, same thing.
             savedJCList =[loadDict objectForKey:@"favoritesList"];
             if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-            rememberNumPref = [[DBUserDefaults standardUserDefaults]
+            rememberNumPref = [[NSUserDefaults standardUserDefaults]
                                integerForKey:@"favoritesRememberNum"];
             rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
             loadRange = NSMakeRange(0, rangeCap);
@@ -1285,7 +1277,7 @@
 	if ( [clippingStore jcListCount] > stackPosition ) {
 		[self fillBezel];
 	} else {
-		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
+		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
 			stackPosition = 0;
 			[self fillBezel];
 		} else {
@@ -1317,7 +1309,7 @@
 {
 	stackPosition--;
 	if ( stackPosition < 0 ) {
-		if ( [[DBUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
+		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
 			stackPosition = [clippingStore jcListCount] - 1;
 			[self fillBezel];
 		} else {
@@ -1360,25 +1352,25 @@
     NSMutableDictionary *saveDict;
     saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
     [saveDict setObject:@"0.7" forKey:@"version"];
-    [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
+    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
                  forKey:@"rememberNum"];
-    [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]]
+    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]]
                  forKey:@"favoritesRememberNum"];
     [saveDict setObject:[NSNumber numberWithInt:_DISPLENGTH]
                  forKey:@"displayLen"];
-    [saveDict setObject:[NSNumber numberWithInt:[[DBUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
+    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
                  forKey:@"displayNum"];
 
     [self saveStore:clippingStore toKey:@"jcList" onDict:saveDict];
     [self saveStore:favoritesStore toKey:@"favoritesList" onDict:saveDict];
 
-    [[DBUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
-    [[DBUserDefaults standardUserDefaults] synchronize];
+    [[NSUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)setHotKeyPreferenceForRecorder:(SRRecorderControl *)aRecorder {
 	if (aRecorder == mainRecorder) {
-		[[DBUserDefaults standardUserDefaults] setObject:
+		[[NSUserDefaults standardUserDefaults] setObject:
 			[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:[mainRecorder keyCombo].code],[NSNumber numberWithInt:[mainRecorder keyCombo].flags],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]]
 		forKey:@"ShortcutRecorder mainHotkey"];
 	}
@@ -1396,27 +1388,15 @@
 	NSLog(@"code: %ld, flags: %lu", (long)newKeyCombo.code, (unsigned long)newKeyCombo.flags);
 }
 
-- (IBAction)toggleDropboxSync:(NSButtonCell*)sender {
-
-    DBUserDefaults * defaults = [DBUserDefaults standardUserDefaults];
-    // First, let's check to make sure Dropbox is available on this machine
-    if (sender.state == 1) { 
-        if([DBUserDefaults isDropboxAvailable])
-            [defaults promptDropboxUnavailable];        
-        else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
-    } else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
-}
-
-
 - (void)applicationWillTerminate:(NSNotification *)notification {
-	if ( [[DBUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
+	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
 		NSLog(@"Saving on exit");
         [self saveEngine];
     } else {
         // Remove clips from store
-        [[DBUserDefaults standardUserDefaults] setValue:[NSDictionary dictionary] forKey:@"store"];
+        [[NSUserDefaults standardUserDefaults] setValue:[NSDictionary dictionary] forKey:@"store"];
         NSLog(@"Saving preferences on exit");
-        [[DBUserDefaults standardUserDefaults] synchronize];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 	//Unregister our hot key (not required)
 	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
@@ -1431,21 +1411,6 @@
 		removeObserver:self
 				  name:@"AppleSelectedInputSourcesChangedNotification"
 				object:nil];
-}
-
--(BOOL) dropboxSync {
-    return [DBUserDefaults isDropboxSyncEnabled];
-}
--(void)setDropboxSync:(BOOL)enable {
-    DBUserDefaults * defaults = [DBUserDefaults standardUserDefaults];
-    if (enable) { 
-        if([DBUserDefaults isDropboxAvailable])
-            [defaults promptDropboxUnavailable];        
-        else [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:YES];
-    } else {
-        [[DBUserDefaults standardUserDefaults] setDropboxSyncEnabled:NO];
-        [dropboxCheckbox setState:NSOffState];   
-    }
 }
 
 - (void) dealloc {
