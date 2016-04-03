@@ -709,7 +709,7 @@
     CGEventSourceRef sourceRef = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
     if (!sourceRef)
     {
-        NSLog(@"No event source");
+        DLog(@"No event source");
         return;
     }
     CGKeyCode veeCode = (CGKeyCode)[keyCode intValue];
@@ -865,7 +865,7 @@
 					[self toggleMenuIconDisabled];
 
 				if ( contents == nil || [self shouldSkip:contents] ) {
-                   NSLog(@"Contents: Empty or skipped");
+                   DLog(@"Contents: Empty or skipped");
                } else {
 					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
                         &&  ! [pbCount isEqualTo:pbBlockCount] ) {
@@ -1002,8 +1002,8 @@
                 [self saveFromStackToFavorites];
                 break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
-				NSLog(@"PRESSED %d", pressed);
-				NSLog(@"CODE %ld", (long)[mainRecorder keyCombo].code);
+				DLog(@"PRESSED %d", pressed);
+				DLog(@"CODE %ld", (long)[mainRecorder keyCombo].code);
 				break;
 		}		
 	}
@@ -1210,7 +1210,7 @@
     if ( (indexInt + 1) > [clippingStore jcListCount] ) {
         // We're asking for a clipping that isn't there yet
 		// This only tends to happen immediately on startup when not saving, as the entire list is empty.
-        NSLog(@"Out of bounds request to jcList ignored.");
+        DLog(@"Out of bounds request to jcList ignored.");
         return false;
     }
     pbFullText = [self clippingStringWithCount:indexInt];
@@ -1264,7 +1264,7 @@
                            fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
                                 atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
             }
-        } else NSLog(@"Not array");
+        } else DLog(@"Not array");
         [self updateMenu];
         [loadDict release];
     }
@@ -1385,17 +1385,17 @@
 		[self toggleMainHotKey: aRecorder];
 		[self setHotKeyPreferenceForRecorder: aRecorder];
 	}
-	NSLog(@"code: %ld, flags: %lu", (long)newKeyCombo.code, (unsigned long)newKeyCombo.flags);
+	DLog(@"code: %ld, flags: %lu", (long)newKeyCombo.code, (unsigned long)newKeyCombo.flags);
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
 	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
-		NSLog(@"Saving on exit");
+		DLog(@"Saving on exit");
         [self saveEngine];
     } else {
         // Remove clips from store
         [[NSUserDefaults standardUserDefaults] setValue:[NSDictionary dictionary] forKey:@"store"];
-        NSLog(@"Saving preferences on exit");
+        DLog(@"Saving preferences on exit");
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 	//Unregister our hot key (not required)
