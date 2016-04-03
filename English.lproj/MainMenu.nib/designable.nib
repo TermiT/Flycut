@@ -238,7 +238,7 @@
                                                         <rect key="frame" x="79" y="174" width="25" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="758">
-                                                            <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="483">
+                                                            <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="483">
                                                                 <attributedString key="attributedStringForZero">
                                                                     <fragment content="0"/>
                                                                 </attributedString>
@@ -257,7 +257,7 @@
                                                         <rect key="frame" x="224" y="174" width="24" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="759">
-                                                            <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="484">
+                                                            <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="484">
                                                                 <attributedString key="attributedStringForZero">
                                                                     <fragment content="0"/>
                                                                 </attributedString>
@@ -511,10 +511,10 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <box identifier="testbox" title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="EFy-pc-aKl" userLabel="Box - Box">
-                                            <rect key="frame" x="0.0" y="155" width="502" height="316"/>
+                                            <rect key="frame" x="0.0" y="189" width="502" height="282"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <view key="contentView">
-                                                <rect key="frame" x="0.0" y="0.0" width="502" height="316"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="502" height="282"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             </view>
                                             <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
@@ -540,7 +540,7 @@
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <clipView key="contentView" id="Yuw-af-7PF">
                                                             <rect key="frame" x="1" y="1" width="474" height="344"/>
-                                                            <autoresizingMask key="autoresizingMask"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textView editable="NO" importsGraphics="NO" richText="NO" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="357">
                                                                     <rect key="frame" x="0.0" y="0.0" width="474" height="344"/>

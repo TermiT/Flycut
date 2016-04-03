@@ -70,7 +70,7 @@
         @"saveForgottenClippings",
         [NSNumber numberWithBool:YES],
         @"saveForgottenFavorites",
-        [NSNumber numberWithBool:(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9)],
+        [NSNumber numberWithBool:NO],
         @"popUpAnimation",
         [NSNumber numberWithBool:NO],
         @"pasteMovesToTop",
@@ -536,12 +536,12 @@
 	[appearancePanel addSubview:row];
 	nextYMax = row.frame.origin.y;
 
-	row = [self preferencePanelCheckboxRowForText:@"Animate bezel appearance"
-										frameMaxY:nextYMax
-										  binding:@"popUpAnimation"
-										   action:nil];
-	[appearancePanel addSubview:row];
-	nextYMax = row.frame.origin.y;
+//	row = [self preferencePanelCheckboxRowForText:@"Animate bezel appearance"
+//										frameMaxY:nextYMax
+//										  binding:@"popUpAnimation"
+//										   action:nil];
+//	[appearancePanel addSubview:row];
+//	nextYMax = row.frame.origin.y;
 
     row = [self preferencePanelCheckboxRowForText:@"Show clipping source app and time"
                                         frameMaxY:nextYMax
@@ -1046,8 +1046,8 @@
 							   bezel.frame.size.height) display:YES];
 	if ([bezel respondsToSelector:@selector(setCollectionBehavior:)])
 		[bezel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"])
-		[bezel makeKeyAndOrderFrontWithPopEffect];
+//	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"popUpAnimation"])
+//		[bezel makeKeyAndOrderFrontWithPopEffect];
 	else [bezel makeKeyAndOrderFront:self];
 	isBezelDisplayed = YES;
 }
