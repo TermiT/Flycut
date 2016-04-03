@@ -13,7 +13,13 @@ If you like Flycut, you can donate [here](http://www.pledgie.com/campaigns/16338
 **MacAppStore:**
 Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12)
 
-Note: the App Store version is not up to date - if you want the latest version with all the features, you will have to compile Flycut yourself.
+Note: the App Store version is not up to date - if you want the latest version with all the features, you will have to download DRM-Free version or compile Flycut yourself.
+
+**DRM-Free:**
+Download latest DRM-Free verision [here](https://github.com/TermiT/Flycut/releases)
+
+**Contributors:**
+Check the list of contributors [here](https://github.com/TermiT/Flycut/graphs/contributors)
 
 **License:**
 MIT
@@ -24,7 +30,5 @@ MIT
 **Todo:**
 
 * Big refactoring
-* Search
 * Expose-like view of all clips
 * iCloud sync
-* Ability to pin clips
