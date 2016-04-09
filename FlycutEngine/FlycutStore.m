@@ -1,33 +1,19 @@
 //
-//  JumpcutStore.m
-//  Jumpcut
-//  http://jumpcut.sourceforge.net/
+//  FlycutStore.m
+//  Flycut
 //
-//  Created by steve on Sun Dec 21 2003.
-//  Copyright (c) 2003-2006 Steve Cook
-//  Permission is hereby granted, free of charge, to any person obtaining a 
-//  copy of this software and associated documentation files (the "Software"),
-//  to deal in the Software without restriction, including without limitation
-//  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-//  and/or sell copies of the Software, and to permit persons to whom the 
-//  Software is furnished to do so, subject to the following conditions:
+//  Flycut by Gennadiy Potapov and contributors. Based on Jumpcut by Steve Cook.
+//  Copyright 2011 General Arcade. All rights reserved.
 //
-//  The above copyright notice and this permission notice shall be included 
-//  in all copies or substantial portions of the Software.
+//  This code is open-source software subject to the MIT License; see the homepage
+//  at <https://github.com/TermiT/Flycut> for details.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE  WARRANTIES OF 
-//  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-//  NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-//  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-//  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR 
-//  THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import "JumpcutStore.h"
-#import "JumpcutClipping.h"
+#import "FlycutStore.h"
+#import "FlycutClipping.h"
 
-@implementation JumpcutStore
+@implementation FlycutStore
 
 -(id) init
 {
@@ -54,9 +40,9 @@
         return;
     }
     // Clipping object
-    JumpcutClipping * newClipping;
+    FlycutClipping * newClipping;
 	// Create clipping
-    newClipping = [[JumpcutClipping alloc] initWithContents:clipping
+    newClipping = [[FlycutClipping alloc] initWithContents:clipping
 												   withType:type
 										  withDisplayLength:[self displayLen]
 									   withAppLocalizedName:appLocalizedName
@@ -68,7 +54,7 @@
 	[newClipping release];
 }
 
--(void) addClipping:(JumpcutClipping*) clipping{
+-(void) addClipping:(FlycutClipping*) clipping{
     if ([jcList containsObject:clipping] && [[[NSUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
         [jcList removeObject:clipping];
     }
@@ -105,7 +91,7 @@
 
 -(void) clippingMoveToTop:(int)index
 {
-	JumpcutClipping *clipping = [jcList objectAtIndex:index];
+	FlycutClipping *clipping = [jcList objectAtIndex:index];
 	[jcList insertObject:clipping atIndex:0];
 	[jcList removeObjectAtIndex:index+1];
 }
@@ -133,7 +119,7 @@
   
     if ( newDisplayLength > 0 ) {
         jcDisplayLen = newDisplayLength;
-        for (JumpcutClipping *aClipping in jcList) {
+        for (FlycutClipping *aClipping in jcList) {
             [aClipping setDisplayLength:newDisplayLength];
         }
     }
@@ -154,7 +140,7 @@
     return [jcList count];
 }
 
--(JumpcutClipping *) clippingAtPosition:(int)index
+-(FlycutClipping *) clippingAtPosition:(int)index
 {
     if ( index >= [jcList count] ) {
         return nil;
@@ -191,7 +177,7 @@
     NSArray *subArray;
     NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
     NSEnumerator *enumerator;
-    JumpcutClipping *aClipping;
+    FlycutClipping *aClipping;
     theRange.location = 0;
     theRange.length = howMany;
     if ( howMany > [jcList count] ) {
@@ -217,7 +203,7 @@
     NSArray *subArray;
     NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
     NSEnumerator *enumerator;
-    JumpcutClipping *aClipping;
+    FlycutClipping *aClipping;
 
     // If we have a search, do that.  Pretty much a mix of the other two paths below, but separated out to avoid extra processing.
     if (nil != search && search.length > 0) {
@@ -255,7 +241,7 @@
     NSArray *subArray;
     NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
     NSEnumerator *enumerator;
-    JumpcutClipping *aClipping;
+    FlycutClipping *aClipping;
 
     // If we have a search, do that.
     if (nil != search && search.length > 0) {

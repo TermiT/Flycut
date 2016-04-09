@@ -1,9 +1,13 @@
 //
 //  NSWindow+TrueCenter.m
-//  Jumpcut
+//  Flycut
 //
-//  Created by Gennadii Potapov on 4/8/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Flycut by Gennadiy Potapov and contributors. Based on Jumpcut by Steve Cook.
+//  Copyright 2011 General Arcade. All rights reserved.
+//
+//  This code is open-source software subject to the MIT License; see the homepage
+//  at <https://github.com/TermiT/Flycut> for details.
+//
 //
 
 #import "NSWindow+TrueCenter.h"

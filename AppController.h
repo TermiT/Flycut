@@ -1,9 +1,12 @@
 //
-//  AppController.h
-//  Snapback
+//  AppController.m
+//  Flycut
 //
-//  Created by Steve Cook on 4/3/06.
-//  Copyright 2006 __MyCompanyName__. All rights reserved.
+//  Flycut by Gennadiy Potapov and contributors. Based on Jumpcut by Steve Cook.
+//  Copyright 2011 General Arcade. All rights reserved.
+//
+//  This code is open-source software subject to the MIT License; see the homepage
+//  at <https://github.com/TermiT/Flycut> for details.
 //
 
 #import <Cocoa/Cocoa.h>
@@ -11,7 +14,7 @@
 #import "BezelWindow.h"
 #import "SRRecorderControl.h"
 #import "SRKeyCodeTransformer.h"
-#import "JumpcutStore.h"
+#import "FlycutStore.h"
 #import "SGHotKey.h"
 
 @class SGHotKey;
@@ -32,10 +35,9 @@
     int							stashedStackPosition;
     NSDateFormatter*            dateFormat;
 	
-	// The below were pulled in from JumpcutController
-    JumpcutStore				*clippingStore;
-    JumpcutStore				*favoritesStore;
-    JumpcutStore				*stashedStore;
+    FlycutStore				*clippingStore;
+    FlycutStore				*favoritesStore;
+    FlycutStore				*stashedStore;
     
     // Status item -- the little icon in the menu bar
     NSStatusItem *statusItem;
@@ -59,7 +61,7 @@
     // Track the clipboard count so we only act when its contents change
     NSNumber *pbCount;
     BOOL disableStore;
-    //stores PasteboardCount for internal Jumpcut pasteboard actions so they don't trigger any events
+    //stores PasteboardCount for internal Flycut pasteboard actions so they don't trigger any events
     NSNumber *pbBlockCount;
     //Preferences
 	NSDictionary *standardPreferences;

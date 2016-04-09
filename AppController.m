@@ -1,12 +1,13 @@
 //
 //  AppController.m
-//  Jumpcut
+//  Flycut
 //
-//  Created by Steve Cook on 4/3/06.
-//  Copyright 2006 __MyCompanyName__. All rights reserved.
+//  Flycut by Gennadiy Potapov and contributors. Based on Jumpcut by Steve Cook.
+//  Copyright 2011 General Arcade. All rights reserved.
 //
 //  This code is open-source software subject to the MIT License; see the homepage
-//  at <http://jumpcut.sourceforge.net/> for details.
+//  at <https://github.com/TermiT/Flycut> for details.
+//
 
 #import "AppController.h"
 #import "SGHotKey.h"
@@ -90,11 +91,11 @@
 												 [[[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] objectForKey:@"modifierFlags"] intValue] )
 		];
 	};
-	// Initialize the JumpcutStore
-	clippingStore = [[JumpcutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
+	// Initialize the FlycutStore
+	clippingStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
 											   displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
 										withDisplayLength:_DISPLENGTH];
-    favoritesStore = [[JumpcutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
+    favoritesStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
                                                displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
                                         withDisplayLength:_DISPLENGTH];
     stashedStore = NULL;
@@ -364,7 +365,7 @@
 
 -(IBAction) setFavoritesRememberNumPref:(id)sender
 {
-    JumpcutStore *primary = clippingStore;
+    FlycutStore *primary = clippingStore;
     clippingStore = favoritesStore;
     [self setRememberNumPref: sender];
     clippingStore = primary;
@@ -1306,7 +1307,7 @@
 
 -(void) fillBezel
 {
-    JumpcutClipping* clipping = [clippingStore clippingAtPosition:stackPosition];
+    FlycutClipping* clipping = [clippingStore clippingAtPosition:stackPosition];
     [bezel setText:[NSString stringWithFormat:@"%@", [clipping contents]]];
     [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
     NSString *localizedName = [clipping appLocalizedName];
@@ -1339,11 +1340,11 @@
 	}
 }
 
-- (void)saveStore:(JumpcutStore *)store toKey:(NSString *)key onDict:(NSMutableDictionary *)saveDict {
+- (void)saveStore:(FlycutStore *)store toKey:(NSString *)key onDict:(NSMutableDictionary *)saveDict {
     NSMutableArray *jcListArray = [NSMutableArray array];
     for ( int i = 0 ; i < [store jcListCount] ; i++ )
     {
-        JumpcutClipping *clipping = [store clippingAtPosition:i];
+        FlycutClipping *clipping = [store clippingAtPosition:i];
         NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                      [clipping contents], @"Contents",
                                      [clipping type], @"Type",

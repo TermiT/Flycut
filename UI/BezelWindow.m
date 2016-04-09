@@ -1,12 +1,13 @@
 //
 //  BezelWindow.m
-//  Jumpcut
+//  Flycut
 //
-//  Created by Steve Cook on 4/3/06.
-//  Copyright 2006 Steve Cook. All rights reserved.
+//  Flycut by Gennadiy Potapov and contributors. Based on Jumpcut by Steve Cook.
+//  Copyright 2011 General Arcade. All rights reserved.
 //
 //  This code is open-source software subject to the MIT License; see the homepage
-//  at <http://jumpcut.sourceforge.net/> for details.
+//  at <https://github.com/TermiT/Flycut> for details.
+//
 
 #import "BezelWindow.h"
 

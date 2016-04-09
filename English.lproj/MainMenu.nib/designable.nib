@@ -272,7 +272,7 @@
                                                             <binding destination="808" name="value" keyPath="values.displayNum" id="832"/>
                                                         </connections>
                                                     </textField>
-                                                    <stepper toolTip="Controls how many clippings Jumpcut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="472">
+                                                    <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="472">
                                                         <rect key="frame" x="104" y="172" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="760"/>
@@ -281,7 +281,7 @@
                                                             <binding destination="808" name="value" keyPath="values.rememberNum" id="829"/>
                                                         </connections>
                                                     </stepper>
-                                                    <stepper toolTip="Controls how many clippings Jumpcut shows in the menu" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="473">
+                                                    <stepper toolTip="Controls how many clippings Flycut shows in the menu" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="473">
                                                         <rect key="frame" x="249" y="172" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="5" maxValue="99" doubleValue="5" valueWraps="YES" id="761"/>
@@ -363,7 +363,7 @@
                                                             <binding destination="808" name="value" keyPath="values.rememberNum" id="887-jS-Kpn"/>
                                                         </connections>
                                                     </textField>
-                                                    <stepper toolTip="Controls how many clippings Jumpcut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="wZv-HJ-VdW">
+                                                    <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="wZv-HJ-VdW">
                                                         <rect key="frame" x="371" y="172" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="gUi-gl-RH6"/>
