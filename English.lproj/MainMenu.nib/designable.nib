@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10116" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1050" identifier="macosx"/>
         <development version="6300" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10116"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -123,14 +123,14 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="387">
-                                            <rect key="frame" x="-3" y="136" width="555" height="349"/>
+                                            <rect key="frame" x="-3" y="91" width="555" height="394"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <view key="contentView">
-                                                <rect key="frame" x="0.0" y="0.0" width="555" height="349"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="555" height="394"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <button toolTip="The bezel must be manually dismissed using the &quot;escape&quot; or &quot;return&quot; keys." id="390">
-                                                        <rect key="frame" x="14" y="319" width="97" height="18"/>
+                                                        <rect key="frame" x="14" y="364" width="97" height="18"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <buttonCell key="cell" type="check" title="Sticky bezel" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="750">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -141,7 +141,7 @@
                                                         </connections>
                                                     </button>
                                                     <popUpButton verticalHuggingPriority="750" id="392">
-                                                        <rect key="frame" x="79" y="199" width="189" height="26"/>
+                                                        <rect key="frame" x="79" y="244" width="189" height="26"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <popUpButtonCell key="cell" type="push" title="On exit" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="394" id="751">
                                                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -159,7 +159,7 @@
                                                         </connections>
                                                     </popUpButton>
                                                     <button id="398">
-                                                        <rect key="frame" x="14" y="258" width="204" height="18"/>
+                                                        <rect key="frame" x="14" y="303" width="204" height="18"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <buttonCell key="cell" type="check" title="Launch Flycut on login" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="753">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -171,7 +171,7 @@
                                                         </connections>
                                                     </button>
                                                     <button id="897">
-                                                        <rect key="frame" x="14" y="143" width="247" height="18"/>
+                                                        <rect key="frame" x="14" y="188" width="247" height="18"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <buttonCell key="cell" type="check" title="Don't copy from password fields" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="898">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -182,7 +182,7 @@
                                                         </connections>
                                                     </button>
                                                     <button id="903">
-                                                        <rect key="frame" x="14" y="61" width="247" height="18"/>
+                                                        <rect key="frame" x="14" y="81" width="247" height="18"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <buttonCell key="cell" type="check" title="Remove duplicates" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="904">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -193,7 +193,7 @@
                                                         </connections>
                                                     </button>
                                                     <textField verticalHuggingPriority="750" id="416">
-                                                        <rect key="frame" x="13" y="227" width="76" height="23"/>
+                                                        <rect key="frame" x="13" y="272" width="76" height="23"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="754">
                                                             <font key="font" metaFont="system"/>
@@ -204,7 +204,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" id="418">
-                                                        <rect key="frame" x="13" y="205" width="33" height="14"/>
+                                                        <rect key="frame" x="13" y="250" width="33" height="14"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="755">
                                                             <font key="font" metaFont="smallSystem"/>
@@ -215,7 +215,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" id="419">
-                                                        <rect key="frame" x="13" y="179" width="62" height="14"/>
+                                                        <rect key="frame" x="13" y="224" width="62" height="14"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="756">
                                                             <font key="font" metaFont="smallSystem"/>
@@ -226,7 +226,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" id="420">
-                                                        <rect key="frame" x="134" y="179" width="95" height="14"/>
+                                                        <rect key="frame" x="134" y="224" width="95" height="14"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Display in menu" id="757">
                                                             <font key="font" metaFont="smallSystem"/>
@@ -235,7 +235,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" id="470">
-                                                        <rect key="frame" x="79" y="174" width="25" height="22"/>
+                                                        <rect key="frame" x="79" y="219" width="25" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="758">
                                                             <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="483">
@@ -254,7 +254,7 @@
                                                         </connections>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" id="471">
-                                                        <rect key="frame" x="224" y="174" width="24" height="22"/>
+                                                        <rect key="frame" x="224" y="219" width="24" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="759">
                                                             <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="484">
@@ -273,7 +273,7 @@
                                                         </connections>
                                                     </textField>
                                                     <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="472">
-                                                        <rect key="frame" x="104" y="172" width="19" height="27"/>
+                                                        <rect key="frame" x="104" y="217" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="760"/>
                                                         <connections>
@@ -282,7 +282,7 @@
                                                         </connections>
                                                     </stepper>
                                                     <stepper toolTip="Controls how many clippings Flycut shows in the menu" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="473">
-                                                        <rect key="frame" x="249" y="172" width="19" height="27"/>
+                                                        <rect key="frame" x="249" y="217" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="5" maxValue="99" doubleValue="5" valueWraps="YES" id="761"/>
                                                         <connections>
@@ -292,7 +292,7 @@
                                                         </connections>
                                                     </stepper>
                                                     <button toolTip="In the bezel, moving down from the last item takes you to the top and moving up from the first item takes you to the bottom." id="692">
-                                                        <rect key="frame" x="14" y="299" width="162" height="18"/>
+                                                        <rect key="frame" x="14" y="344" width="162" height="18"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <buttonCell key="cell" type="check" title="Wraparound bezel" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="762">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -303,7 +303,7 @@
                                                         </connections>
                                                     </button>
                                                     <button toolTip="Selecting a clipping from the menu causes it to be pasted instead of copied back onto the pasteboard." id="694">
-                                                        <rect key="frame" x="14" y="279" width="162" height="18"/>
+                                                        <rect key="frame" x="14" y="324" width="162" height="18"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <buttonCell key="cell" type="check" title="Menu selection pastes" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="763">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -314,7 +314,7 @@
                                                         </connections>
                                                     </button>
                                                     <button id="914">
-                                                        <rect key="frame" x="14" y="41" width="230" height="18"/>
+                                                        <rect key="frame" x="14" y="61" width="230" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" title="Move pasted item to top of stack" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="915">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -325,7 +325,7 @@
                                                         </connections>
                                                     </button>
                                                     <button id="LLh-vf-2Q3">
-                                                        <rect key="frame" x="246" y="21" width="87" height="18"/>
+                                                        <rect key="frame" x="246" y="41" width="87" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" title="Clippings" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="oLu-XL-Wuo">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -336,7 +336,7 @@
                                                         </connections>
                                                     </button>
                                                     <textField verticalHuggingPriority="750" id="Ubt-DS-zHf">
-                                                        <rect key="frame" x="280" y="179" width="62" height="14"/>
+                                                        <rect key="frame" x="280" y="224" width="62" height="14"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Favorites" id="2L6-OM-5rx">
                                                             <font key="font" metaFont="smallSystem"/>
@@ -345,7 +345,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" id="dM5-eN-Zvt">
-                                                        <rect key="frame" x="346" y="174" width="25" height="22"/>
+                                                        <rect key="frame" x="346" y="219" width="25" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="nes-6O-e5R">
                                                             <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator="," id="aqt-p2-eya">
@@ -364,7 +364,7 @@
                                                         </connections>
                                                     </textField>
                                                     <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" id="wZv-HJ-VdW">
-                                                        <rect key="frame" x="371" y="172" width="19" height="27"/>
+                                                        <rect key="frame" x="371" y="217" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="gUi-gl-RH6"/>
                                                         <connections>
@@ -373,7 +373,7 @@
                                                         </connections>
                                                     </stepper>
                                                     <button id="pDS-jE-9jb">
-                                                        <rect key="frame" x="32" y="123" width="133" height="18"/>
+                                                        <rect key="frame" x="32" y="168" width="133" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" title="Pasteboard types:" bezelStyle="regularSquare" imagePosition="left" inset="2" id="tzh-NM-RSb">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -384,7 +384,7 @@
                                                         </connections>
                                                     </button>
                                                     <button id="Bxp-pI-XMk">
-                                                        <rect key="frame" x="32" y="102" width="356" height="18"/>
+                                                        <rect key="frame" x="32" y="122" width="356" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" title="Detect with Upper, Lower, Digit, and Symbol lengths:" bezelStyle="regularSquare" imagePosition="left" inset="2" id="aAK-L0-EHa">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -395,7 +395,7 @@
                                                         </connections>
                                                     </button>
                                                     <button toolTip="For identifying types to include in Pasteboard Types above." id="mka-NZ-Esg">
-                                                        <rect key="frame" x="32" y="82" width="279" height="18"/>
+                                                        <rect key="frame" x="32" y="102" width="279" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" title="Include pasteboard types in clippings list" bezelStyle="regularSquare" imagePosition="left" inset="2" id="9Vi-RY-G0b">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -406,7 +406,7 @@
                                                         </connections>
                                                     </button>
                                                     <textField verticalHuggingPriority="750" id="RYj-wx-tTx">
-                                                        <rect key="frame" x="394" y="100" width="108" height="22"/>
+                                                        <rect key="frame" x="394" y="120" width="108" height="22"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="12, 20, 32" drawsBackground="YES" id="aqQ-SR-BmT">
                                                             <font key="font" metaFont="system"/>
@@ -418,7 +418,7 @@
                                                         </connections>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" id="x34-dK-wxl">
-                                                        <rect key="frame" x="171" y="121" width="331" height="22"/>
+                                                        <rect key="frame" x="171" y="166" width="331" height="22"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="PasswordPboardType" drawsBackground="YES" id="kTZ-dC-s1q">
                                                             <font key="font" metaFont="system"/>
@@ -430,7 +430,7 @@
                                                         </connections>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="FNU-zj-OIm">
-                                                        <rect key="frame" x="32" y="22" width="211" height="17"/>
+                                                        <rect key="frame" x="32" y="42" width="211" height="17"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Save forgotten items to Desktop:" id="ksy-al-FbE">
                                                             <font key="font" metaFont="system"/>
@@ -439,7 +439,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <button id="cGj-g9-2Dm">
-                                                        <rect key="frame" x="337" y="21" width="157" height="18"/>
+                                                        <rect key="frame" x="337" y="41" width="157" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" title="Favorites" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="vC2-Ch-UPQ">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -449,6 +449,29 @@
                                                             <binding destination="808" name="value" keyPath="values.saveForgottenFavorites" id="WTf-Ip-R9L"/>
                                                         </connections>
                                                     </button>
+                                                    <button id="tIf-t9-JxV">
+                                                        <rect key="frame" x="32" y="145" width="133" height="18"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <buttonCell key="cell" type="check" title="Blacklist Apps:" bezelStyle="regularSquare" imagePosition="left" inset="2" id="V4k-lz-e8F">
+                                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.skipAppNames" id="bD5-4r-3dT"/>
+                                                        </connections>
+                                                    </button>
+                                                    <textField verticalHuggingPriority="750" id="gno-NW-sUa">
+                                                        <rect key="frame" x="171" y="143" width="331" height="22"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="LastPass,1Password" drawsBackground="YES" id="Anq-rp-ND1">
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                        <connections>
+                                                            <binding destination="808" name="value" keyPath="values.skipAppsList" id="7a2-k9-2tF"/>
+                                                        </connections>
+                                                    </textField>
                                                 </subviews>
                                             </view>
                                             <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
@@ -646,7 +669,7 @@ Thanks to Clare Bates Congdon, Joshua Davis, Brad Graham, David Jacobs, John Ken
                     </connections>
                 </searchField>
             </subviews>
-            <point key="canvasLocation" x="194" y="396"/>
+            <point key="canvasLocation" x="206" y="108"/>
         </customView>
     </objects>
 </document>

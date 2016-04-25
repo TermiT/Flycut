@@ -60,6 +60,10 @@
 		@"PasswordPboardType",
 		@"skipPboardTypesList",
 		[NSNumber numberWithBool:NO],
+        @"skipAppNames",
+        @"LastPass,1Password",
+        @"skipAppsList",
+        [NSNumber numberWithBool:NO],
 		@"skipPasswordLengths",
 		@"12, 20, 32",
 		@"skipPasswordLengthsList",
@@ -769,7 +773,7 @@
     return NO;    // Default handling of the command
 }
 
--(BOOL)shouldSkip:(NSString *)contents
+-(BOOL)shouldSkip:(NSString *)contents from:(NSString*) localizedAppName
 {
 	NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
 
@@ -797,6 +801,25 @@
 		}
 		if (skipClipping)
 			return YES;
+
+        // Check the array of apps to skip.
+        if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipAppNames"] )
+        {
+            NSArray *typesArray = [[[[NSUserDefaults standardUserDefaults] stringForKey:@"skipAppsList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+            NSString * localizedAppNameNoSpaces = [localizedAppName stringByReplacingOccurrencesOfString:@" " withString:@""];
+            
+            [typesArray enumerateObjectsUsingBlock:^(id appString, NSUInteger idx, BOOL *stop)
+             {
+                 if ( [localizedAppNameNoSpaces isEqualToString:appString] )
+                 {
+                     skipClipping = YES;
+                     stop = YES;
+                 }
+             }];
+        }
+        
+        if (skipClipping)
+            return YES;
 
 		// Check the array of lengths to skip for suspicious strings.
 		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordLengths"] )
@@ -862,12 +885,12 @@
 
 				// This operation blocks until the transfer is complete, though it was was here before the RDC issue was discovered.  Convenient.
                 NSString *contents = [jcPasteboard stringForType:type];
-
+                
 				// Toggle back if dealing with the RDC issue.
 				if (largeCopyRisk)
 					[self toggleMenuIconDisabled];
 
-				if ( contents == nil || [self shouldSkip:contents] ) {
+                if ( contents == nil || [self shouldSkip:contents from:[currRunningApp localizedName]] ) {
                    DLog(@"Contents: Empty or skipped");
                } else {
 					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
