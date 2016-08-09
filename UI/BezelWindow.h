@@ -15,7 +15,7 @@
 #import "RoundRecTextField.h"
 
 
-@interface BezelWindow : NSWindow {
+@interface BezelWindow : NSPanel {
 	// "n of n" text in bezel
 	NSString			*charString; // Slightly misleading, as this can be longer than one character
 	NSString			*title;
