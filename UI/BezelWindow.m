@@ -21,14 +21,14 @@ static const float lineHeight = 16;
 					defer:(BOOL)flag
 			   showSource:(BOOL)showSource {
 
-    self = [super initWithContentRect:contentRect
+	self = [super initWithContentRect:contentRect
 							styleMask:NSNonactivatingPanelMask | NSBorderlessWindowMask
 							backing:NSBackingStoreBuffered
 							defer:NO];
 	if ( self )
 	{
-        //set this window to be on top of all other windows
-        [self setLevel:NSScreenSaverWindowLevel];
+		//set this window to be on top of all other windows
+		[self setLevel:NSScreenSaverWindowLevel];
 
 		[self setOpaque:NO];
 		[self setAlphaValue:1.0];
