@@ -1089,7 +1089,9 @@
 - (void)hitMainHotKey:(SGHotKey *)hotKey
 {
 	if ( ! isBezelDisplayed ) {
-		[NSApp activateIgnoringOtherApps:YES];
+		//Do NOT activate the app so focus stays on app the user is interacting with
+		//https://github.com/TermiT/Flycut/issues/45
+		//[NSApp activateIgnoringOtherApps:YES];
 		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"stickyBezel"] ) {
 			isBezelPinned = YES;
 		}
