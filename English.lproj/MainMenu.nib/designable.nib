@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10116" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16B2555" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1050" identifier="macosx"/>
-        <development version="6300" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10116"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
+        <capability name="box content view" minToolsVersion="7.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -91,6 +92,7 @@
                     </connections>
                 </menuItem>
             </items>
+            <point key="canvasLocation" x="131.5" y="150.5"/>
         </menu>
         <customObject id="213" userLabel="AppController" customClass="AppController">
             <connections>
@@ -122,10 +124,10 @@
                                     <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="387">
+                                        <box boxType="oldStyle" borderType="none" title="Box" titlePosition="noTitle" id="387">
                                             <rect key="frame" x="-3" y="136" width="555" height="349"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <view key="contentView">
+                                            <view key="contentView" id="OKE-OW-DrT">
                                                 <rect key="frame" x="0.0" y="0.0" width="555" height="349"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
@@ -451,8 +453,6 @@
                                                     </button>
                                                 </subviews>
                                             </view>
-                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </box>
                                     </subviews>
                                 </view>
@@ -462,10 +462,10 @@
                                     <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="348">
+                                        <box boxType="oldStyle" borderType="none" title="Box" titlePosition="noTitle" id="348">
                                             <rect key="frame" x="0.0" y="227" width="555" height="125"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <view key="contentView">
+                                            <view key="contentView" id="Kdy-dK-U26">
                                                 <rect key="frame" x="0.0" y="0.0" width="555" height="125"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
@@ -499,8 +499,6 @@
                                                     </customView>
                                                 </subviews>
                                             </view>
-                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </box>
                                     </subviews>
                                 </view>
@@ -510,15 +508,13 @@
                                     <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <box identifier="testbox" title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="EFy-pc-aKl" userLabel="Box - Box">
+                                        <box identifier="testbox" boxType="oldStyle" borderType="none" title="Box" titlePosition="noTitle" id="EFy-pc-aKl" userLabel="Box - Box">
                                             <rect key="frame" x="0.0" y="189" width="502" height="282"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <view key="contentView">
+                                            <view key="contentView" id="CNJ-Hp-X9R">
                                                 <rect key="frame" x="0.0" y="0.0" width="502" height="282"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             </view>
-                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </box>
                                     </subviews>
                                 </view>
@@ -528,10 +524,10 @@
                                     <rect key="frame" x="0.0" y="0.0" width="507" height="471"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <box title="Box" boxType="oldStyle" borderType="none" titlePosition="noTitle" id="354">
+                                        <box boxType="oldStyle" borderType="none" title="Box" titlePosition="noTitle" id="354">
                                             <rect key="frame" x="-3" y="109" width="555" height="376"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <view key="contentView">
+                                            <view key="contentView" id="Rzy-Jv-79m">
                                                 <rect key="frame" x="0.0" y="0.0" width="555" height="376"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
@@ -540,9 +536,9 @@
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <clipView key="contentView" id="Yuw-af-7PF">
                                                             <rect key="frame" x="1" y="1" width="474" height="344"/>
-                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <autoresizingMask key="autoresizingMask"/>
                                                             <subviews>
-                                                                <textView editable="NO" importsGraphics="NO" richText="NO" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="357">
+                                                                <textView editable="NO" importsGraphics="NO" richText="NO" usesFontPanel="YES" usesRuler="YES" spellingCorrection="YES" smartInsertDelete="YES" id="357">
                                                                     <rect key="frame" x="0.0" y="0.0" width="474" height="344"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
@@ -594,8 +590,6 @@ Thanks to Clare Bates Congdon, Joshua Davis, Brad Graham, David Jacobs, John Ken
                                                                         </fragment>
                                                                     </attributedString>
                                                                     <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                                                    <size key="minSize" width="474" height="344"/>
-                                                                    <size key="maxSize" width="551" height="10000000"/>
                                                                 </textView>
                                                             </subviews>
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -611,8 +605,6 @@ Thanks to Clare Bates Congdon, Joshua Davis, Brad Graham, David Jacobs, John Ken
                                                     </scrollView>
                                                 </subviews>
                                             </view>
-                                            <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                                            <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </box>
                                     </subviews>
                                 </view>

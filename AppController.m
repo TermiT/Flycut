@@ -198,12 +198,12 @@
             menuOpenEvent = [event retain]; // So we can send it again to open the menu.
             [menu cancelTracking]; // Prevent the menu from displaying, since activateIgnoringOtherApps would close it anyway.
             [NSApp activateIgnoringOtherApps: YES]; // Required to make the search field firstResponder any good.
-            [self performSelector:@selector(reopenMenu) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]]; // Because we really do want the menu open.
+            [self performSelector:@selector(reopenMenu) withObject:nil afterDelay:0.2 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]]; // Because we really do want the menu open.
         }
         else
         {
             // Flycut is now active, so set the first responder once the menu opens.
-            [self performSelector:@selector(activateSearchBox) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+            [self performSelector:@selector(activateSearchBox) withObject:nil afterDelay:0.2 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
         }
     }
 }
