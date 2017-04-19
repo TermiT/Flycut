@@ -183,7 +183,7 @@ static const float lineHeight = 16;
 
 -(NSRect) charFrame
 {
-    return NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 4 * lineHeight, 1.2 * lineHeight);
+    return NSMakeRect(([self frame].size.width - (3 * lineHeight)) / 2, 7, 8 * lineHeight, 1.2 * lineHeight);
 }
 
 -(NSColor*) backgroundColor
