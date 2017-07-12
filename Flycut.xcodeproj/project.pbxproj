@@ -56,6 +56,7 @@
 		77DA6B931CB9549B0077917F /* FlycutStore.h in Headers */ = {isa = PBXBuildFile; fileRef = 77DA6B8F1CB9549B0077917F /* FlycutStore.h */; };
 		77DA6B941CB9549B0077917F /* FlycutClipping.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B901CB9549B0077917F /* FlycutClipping.m */; };
 		77DA6B951CB9549B0077917F /* FlycutClipping.h in Headers */ = {isa = PBXBuildFile; fileRef = 77DA6B911CB9549B0077917F /* FlycutClipping.h */; };
+		8D0C119F1F147E250046FAA0 /* FlycutOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C119E1F147E250046FAA0 /* FlycutOperator.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -128,6 +129,8 @@
 		77DA6B8F1CB9549B0077917F /* FlycutStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FlycutStore.h; path = FlycutEngine/FlycutStore.h; sourceTree = SOURCE_ROOT; };
 		77DA6B901CB9549B0077917F /* FlycutClipping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FlycutClipping.m; path = FlycutEngine/FlycutClipping.m; sourceTree = SOURCE_ROOT; };
 		77DA6B911CB9549B0077917F /* FlycutClipping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FlycutClipping.h; path = FlycutEngine/FlycutClipping.h; sourceTree = SOURCE_ROOT; };
+		8D0C119E1F147E250046FAA0 /* FlycutOperator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlycutOperator.m; sourceTree = "<group>"; };
+		8D0C11A01F147E3C0046FAA0 /* FlycutOperator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlycutOperator.h; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
 		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
@@ -158,6 +161,8 @@
 			children = (
 				AABE497A09FF9CD000A6A239 /* AppController.h */,
 				AABE497B09FF9CD000A6A239 /* AppController.m */,
+				8D0C11A01F147E3C0046FAA0 /* FlycutOperator.h */,
+				8D0C119E1F147E250046FAA0 /* FlycutOperator.m */,
 				7761C89B139BDF12000FB3AB /* ShortcutRecorder */,
 				7761C896139BDEC4000FB3AB /* UKPrefsPanel */,
 				7761C889139BDEAF000FB3AB /* UI */,
@@ -485,6 +490,7 @@
 				7761C89A139BDEC4000FB3AB /* UKPrefsPanel.m in Sources */,
 				7761C8AB139BDF12000FB3AB /* SRCommon.m in Sources */,
 				77DA6B941CB9549B0077917F /* FlycutClipping.m in Sources */,
+				8D0C119F1F147E250046FAA0 /* FlycutOperator.m in Sources */,
 				7761C8AD139BDF12000FB3AB /* SRKeyCodeTransformer.m in Sources */,
 				7761C8AF139BDF12000FB3AB /* SRRecorderCell.m in Sources */,
 				7761C8B1139BDF12000FB3AB /* SRRecorderControl.m in Sources */,
