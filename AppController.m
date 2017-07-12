@@ -9,6 +9,9 @@
 //  at <https://github.com/TermiT/Flycut> for details.
 //
 
+// AppController owns and interacts with the FlycutOperator, providing a user
+// interface and platform-specific mechanisms.
+
 #import "AppController.h"
 #import "SGHotKey.h"
 #import "SGHotKeyCenter.h"
@@ -17,23 +20,13 @@
 #import "NSWindow+TrueCenter.h"
 #import "NSWindow+ULIZoomEffect.h"
 
-#define _DISPLENGTH 40
-
 @implementation AppController
 
 - (id)init
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-		[NSNumber numberWithInt:10],
-		@"displayNum",
 		[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:9],[NSNumber numberWithLong:1179648],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]],
 		@"ShortcutRecorder mainHotkey",
-		[NSNumber numberWithInt:40],
-		@"rememberNum",
-        [NSNumber numberWithInt:40],
-        @"favoritesRememberNum",
-		[NSNumber numberWithInt:1],
-		@"savePreference",
 		[NSNumber numberWithInt:0],
 		@"menuIcon",
 		[NSNumber numberWithFloat:.25],
@@ -51,30 +44,8 @@
         @"bezelWidth",
         [NSNumber numberWithFloat:320.0],
         @"bezelHeight",
-        [NSDictionary dictionary],
-        @"store",
-        [NSNumber numberWithBool:YES],
-        @"skipPasswordFields",
-		[NSNumber numberWithBool:YES],
-		@"skipPboardTypes",
-		@"PasswordPboardType",
-		@"skipPboardTypesList",
-		[NSNumber numberWithBool:NO],
-		@"skipPasswordLengths",
-		@"12, 20, 32",
-		@"skipPasswordLengthsList",
-		[NSNumber numberWithBool:NO],
-		@"revealPasteboardTypes",
-        [NSNumber numberWithBool:NO],
-        @"removeDuplicates",
-        [NSNumber numberWithBool:NO],
-        @"saveForgottenClippings",
-        [NSNumber numberWithBool:YES],
-        @"saveForgottenFavorites",
         [NSNumber numberWithBool:NO],
         @"popUpAnimation",
-        [NSNumber numberWithBool:NO],
-        @"pasteMovesToTop",
         [NSNumber numberWithBool:YES],
         @"displayClippingSource",
         nil]];
@@ -91,14 +62,11 @@
 												 [[[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder mainHotkey"] objectForKey:@"modifierFlags"] intValue] )
 		];
 	};
-	// Initialize the FlycutStore
-	clippingStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
-											   displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
-										withDisplayLength:_DISPLENGTH];
-    favoritesStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
-                                               displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
-                                        withDisplayLength:_DISPLENGTH];
-    stashedStore = NULL;
+
+	// Initialize the FlycutOperator
+	flycutOperator = [[FlycutOperator alloc] init];
+	[flycutOperator awakeFromNib];
+
     [bezel setColor:NO];
     
 	// Set up the bezel window
@@ -107,7 +75,6 @@
 	// Set up the bezel date formatter
 	dateFormat = [[NSDateFormatter alloc] init];
 	[dateFormat setDateFormat:@"EEEE, MMMM dd 'at' h:mm a"];
-
 
 	// Create our pasteboard interface
     jcPasteboard = [NSPasteboard generalPasteboard];
@@ -123,12 +90,13 @@
     [jcMenu setDelegate:self];
     jcMenuBaseItemsCount = [[[[jcMenu itemArray] reverseObjectEnumerator] allObjects] count];
     [statusItem setEnabled:YES];
-	
-    // If our preferences indicate that we are saving, load the dictionary from the saved plist
-    // and use it to get everything set up.
+
+    // If our preferences indicate that we are saving, we may have loaded the dictionary from the
+    // saved plist and should update the menu.
 	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
-		[self loadEngineFromPList];
+        [self updateMenu];
 	}
+
 	// Build our listener timer
     pollPBTimer = [[NSTimer scheduledTimerWithTimeInterval:(1.0)
 													target:self
@@ -140,10 +108,6 @@
 	srTransformer = [[[SRKeyCodeTransformer alloc] init] retain];
     pbBlockCount = [[NSNumber numberWithInt:0] retain];
     [pollPBTimer fire];
-
-	// Stack position starts @ 0 by default
-	stackPosition = favoritesStackPosition = stashedStackPosition = 0;
-    
     
     // The load-on-startup check can be really slow, so this will be dispatched out so our thread isn't blocked.
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -167,7 +131,8 @@
     NSEvent *event = [NSApp currentEvent];
     if([event modifierFlags] & NSAlternateKeyMask) {
         [menu cancelTracking];
-        if (disableStore)
+        bool disableStore = [self toggleMenuIconDisabled];
+        if (!disableStore)
         {
             // Update the pbCount so we don't enable and have it immediately copy the thing the user was trying to avoid.
             // Code copied from pollPB, which is disabled at this point, so the "should be okay" should still be okay.
@@ -177,7 +142,7 @@
             [pbCount release];
             pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         }
-        disableStore = [self toggleMenuIconDisabled];
+        [flycutOperator setDisableStoreTo:disableStore];
     }
     else
     {
@@ -336,7 +301,7 @@
 {
 	int choice;
 	int newRemember = [sender intValue];
-	if ( newRemember < [clippingStore jcListCount] &&
+	if ( newRemember < [flycutOperator jcListCount] &&
 		 ! issuedRememberResizeWarning &&
 		 ! [[NSUserDefaults standardUserDefaults] boolForKey:@"stifleRememberResizeWarning"]
 		 ) {
@@ -344,7 +309,12 @@
 								 @"Resizing the stack to a value below its present size will cause clippings to be lost.",
 								 @"Resize", @"Cancel", @"Don't Warn Me Again");
 		if ( choice == NSAlertAlternateReturn ) {
-			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:[clippingStore jcListCount]]
+			// User selected Cancel.  This appears to set the user default to
+			// the current clipping count while not updating the clippingStore,
+			// resulting in truncation in the future.  This condition dates back
+			// to snarkout's original creation of setRememberNumPref on May 17,
+			// 2006.
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:[flycutOperator jcListCount]]
 													 forKey:@"rememberNum"];
 			[self updateMenu];
 			return;
@@ -355,20 +325,24 @@
 			issuedRememberResizeWarning = YES;
 		}
 	}
+
+	// Trim down the number displayed in the menu if it is greater than the new
+	// number to remember.
 	if ( newRemember < [[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] ) {
 		[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
 												 forKey:@"displayNum"];
 	}
-	[clippingStore setRememberNum:newRemember];
+
+	// Set the value.
+	[flycutOperator setRememberNum: newRemember];
 	[self updateMenu];
 }
 
 -(IBAction) setFavoritesRememberNumPref:(id)sender
 {
-    FlycutStore *primary = clippingStore;
-    clippingStore = favoritesStore;
+    [flycutOperator switchToFavoritesStore];
     [self setRememberNumPref: sender];
-    clippingStore = primary;
+    [flycutOperator restoreStashedStore];
 }
 
 -(IBAction) setDisplayNumPref:(id)sender
@@ -571,24 +545,10 @@
 	}
 }
 
--(void)switchToFavoritesStore
+- (void)restoreStashedStoreAndUpdate
 {
-    stashedStore = clippingStore;
-    clippingStore = favoritesStore;
-    stashedStackPosition = stackPosition;
-    stackPosition = favoritesStackPosition;
-    [bezel setColor:YES];
-    [self updateBezel];
-}
-
-- (void)restoreStashedStore
-{
-    if (NULL != stashedStore)
+    if ([flycutOperator restoreStashedStore])
     {
-        clippingStore = stashedStore;
-        stashedStore = NULL;
-        favoritesStackPosition = stackPosition;
-        stackPosition = stashedStackPosition;
         [bezel setColor:NO];
         [self updateBezel];
     }
@@ -596,105 +556,40 @@
 
 - (void)pasteFromStack
 {
-	if ( [clippingStore jcListCount] > stackPosition ) {
-		[self pasteIndex: stackPosition];
+	NSString *content = [flycutOperator getPasteFromStackPosition];
+	if ( nil != content ) {
+		[self addClipToPasteboard:content];
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 		[self performSelector:@selector(fakeCommandV) withObject:nil afterDelay:0.2];
 	} else {
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 	}
-    [self restoreStashedStore];
+    [self restoreStashedStoreAndUpdate];
 }
 
-- (void)saveFromStack
+- (void)moveItemAtStackPositionToTopOfStack
 {
-    [self saveFromStackWithPrefix:@""];
-}
-
-- (void)saveFromStackWithPrefix:(NSString*) prefix
-{
-    if ( [clippingStore jcListCount] > stackPosition ) {
-        // Get text from clipping store.
-        NSString *pbFullText = [self clippingStringWithCount:stackPosition];
-        pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
-        
-        // Get the Desktop directory:
-        NSArray *paths = NSSearchPathForDirectoriesInDomains
-        (NSDesktopDirectory, NSUserDomainMask, YES);
-        NSString *desktopDirectory = [paths objectAtIndex:0];
-        
-        // Get the timestamp string:
-        NSDate *currentDate = [NSDate date];
-        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateFormat:@"YYYY-MM-dd 'at' HH.mm.ss"];
-        NSString *dateString = [dateFormatter stringFromDate:currentDate];
-        
-        // Make a file name to write the data to using the Desktop directory:
-        NSString *fileName = [NSString stringWithFormat:@"%@/%@%@Clipping %@.txt",
-                              desktopDirectory, prefix, clippingStore == favoritesStore ? @"Favorite " : @"", dateString];
-        
-        // Save content to the file
-        [pbFullText writeToFile:fileName
-                  atomically:NO
-                    encoding:NSNonLossyASCIIStringEncoding
-                       error:nil];
-    }
-    
-    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
-    [self restoreStashedStore];
-}
-
-- (void)saveFromStackToFavorites
-{
-    if ( clippingStore != favoritesStore && [clippingStore jcListCount] > stackPosition ) {
-        if ( [favoritesStore rememberNum] == [favoritesStore jcListCount]
-            && [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenFavorites"] boolValue] )
-        {
-            // favoritesStore is full, so save the last entry before it gets lost.
-            [self switchToFavoritesStore];
-            
-            // Set to last item, save, and restore position.
-            stackPosition = [favoritesStore rememberNum]-1;
-            [self saveFromStackWithPrefix:@"Autosave "];
-            stackPosition = favoritesStackPosition;
-            
-            // Restore prior state.
-            [self restoreStashedStore];
-        }
-        // Get text from clipping store.
-        [favoritesStore addClipping:[clippingStore clippingAtPosition:stackPosition] ];
-        [clippingStore clearItem:stackPosition];
-        [self updateBezel];
-        [self updateMenu];
-    }
-    
-    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
-}
-
-- (void)changeStack
-{
-	if ( [clippingStore jcListCount] > stackPosition ) {
-		[self pasteIndex: stackPosition];
+	if ( [flycutOperator stackPositionIsInBounds] ) {
+		[self pasteIndexAndUpdate: [flycutOperator stackPosition]];
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 	} else {
 		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
 	}
 }
 
-- (void)pasteIndex:(int) position {
+- (void)pasteIndexAndUpdate:(int) position {
     // If there is an active search, we need to map the menu index to the stack position.
     NSString* search = [searchBox stringValue];
     if ( nil != search && 0 != search.length )
     {
-        NSArray *mapping = [clippingStore previousIndexes:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
+        NSArray *mapping = [flycutOperator previousIndexes:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
         position = [mapping[position] intValue];
     }
 
-	[self addClipToPasteboardFromCount:position];
-
-	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"pasteMovesToTop"] ) {
-		[clippingStore clippingMoveToTop:position];
-		stackPosition = 0;
+    NSString *content = [flycutOperator getPasteFromIndex: position];
+    if ( nil != content )
+    {
+        [self addClipToPasteboard:content];
         [self updateMenu];
 	}
 }
@@ -769,78 +664,10 @@
     return NO;    // Default handling of the command
 }
 
--(BOOL)shouldSkip:(NSString *)contents
-{
-	NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-
-	// Check to see if we are skipping passwords based on length and characters.
-	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
-	{
-		// Check to see if they want a little help figuring out what types to enter.
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
-			[clippingStore addClipping:type ofType:type fromAppLocalizedName:@"Flycut" fromAppBundleURL:nil atTimestamp:0];
-
-		__block bool skipClipping = NO;
-
-		// Check the array of types to skip.
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
-		{
-			NSArray *typesArray = [[[[NSUserDefaults standardUserDefaults] stringForKey:@"skipPboardTypesList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
-			[typesArray enumerateObjectsUsingBlock:^(id typeString, NSUInteger idx, BOOL *stop)
-			{
-				if ( [type isEqualToString:typeString] )
-				{
-					skipClipping = YES;
-					*stop = YES;
-				}
-			}];
-		}
-		if (skipClipping)
-			return YES;
-
-		// Check the array of lengths to skip for suspicious strings.
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordLengths"] )
-		{
-			int contentsLength = [contents length];
-			NSArray *lengthsArray = [[[[NSUserDefaults standardUserDefaults] stringForKey:@"skipPasswordLengthsList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
-			[lengthsArray enumerateObjectsUsingBlock:^(id lengthString, NSUInteger idx, BOOL *stop)
-			{
-				if ( [lengthString integerValue] == contentsLength )
-				{
-					NSRange uppercaseLetter = [contents rangeOfCharacterFromSet: [NSCharacterSet uppercaseLetterCharacterSet]];
-					NSRange lowercaseLetter = [contents rangeOfCharacterFromSet: [NSCharacterSet lowercaseLetterCharacterSet]];
-					NSRange decimalDigit = [contents rangeOfCharacterFromSet: [NSCharacterSet decimalDigitCharacterSet]];
-					NSRange punctuation = [contents rangeOfCharacterFromSet: [NSCharacterSet punctuationCharacterSet]];
-					NSRange symbol = [contents rangeOfCharacterFromSet: [NSCharacterSet symbolCharacterSet]];
-					NSRange control = [contents rangeOfCharacterFromSet: [NSCharacterSet controlCharacterSet]];
-					NSRange illegal = [contents rangeOfCharacterFromSet: [NSCharacterSet illegalCharacterSet]];
-					NSRange whitespaceAndNewline = [contents rangeOfCharacterFromSet: [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-					if ( NSNotFound == control.location
-						&& NSNotFound == illegal.location
-						&& NSNotFound == whitespaceAndNewline.location
-						&& NSNotFound != uppercaseLetter.location
-						&& NSNotFound != lowercaseLetter.location
-						&& NSNotFound != decimalDigit.location
-						&& ( NSNotFound != punctuation.location
-							|| NSNotFound != symbol.location ) )
-					{
-						skipClipping = YES;
-						*stop = YES;
-					}
-				}
-			}];
-
-			if (skipClipping)
-				return YES;
-		}
-	}
-	return NO;
-}
-
 -(void)pollPB:(NSTimer *)timer
 {
     NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-    if ( [pbCount intValue] != [jcPasteboard changeCount] && !disableStore ) {
+    if ( [pbCount intValue] != [jcPasteboard changeCount] && ![flycutOperator storeDisabled] ) {
         // Reload pbCount with the current changeCount
         // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
         [pbCount release];
@@ -867,35 +694,10 @@
 				if (largeCopyRisk)
 					[self toggleMenuIconDisabled];
 
-				if ( contents == nil || [self shouldSkip:contents] ) {
+				if ( contents == nil || [flycutOperator shouldSkip:contents ofType:[jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]]] ) {
                    DLog(@"Contents: Empty or skipped");
-               } else {
-					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
-                        &&  ! [pbCount isEqualTo:pbBlockCount] ) {
-                        
-                        if ( [clippingStore rememberNum] == [clippingStore jcListCount]
-                            && [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenClippings"] boolValue] )
-                        {
-                            // clippingStore is full, so save the last entry before it gets lost.
-                            // Set to last item, save, and restore position.
-                            int savePosition = stackPosition;
-                            stackPosition = [clippingStore rememberNum]-1;
-                            [self saveFromStackWithPrefix:@"Autosave "];
-                            stackPosition = savePosition;
-                        }
-                        
-                       [clippingStore addClipping:contents
-										   ofType:type
-									   fromAppLocalizedName:[currRunningApp localizedName]
-									   fromAppBundleURL:currRunningApp.bundleURL.path
-									  atTimestamp:[[NSDate date] timeIntervalSince1970]];
-//						The below tracks our position down down down... Maybe as an option?
-//						if ( [clippingStore jcListCount] > 1 ) stackPosition++;
-						stackPosition = 0;
-                        [self updateMenu];
-						if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
-                           [self saveEngine];
-                   }
+               } else if ( ! [pbCount isEqualTo:pbBlockCount] ) {
+                   [flycutOperator addClipping:contents ofType:type fromApp:[currRunningApp localizedName] withAppBundleURL:currRunningApp.bundleURL.path target:self clippingAddedSelector:@selector(updateMenu)];
                }
             });
         } 
@@ -921,7 +723,7 @@
 				[self pasteFromStack];
 				break;
 			case 0x3:
-                [self changeStack];
+                [self moveItemAtStackPositionToTopOfStack];
                 break;
             case 0x2C: // Comma
                 if ( modifiers & NSCommandKeyMask ) {
@@ -939,37 +741,31 @@
 				[self stackDown];
 				break;
             case NSHomeFunctionKey:
-				if ( [clippingStore jcListCount] > 0 ) {
-					stackPosition = 0;
+				if ( [flycutOperator setStackPositionToFirstItem] ) {
 					[self updateBezel];
 				}
 				break;
             case NSEndFunctionKey:
-				if ( [clippingStore jcListCount] > 0 ) {
-					stackPosition = [clippingStore jcListCount] - 1;
+				if ( [flycutOperator setStackPositionToLastItem] ) {
 					[self updateBezel];
 				}
 				break;
             case NSPageUpFunctionKey:
-				if ( [clippingStore jcListCount] > 0 ) {
-					stackPosition = stackPosition - 10; if ( stackPosition < 0 ) stackPosition = 0;
+				if ( [flycutOperator setStackPositionToTenMoreRecent] ) {
 					[self updateBezel];
 				}
 				break;
 			case NSPageDownFunctionKey:
-				if ( [clippingStore jcListCount] > 0 ) {
-					stackPosition = stackPosition + 10; if ( stackPosition >= [clippingStore jcListCount] ) stackPosition = [clippingStore jcListCount] - 1;
+				if ( [flycutOperator setStackPositionToTenLessRecent] ) {
                     [self updateBezel];
                 }
 				break;
 			case NSBackspaceCharacter:
             case NSDeleteCharacter:
-                if ([clippingStore jcListCount] == 0)
-                    return;
-
-                [clippingStore clearItem:stackPosition];
-                [self updateBezel];
-                [self updateMenu];
+                if ( [flycutOperator clearItemAtStackPosition] ) {
+                    [self updateBezel];
+                    [self updateMenu];
+                }
                 break;
             case NSDeleteFunctionKey: break;
 			case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: 				// Numeral 
@@ -977,32 +773,42 @@
 				// We'll currently ignore the possibility that the user wants to do something with shift.
 				// First, let's set the new stack count to "10" if the user pressed "0"
 				newStackPosition = pressed == 0x30 ? 9 : [[NSString stringWithCharacters:&pressed length:1] intValue] - 1;
-				if ( [clippingStore jcListCount] >= newStackPosition ) {
-					stackPosition = newStackPosition;
+				if ( [flycutOperator setStackPositionTo: newStackPosition] ) {
 					[self fillBezel];
 				}
 				break;
             case 's': case 'S': // Save / Save-and-delete
-                if ([clippingStore jcListCount] == 0)
-                    return;
+                {
+                    bool success = [flycutOperator saveFromStack];
+                    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+                    [self restoreStashedStoreAndUpdate];
 
-                [self saveFromStack];
-                if ( modifiers & NSShiftKeyMask ) {
-                    [clippingStore clearItem:stackPosition];
-                    [self updateBezel];
-                    [self updateMenu];
+                    if ( success ) {
+                        if ( modifiers & NSShiftKeyMask ) {
+                            [flycutOperator clearItemAtStackPosition];
+                            [self updateBezel];
+                            [self updateMenu];
+                        }
+                    }
                 }
                 break;
             case 'f':
-                if (NULL != stashedStore)
-                    [self restoreStashedStore];
-                else
-                    [self switchToFavoritesStore];
+                [flycutOperator toggleToFromFavoritesStore];
+                [bezel setColor:[flycutOperator favoritesStoreIsSelected]];
+                [self updateBezel];
                 [self hideBezel];
                 [self showBezel];
                 break;
             case 'F':
-                [self saveFromStackToFavorites];
+                if ( [flycutOperator saveFromStackToFavorites] )
+                {
+                    [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+                    [self restoreStashedStoreAndUpdate];
+                    [self updateBezel];
+                    [self updateMenu];
+                }
+
+                [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
                 break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				DLog(@"PRESSED %d", pressed);
@@ -1032,10 +838,8 @@
 
 - (void) updateBezel
 {
-	if (stackPosition >= [clippingStore jcListCount] && stackPosition != 0) { // deleted last item
-		stackPosition = [clippingStore jcListCount] - 1;
-	}
-	if (stackPosition == 0 && [clippingStore jcListCount] == 0) { // empty
+	[flycutOperator adjustStackPositionIfOutOfBounds];
+	if ([flycutOperator jcListCount] == 0) { // empty
 		[bezel setText:@""];
 		[bezel setCharString:@"Empty"];
         [bezel setSource:@""];
@@ -1049,7 +853,7 @@
 
 - (void) showBezel
 {
-	if ( [clippingStore jcListCount] > 0 && [clippingStore jcListCount] > stackPosition ) {
+	if ( [flycutOperator stackPositionIsInBounds] ) {
 		[self fillBezel];
 	}
 	NSRect mainScreenRect = [NSScreen mainScreen].visibleFrame;
@@ -1128,18 +932,18 @@
 	
     // on clear, zap the list and redraw the menu
     if ( choice == NSAlertDefaultReturn ) {
-        [self restoreStashedStore]; // Only clear the clipping store.  Never the favorites.
-        [clippingStore clearList];
+        [self restoreStashedStoreAndUpdate]; // Only clear the clipping store.  Never the favorites.
+        [flycutOperator clearList];
         [self updateMenu];
 		if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
-			[self saveEngine];
+			[flycutOperator saveEngine];
 		}
 		[bezel setText:@""];
     }
 }
 
 -(IBAction)mergeClippingList:(id)sender {
-    [clippingStore mergeList];
+    [flycutOperator mergeList];
     [self updateMenu];
 }
 
@@ -1153,7 +957,7 @@
 - (void)updateMenuContaining:(NSString*)search {
     [jcMenu setMenuChangedMessagesEnabled:NO];
     
-    NSArray *returnedDisplayStrings = [clippingStore previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
+    NSArray *returnedDisplayStrings = [flycutOperator previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
     
     NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
     
@@ -1197,24 +1001,12 @@
 -(IBAction)processMenuClippingSelection:(id)sender
 {
 	int index=[[sender menu] indexOfItem:sender];
-	[self pasteIndex:index];
+	[self pasteIndexAndUpdate:index];
 
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"menuSelectionPastes"] ) {
 		[self performSelector:@selector(hideApp) withObject:nil];
 		[self performSelector:@selector(fakeCommandV) withObject:nil afterDelay:0.2];
 	}
-}
-
--(BOOL) isValidClippingNumber:(NSNumber *)number {
-    return ( ([number intValue] + 1) <= [clippingStore jcListCount] );
-}
-
--(NSString *) clippingStringWithCount:(int)count {
-    if ( [self isValidClippingNumber:[NSNumber numberWithInt:count]] ) {
-        return [clippingStore clippingContentsAtPosition:count];
-    } else { // It fails -- we shouldn't be passed this, but...
-        return @"";
-    }
 }
 
 -(void) setPBBlockCount:(NSNumber *)newPBBlockCount
@@ -1224,94 +1016,29 @@
     pbBlockCount = newPBBlockCount;
 }
 
--(BOOL)addClipToPasteboardFromCount:(int)indexInt
+-(void)addClipToPasteboard:(NSString*)pbFullText
 {
-    NSString *pbFullText;
     NSArray *pbTypes;
-    if ( (indexInt + 1) > [clippingStore jcListCount] ) {
-        // We're asking for a clipping that isn't there yet
-		// This only tends to happen immediately on startup when not saving, as the entire list is empty.
-        DLog(@"Out of bounds request to jcList ignored.");
-        return false;
-    }
-    pbFullText = [self clippingStringWithCount:indexInt];
     pbTypes = [NSArray arrayWithObjects:@"NSStringPboardType",NULL];
     
     [jcPasteboard declareTypes:pbTypes owner:NULL];
 	
     [jcPasteboard setString:pbFullText forType:@"NSStringPboardType"];
     [self setPBBlockCount:[NSNumber numberWithInt:[jcPasteboard changeCount]]];
-    return true;
 }
-
--(void) loadEngineFromPList
-{
-    NSDictionary *loadDict = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];   
-    NSArray *savedJCList;
-	NSRange loadRange;
-	
-    int rangeCap;
-	
-    if ( loadDict != nil ) {
-
-        savedJCList = [loadDict objectForKey:@"jcList"];
-        
-        if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-            int rememberNumPref = [[NSUserDefaults standardUserDefaults] 
-                                   integerForKey:@"rememberNum"];
-            // There's probably a nicer way to prevent the range from going out of bounds, but this works.
-			rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
-			loadRange = NSMakeRange(0, rangeCap);
-            NSArray *toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
-            for( NSDictionary *aSavedClipping in toBeRestoredClips)
-				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-									ofType:[aSavedClipping objectForKey:@"Type"]
-					  fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
-						  fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
-							   atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
-            
-            // Now for the favorites, same thing.
-            savedJCList =[loadDict objectForKey:@"favoritesList"];
-            if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-            rememberNumPref = [[NSUserDefaults standardUserDefaults]
-                               integerForKey:@"favoritesRememberNum"];
-            rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
-            loadRange = NSMakeRange(0, rangeCap);
-            toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
-            for( NSDictionary *aSavedClipping in toBeRestoredClips)
-                [favoritesStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-                                     ofType:[aSavedClipping objectForKey:@"Type"]
-                       fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
-                           fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
-                                atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
-            }
-        } else DLog(@"Not array");
-        [self updateMenu];
-        [loadDict release];
-    }
-}
-
 
 -(void) stackDown
 {
-	stackPosition++;
-	if ( [clippingStore jcListCount] > stackPosition ) {
+	if ( [flycutOperator setStackPositionToOneLessRecent] ) {
 		[self fillBezel];
-	} else {
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
-			stackPosition = 0;
-			[self fillBezel];
-		} else {
-			stackPosition--;
-		}
 	}
 }
 
 -(void) fillBezel
 {
-    FlycutClipping* clipping = [clippingStore clippingAtPosition:stackPosition];
+    FlycutClipping* clipping = [flycutOperator clippingAtStackPosition];
     [bezel setText:[NSString stringWithFormat:@"%@", [clipping contents]]];
-    [bezel setCharString:[NSString stringWithFormat:@"%d of %d", stackPosition + 1, [clippingStore jcListCount]]];
+    [bezel setCharString:[NSString stringWithFormat:@"%d of %d", [flycutOperator stackPosition] + 1, [flycutOperator jcListCount]]];
     NSString *localizedName = [clipping appLocalizedName];
     if ( nil == localizedName )
         localizedName = @"";
@@ -1328,65 +1055,9 @@
 
 -(void) stackUp
 {
-	stackPosition--;
-	if ( stackPosition < 0 ) {
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"wraparoundBezel"] ) {
-			stackPosition = [clippingStore jcListCount] - 1;
-			[self fillBezel];
-		} else {
-			stackPosition = 0;
-		}
-	}
-	if ( [clippingStore jcListCount] > stackPosition ) {
+	if ( [flycutOperator setStackPositionToOneMoreRecent] ) {
 		[self fillBezel];
 	}
-}
-
-- (void)saveStore:(FlycutStore *)store toKey:(NSString *)key onDict:(NSMutableDictionary *)saveDict {
-    NSMutableArray *jcListArray = [NSMutableArray array];
-    for ( int i = 0 ; i < [store jcListCount] ; i++ )
-    {
-        FlycutClipping *clipping = [store clippingAtPosition:i];
-        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                     [clipping contents], @"Contents",
-                                     [clipping type], @"Type",
-                                     [NSNumber numberWithInt:i], @"Position",nil];
-
-        NSString *val = [clipping appLocalizedName];
-        if ( nil != val )
-            [dict setObject:val forKey:@"AppLocalizedName"];
-
-        val = [clipping appBundleURL];
-        if ( nil != val )
-            [dict setObject:val forKey:@"AppBundleURL"];
-
-        int timestamp = [clipping timestamp];
-        if ( timestamp > 0 )
-            [dict setObject:[NSNumber numberWithInt:timestamp] forKey:@"Timestamp"];
-
-        [jcListArray addObject:dict];
-    }
-    [saveDict setObject:jcListArray forKey:key];
-}
-
--(void) saveEngine {
-    NSMutableDictionary *saveDict;
-    saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
-    [saveDict setObject:@"0.7" forKey:@"version"];
-    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]]
-                 forKey:@"rememberNum"];
-    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]]
-                 forKey:@"favoritesRememberNum"];
-    [saveDict setObject:[NSNumber numberWithInt:_DISPLENGTH]
-                 forKey:@"displayLen"];
-    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
-                 forKey:@"displayNum"];
-
-    [self saveStore:clippingStore toKey:@"jcList" onDict:saveDict];
-    [self saveStore:favoritesStore toKey:@"favoritesList" onDict:saveDict];
-
-    [[NSUserDefaults standardUserDefaults] setObject:saveDict forKey:@"store"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)setHotKeyPreferenceForRecorder:(SRRecorderControl *)aRecorder {
@@ -1410,15 +1081,7 @@
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
-	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
-		DLog(@"Saving on exit");
-        [self saveEngine];
-    } else {
-        // Remove clips from store
-        [[NSUserDefaults standardUserDefaults] setValue:[NSDictionary dictionary] forKey:@"store"];
-        DLog(@"Saving preferences on exit");
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
+	[flycutOperator applicationWillTerminate];
 	//Unregister our hot key (not required)
 	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
 	[mainHotKey release];
