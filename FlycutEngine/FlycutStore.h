@@ -50,9 +50,10 @@
 -(NSArray *) previousDisplayStrings:(int)howMany;
 -(NSArray *) previousDisplayStrings:(int)howMany containing:(NSString*)search;
 -(NSArray *) previousIndexes:(int)howMany containing:(NSString*)search; // This method is in newest-first order.
+-(int) indexOfClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp;
 
 // Add a clipping
--(void) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(NSInteger) timestamp;
+-(bool) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(NSInteger) timestamp;
 -(void) addClipping:(FlycutClipping*) clipping;
 
 // Delete a clipping

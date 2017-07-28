@@ -57,6 +57,16 @@
 		77DA6B941CB9549B0077917F /* FlycutClipping.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B901CB9549B0077917F /* FlycutClipping.m */; };
 		77DA6B951CB9549B0077917F /* FlycutClipping.h in Headers */ = {isa = PBXBuildFile; fileRef = 77DA6B911CB9549B0077917F /* FlycutClipping.h */; };
 		8D0C119F1F147E250046FAA0 /* FlycutOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C119E1F147E250046FAA0 /* FlycutOperator.m */; };
+		8D0C11A81F171B140046FAA0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C11A71F171B140046FAA0 /* AppDelegate.swift */; };
+		8D0C11AA1F171B140046FAA0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C11A91F171B140046FAA0 /* ViewController.swift */; };
+		8D0C11AD1F171B140046FAA0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8D0C11AB1F171B140046FAA0 /* Main.storyboard */; };
+		8D0C11AF1F171B140046FAA0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8D0C11AE1F171B140046FAA0 /* Assets.xcassets */; };
+		8D0C11B21F171B140046FAA0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8D0C11B01F171B140046FAA0 /* LaunchScreen.storyboard */; };
+		8D0C11BD1F171B140046FAA0 /* Flycut_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C11BC1F171B140046FAA0 /* Flycut_iOSTests.swift */; };
+		8D0C11C81F171B140046FAA0 /* Flycut_iOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C11C71F171B140046FAA0 /* Flycut_iOSUITests.swift */; };
+		8D0C11D31F171B240046FAA0 /* FlycutOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C119E1F147E250046FAA0 /* FlycutOperator.m */; };
+		8D0C11D61F18835F0046FAA0 /* FlycutStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B8E1CB9549B0077917F /* FlycutStore.m */; };
+		8D0C11D71F1883620046FAA0 /* FlycutClipping.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B901CB9549B0077917F /* FlycutClipping.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -69,6 +79,23 @@
 		DBEB0C9C1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h in Headers */ = {isa = PBXBuildFile; fileRef = DBEB0C9A1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h */; };
 		DBEB0C9D1442F2AE0080D24E /* NSWindow+ULIZoomEffect.m in Sources */ = {isa = PBXBuildFile; fileRef = DBEB0C9B1442F2AE0080D24E /* NSWindow+ULIZoomEffect.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8D0C11B91F171B140046FAA0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D0C11A41F171B140046FAA0;
+			remoteInfo = "Flycut-iOS";
+		};
+		8D0C11C41F171B140046FAA0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D0C11A41F171B140046FAA0;
+			remoteInfo = "Flycut-iOS";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -131,6 +158,21 @@
 		77DA6B911CB9549B0077917F /* FlycutClipping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FlycutClipping.h; path = FlycutEngine/FlycutClipping.h; sourceTree = SOURCE_ROOT; };
 		8D0C119E1F147E250046FAA0 /* FlycutOperator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlycutOperator.m; sourceTree = "<group>"; };
 		8D0C11A01F147E3C0046FAA0 /* FlycutOperator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlycutOperator.h; sourceTree = "<group>"; };
+		8D0C11A51F171B140046FAA0 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D0C11A71F171B140046FAA0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8D0C11A91F171B140046FAA0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8D0C11AC1F171B140046FAA0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		8D0C11AE1F171B140046FAA0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8D0C11B11F171B140046FAA0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8D0C11B31F171B140046FAA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8D0C11B81F171B140046FAA0 /* Flycut-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flycut-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D0C11BC1F171B140046FAA0 /* Flycut_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flycut_iOSTests.swift; sourceTree = "<group>"; };
+		8D0C11BE1F171B140046FAA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8D0C11C31F171B140046FAA0 /* Flycut-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flycut-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D0C11C71F171B140046FAA0 /* Flycut_iOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flycut_iOSUITests.swift; sourceTree = "<group>"; };
+		8D0C11C91F171B140046FAA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8D0C11D41F1720070046FAA0 /* Flycut-iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Flycut-iOS-Bridging-Header.h"; sourceTree = "<group>"; };
+		8D0C11D51F1882B30046FAA0 /* Flycut-iOS_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Flycut-iOS_Prefix.pch"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
 		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
@@ -144,6 +186,27 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		8D0C11A21F171B140046FAA0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D0C11B51F171B140046FAA0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D0C11C01F171B140046FAA0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D11072E0486CEB800E47090 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -163,6 +226,7 @@
 				AABE497B09FF9CD000A6A239 /* AppController.m */,
 				8D0C11A01F147E3C0046FAA0 /* FlycutOperator.h */,
 				8D0C119E1F147E250046FAA0 /* FlycutOperator.m */,
+				8D0C11D41F1720070046FAA0 /* Flycut-iOS-Bridging-Header.h */,
 				7761C89B139BDF12000FB3AB /* ShortcutRecorder */,
 				7761C896139BDEC4000FB3AB /* UKPrefsPanel */,
 				7761C889139BDEAF000FB3AB /* UI */,
@@ -196,6 +260,9 @@
 			isa = PBXGroup;
 			children = (
 				8D1107320486CEB800E47090 /* Flycut.app */,
+				8D0C11A51F171B140046FAA0 /* Flycut.app */,
+				8D0C11B81F171B140046FAA0 /* Flycut-iOSTests.xctest */,
+				8D0C11C31F171B140046FAA0 /* Flycut-iOSUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -207,6 +274,9 @@
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				8D0C11A61F171B140046FAA0 /* Flycut-iOS */,
+				8D0C11BB1F171B140046FAA0 /* Flycut-iOSTests */,
+				8D0C11C61F171B140046FAA0 /* Flycut-iOSUITests */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -217,6 +287,7 @@
 			isa = PBXGroup;
 			children = (
 				32CA4F630368D1EE00C91783 /* Flycut_Prefix.pch */,
+				8D0C11D51F1882B30046FAA0 /* Flycut-iOS_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
 			name = "Other Sources";
@@ -338,6 +409,37 @@
 			path = SGHotKeysLib;
 			sourceTree = "<group>";
 		};
+		8D0C11A61F171B140046FAA0 /* Flycut-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				8D0C11A71F171B140046FAA0 /* AppDelegate.swift */,
+				8D0C11A91F171B140046FAA0 /* ViewController.swift */,
+				8D0C11AB1F171B140046FAA0 /* Main.storyboard */,
+				8D0C11AE1F171B140046FAA0 /* Assets.xcassets */,
+				8D0C11B01F171B140046FAA0 /* LaunchScreen.storyboard */,
+				8D0C11B31F171B140046FAA0 /* Info.plist */,
+			);
+			path = "Flycut-iOS";
+			sourceTree = "<group>";
+		};
+		8D0C11BB1F171B140046FAA0 /* Flycut-iOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				8D0C11BC1F171B140046FAA0 /* Flycut_iOSTests.swift */,
+				8D0C11BE1F171B140046FAA0 /* Info.plist */,
+			);
+			path = "Flycut-iOSTests";
+			sourceTree = "<group>";
+		};
+		8D0C11C61F171B140046FAA0 /* Flycut-iOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				8D0C11C71F171B140046FAA0 /* Flycut_iOSUITests.swift */,
+				8D0C11C91F171B140046FAA0 /* Info.plist */,
+			);
+			path = "Flycut-iOSUITests";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -370,6 +472,61 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		8D0C11A41F171B140046FAA0 /* Flycut-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D0C11CA1F171B140046FAA0 /* Build configuration list for PBXNativeTarget "Flycut-iOS" */;
+			buildPhases = (
+				8D0C11A11F171B140046FAA0 /* Sources */,
+				8D0C11A21F171B140046FAA0 /* Frameworks */,
+				8D0C11A31F171B140046FAA0 /* Resources */,
+				8D5D88001F2063720050D4BD /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8D5D87FB1F2063720050D4BD /* PBXTargetDependency */,
+			);
+			name = "Flycut-iOS";
+			productName = "Flycut-iOS";
+			productReference = 8D0C11A51F171B140046FAA0 /* Flycut.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8D0C11B71F171B140046FAA0 /* Flycut-iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D0C11CD1F171B140046FAA0 /* Build configuration list for PBXNativeTarget "Flycut-iOSTests" */;
+			buildPhases = (
+				8D0C11B41F171B140046FAA0 /* Sources */,
+				8D0C11B51F171B140046FAA0 /* Frameworks */,
+				8D0C11B61F171B140046FAA0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8D0C11BA1F171B140046FAA0 /* PBXTargetDependency */,
+			);
+			name = "Flycut-iOSTests";
+			productName = "Flycut-iOSTests";
+			productReference = 8D0C11B81F171B140046FAA0 /* Flycut-iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		8D0C11C21F171B140046FAA0 /* Flycut-iOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D0C11D01F171B140046FAA0 /* Build configuration list for PBXNativeTarget "Flycut-iOSUITests" */;
+			buildPhases = (
+				8D0C11BF1F171B140046FAA0 /* Sources */,
+				8D0C11C01F171B140046FAA0 /* Frameworks */,
+				8D0C11C11F171B140046FAA0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8D0C11C51F171B140046FAA0 /* PBXTargetDependency */,
+			);
+			name = "Flycut-iOSUITests";
+			productName = "Flycut-iOSUITests";
+			productReference = 8D0C11C31F171B140046FAA0 /* Flycut-iOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		8D1107260486CEB800E47090 /* Flycut */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Flycut" */;
@@ -390,14 +547,43 @@
 			productReference = 8D1107320486CEB800E47090 /* Flycut.app */;
 			productType = "com.apple.product-type.application";
 		};
+		8D5D87F21F2063720050D4BD /* CopyExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D5D87FF1F2063720050D4BD /* Build configuration list for PBXNativeTarget "CopyExtension" */;
+			buildPhases = (
+				8D5D87EF1F2063720050D4BD /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CopyExtension;
+			productName = CopyExtension;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0820;
 				LastUpgradeCheck = 0500;
 				TargetAttributes = {
+					8D0C11A41F171B140046FAA0 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					8D0C11B71F171B140046FAA0 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 8D0C11A41F171B140046FAA0;
+					};
+					8D0C11C21F171B140046FAA0 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 8D0C11A41F171B140046FAA0;
+					};
 					8D1107260486CEB800E47090 = {
 						DevelopmentTeam = S8JLSG5ES7;
 						SystemCapabilities = {
@@ -417,17 +603,46 @@
 				Japanese,
 				French,
 				German,
+				Base,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Jumpcut */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Flycut */,
+				8D0C11A41F171B140046FAA0 /* Flycut-iOS */,
+				8D0C11B71F171B140046FAA0 /* Flycut-iOSTests */,
+				8D0C11C21F171B140046FAA0 /* Flycut-iOSUITests */,
+				8D5D87F21F2063720050D4BD /* CopyExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		8D0C11A31F171B140046FAA0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C11B21F171B140046FAA0 /* LaunchScreen.storyboard in Resources */,
+				8D0C11AF1F171B140046FAA0 /* Assets.xcassets in Resources */,
+				8D0C11AD1F171B140046FAA0 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D0C11B61F171B140046FAA0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D0C11C11F171B140046FAA0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D1107290486CEB800E47090 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -472,6 +687,34 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		8D0C11A11F171B140046FAA0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C11D61F18835F0046FAA0 /* FlycutStore.m in Sources */,
+				8D0C11AA1F171B140046FAA0 /* ViewController.swift in Sources */,
+				8D0C11D71F1883620046FAA0 /* FlycutClipping.m in Sources */,
+				8D0C11A81F171B140046FAA0 /* AppDelegate.swift in Sources */,
+				8D0C11D31F171B240046FAA0 /* FlycutOperator.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D0C11B41F171B140046FAA0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C11BD1F171B140046FAA0 /* Flycut_iOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D0C11BF1F171B140046FAA0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C11C81F171B140046FAA0 /* Flycut_iOSUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D11072C0486CEB800E47090 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -501,7 +744,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8D5D87EF1F2063720050D4BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8D0C11BA1F171B140046FAA0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D0C11A41F171B140046FAA0 /* Flycut-iOS */;
+			targetProxy = 8D0C11B91F171B140046FAA0 /* PBXContainerItemProxy */;
+		};
+		8D0C11C51F171B140046FAA0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D0C11A41F171B140046FAA0 /* Flycut-iOS */;
+			targetProxy = 8D0C11C41F171B140046FAA0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		29B97318FDCFA39411CA2CEA /* MainMenu.nib */ = {
@@ -512,9 +775,362 @@
 			name = MainMenu.nib;
 			sourceTree = "<group>";
 		};
+		8D0C11AB1F171B140046FAA0 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8D0C11AC1F171B140046FAA0 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		8D0C11B01F171B140046FAA0 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8D0C11B11F171B140046FAA0 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		8D0C11CB1F171B140046FAA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Flycut-iOS_Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Flycut-iOS/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mark-a-jerde.Flycut-iOS";
+				PRODUCT_NAME = Flycut;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "Flycut-iOS-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8D0C11CC1F171B140046FAA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Flycut-iOS_Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Flycut-iOS/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mark-a-jerde.Flycut-iOS";
+				PRODUCT_NAME = Flycut;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Flycut-iOS-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8D0C11CE1F171B140046FAA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Flycut-iOSTests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mark-a-jerde.Flycut-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flycut-iOS.app/Flycut-iOS";
+			};
+			name = Debug;
+		};
+		8D0C11CF1F171B140046FAA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Flycut-iOSTests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mark-a-jerde.Flycut-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flycut-iOS.app/Flycut-iOS";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8D0C11D11F171B140046FAA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Flycut-iOSUITests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mark-a-jerde.Flycut-iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = "Flycut-iOS";
+			};
+			name = Debug;
+		};
+		8D0C11D21F171B140046FAA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Flycut-iOSUITests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mark-a-jerde.Flycut-iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = "Flycut-iOS";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8D67DA5F1F454988008BA2E3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = CopyExtension;
+			};
+			name = Debug;
+		};
+		8D67DA601F454988008BA2E3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				PRODUCT_NAME = CopyExtension;
+			};
+			name = Release;
+		};
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -593,6 +1209,42 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8D0C11CA1F171B140046FAA0 /* Build configuration list for PBXNativeTarget "Flycut-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D0C11CB1F171B140046FAA0 /* Debug */,
+				8D0C11CC1F171B140046FAA0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8D0C11CD1F171B140046FAA0 /* Build configuration list for PBXNativeTarget "Flycut-iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D0C11CE1F171B140046FAA0 /* Debug */,
+				8D0C11CF1F171B140046FAA0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8D0C11D01F171B140046FAA0 /* Build configuration list for PBXNativeTarget "Flycut-iOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D0C11D11F171B140046FAA0 /* Debug */,
+				8D0C11D21F171B140046FAA0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8DD058FD1F3989EB00846028 /* Build configuration list for PBXNativeTarget "CopyExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D67DA5F1F454988008BA2E3 /* Debug */,
+				8D67DA601F454988008BA2E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Flycut" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -34,10 +34,38 @@
     return self;
 }
 
+-(int) indexOfClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp{
+	if ([clipping length] == 0) {
+		return -1;
+	}
+	// Clipping object
+	FlycutClipping * newClipping;
+	// Create clipping
+	newClipping = [[FlycutClipping alloc] initWithContents:clipping
+												  withType:type
+										 withDisplayLength:[self displayLen]
+									  withAppLocalizedName:appLocalizedName
+										  withAppBundleURL:bundleURL
+											 withTimestamp:timestamp];
+
+	int result = [self indexOfClipping: newClipping];
+
+	[newClipping release];
+
+	return result;
+}
+
+-(int) indexOfClipping:(FlycutClipping*) clipping{
+	if (![jcList containsObject:clipping]) {
+		return -1;
+	}
+	return (int)[jcList indexOfObject:clipping];
+}
+
 // Add a clipping
--(void) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp{
+-(bool) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp{
     if ([clipping length] == 0) {
-        return;
+        return NO;
     }
     // Clipping object
     FlycutClipping * newClipping;
@@ -52,6 +80,7 @@
 	[self addClipping:newClipping];
 	
 	[newClipping release];
+	return YES;
 }
 
 -(void) addClipping:(FlycutClipping*) clipping{

@@ -285,6 +285,15 @@
 	return disableStore;
 }
 
+-(int)indexOfClipping:(NSString*)contents ofType:(NSString*)type fromApp:(NSString *)appName withAppBundleURL:(NSString *)bundleURL
+{
+	return [clippingStore indexOfClipping:contents
+								   ofType:type
+					 fromAppLocalizedName:appName
+						 fromAppBundleURL:bundleURL
+							  atTimestamp:[[NSDate date] timeIntervalSince1970]];
+}
+
 -(bool)addClipping:(NSString*)contents ofType:(NSString*)type fromApp:(NSString *)appName withAppBundleURL:(NSString *)bundleURL target:(id)selectorTarget clippingAddedSelector:(SEL)clippingAddedSelector
 {
 	if ( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]]) {
@@ -299,11 +308,11 @@
             stackPosition = savePosition;
         }
 
-        [clippingStore addClipping:contents
-		                    ofType:type
-		      fromAppLocalizedName:appName
-		          fromAppBundleURL:bundleURL
-		               atTimestamp:[[NSDate date] timeIntervalSince1970]];
+		bool success = [clippingStore addClipping:contents
+										   ofType:type
+							 fromAppLocalizedName:appName
+								 fromAppBundleURL:bundleURL
+									  atTimestamp:[[NSDate date] timeIntervalSince1970]];
 //		The below tracks our position down down down... Maybe as an option?
 //		if ( [clippingStore jcListCount] > 1 ) stackPosition++;
 		stackPosition = 0;
@@ -311,7 +320,7 @@
 		if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
             [self saveEngine];
 
-		return YES;
+		return success;
     }
 	return  NO;
 }
