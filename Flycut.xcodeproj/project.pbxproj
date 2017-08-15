@@ -75,6 +75,8 @@
 		8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */; };
 		8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */; };
 		8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png */; };
+		8DCE82681F4550AA00124117 /* MGSwipeTableCell.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D0DC8571F3D682800A2A8AF /* MGSwipeTableCell.framework */; };
+		8DCE82691F4550AA00124117 /* MGSwipeTableCell.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8D0DC8571F3D682800A2A8AF /* MGSwipeTableCell.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AABE497C09FF9CD000A6A239 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = AABE497B09FF9CD000A6A239 /* AppController.m */; };
 		AAFAC85F0A1BD9DD00DC6025 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */; };
 		DBEB0C9C1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h in Headers */ = {isa = PBXBuildFile; fileRef = DBEB0C9A1442F2AE0080D24E /* NSWindow+ULIZoomEffect.h */; };
@@ -110,7 +112,28 @@
 			remoteGlobalIDString = C63EE56A1BBA07ED008F46BB;
 			remoteInfo = MGSwipeTableCell;
 		};
+		8DCE826A1F4550AA00124117 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = C63EE56A1BBA07ED008F46BB;
+			remoteInfo = MGSwipeTableCell;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DCE826C1F4550AA00124117 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				8DCE82691F4550AA00124117 /* MGSwipeTableCell.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -206,6 +229,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8DCE82681F4550AA00124117 /* MGSwipeTableCell.framework in Frameworks */,
 				8D0DC85A1F3D697000A2A8AF /* MGSwipeTableCell.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -505,12 +529,13 @@
 				8D0C11A11F171B140046FAA0 /* Sources */,
 				8D0C11A21F171B140046FAA0 /* Frameworks */,
 				8D0C11A31F171B140046FAA0 /* Resources */,
-				8D5D88001F2063720050D4BD /* Embed App Extensions */,
+				8DCE826C1F4550AA00124117 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				8D0DC8591F3D696B00A2A8AF /* PBXTargetDependency */,
+				8DCE826B1F4550AA00124117 /* PBXTargetDependency */,
 			);
 			name = "Flycut-iOS";
 			productName = "Flycut-iOS";
@@ -810,6 +835,11 @@
 			isa = PBXTargetDependency;
 			name = MGSwipeTableCell;
 			targetProxy = 8D0DC8581F3D696B00A2A8AF /* PBXContainerItemProxy */;
+		};
+		8DCE826B1F4550AA00124117 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MGSwipeTableCell;
+			targetProxy = 8DCE826A1F4550AA00124117 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

@@ -93,43 +93,53 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		//let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "UITableViewCell", for: indexPath)
 
-		let item = UITableViewCell();
+		let item = MGSwipeTableCell();
 		item.textLabel?.text = flycut.previousDisplayStrings(indexPath.row + 1, containing: nil).last as! String?
-		//cell.textLabel?.text = item.textLabel?.text
-		//cell.detailTextLabel?.text=item.detailTextLabel?.text
+		let content = flycut.clippingString(withCount: Int32(indexPath.row) )
+
+		//configure left buttons
+		if let url = URL(string: content!) {
+			if (content?.lowercased().hasPrefix("http"))! {
+				item.leftButtons = [MGSwipeButton(title: "Open", backgroundColor: .blue, callback: { (cell) -> Bool in
+					let indexPath = tableView.indexPath(for: cell)
+					if ( nil != indexPath ) {
+						UIApplication.shared.open(url, options: [:], completionHandler: nil)
+						tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.none)
+					}
+
+					return true;
+				})]
+				item.leftSwipeSettings.transition = .border
+				item.leftExpansion.buttonIndex=0
+			}
+		}
+
+		//configure right buttons
+		item.rightButtons = [MGSwipeButton(title: "Delete", backgroundColor: .red, callback: { (cell) -> Bool in
+			let indexPath = tableView.indexPath(for: cell)
+			if ( nil != indexPath ) {
+				self.flycut.setStackPositionTo( Int32((indexPath?.row)! ))
+				self.flycut.clearItemAtStackPosition()
+				tableView.beginUpdates()
+				tableView.deleteRows(at: [indexPath!], with: .left) // Use .left to look better with swiping left to delete.
+				tableView.endUpdates()
+			}
+
+			return true;
+		})]
+		item.rightSwipeSettings.transition = .border
+		item.rightExpansion.buttonIndex = 0
 
 		return item
 	}
 
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-		let content = flycut.clippingString(withCount: Int32(indexPath.row) )
-		print("Select: \(indexPath.row) \(content) OK")
-		tableView.deselectRow(at: indexPath, animated: true)
-		UIPasteboard.general.string = content
-	}
-
-	func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-		let deleteAction:UITableViewRowAction = UITableViewRowAction(style: .destructive, title: "Delete") { (rowAction, indexPath) in
-			self.flycut.setStackPositionTo( Int32(indexPath.row ))
-			self.flycut.clearItemAtStackPosition()
-			tableView.deleteRows(at: [indexPath], with: .none)
+		if ( MGSwipeState.none == (tableView.cellForRow(at: indexPath) as! MGSwipeTableCell).swipeState ) {
+			let content = flycut.clippingString(withCount: Int32(indexPath.row) )
+			print("Select: \(indexPath.row) \(content) OK")
+			tableView.deselectRow(at: indexPath, animated: true)
+			UIPasteboard.general.string = content
 		}
-		var results = [deleteAction]
-
-		let content = self.flycut.clippingString(withCount: Int32(indexPath.row) )
-		if let url = URL(string: content!) {
-			if (content?.lowercased().hasPrefix("http"))!
-			{
-				let openWebAction:UITableViewRowAction = UITableViewRowAction(style: .normal, title: "Open") { (rowAction, indexPath) in
-					UIApplication.shared.open(url, options: [:], completionHandler: nil)
-					tableView.reloadRows(at: [indexPath], with: UITableViewRowAnimation.none)
-				}
-				openWebAction.backgroundColor = UIColor.blue
-				results.append(openWebAction)
-			}
-		}
-
-		return results
 	}
 }
 

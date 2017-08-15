@@ -4,4 +4,5 @@
 
 #import <Foundation/Foundation.h>
 #import "FlycutOperator.h"
-
+#import "MGSwipeTableCell/MGSwipeTableCell/MGSwipeTableCell.h"
+#import "MGSwipeTableCell/MGSwipeTableCell/MGSwipeButton.h"
