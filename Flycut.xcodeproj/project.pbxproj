@@ -67,6 +67,7 @@
 		8D0C11D31F171B240046FAA0 /* FlycutOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D0C119E1F147E250046FAA0 /* FlycutOperator.m */; };
 		8D0C11D61F18835F0046FAA0 /* FlycutStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B8E1CB9549B0077917F /* FlycutStore.m */; };
 		8D0C11D71F1883620046FAA0 /* FlycutClipping.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B901CB9549B0077917F /* FlycutClipping.m */; };
+		8D0DC85A1F3D697000A2A8AF /* MGSwipeTableCell.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D0DC8571F3D682800A2A8AF /* MGSwipeTableCell.framework */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -94,6 +95,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8D0C11A41F171B140046FAA0;
 			remoteInfo = "Flycut-iOS";
+		};
+		8D0DC8561F3D682800A2A8AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C63EE56B1BBA07ED008F46BB;
+			remoteInfo = MGSwipeTableCell;
+		};
+		8D0DC8581F3D696B00A2A8AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = C63EE56A1BBA07ED008F46BB;
+			remoteInfo = MGSwipeTableCell;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -173,6 +188,7 @@
 		8D0C11C91F171B140046FAA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D0C11D41F1720070046FAA0 /* Flycut-iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Flycut-iOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		8D0C11D51F1882B30046FAA0 /* Flycut-iOS_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Flycut-iOS_Prefix.pch"; sourceTree = "<group>"; };
+		8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MGSwipeTableCell.xcodeproj; path = MGSwipeTableCell/MGSwipeTableCell.xcodeproj; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
 		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
@@ -190,6 +206,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D0DC85A1F3D697000A2A8AF /* MGSwipeTableCell.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,6 +250,7 @@
 				7761C880139BDE94000FB3AB /* LoginItem */,
 				7761C877139BDE7F000FB3AB /* FlycutEngine */,
 				77A4F3A4139BD72300F39666 /* SGHotKeysLib */,
+				8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -440,6 +458,14 @@
 			path = "Flycut-iOSUITests";
 			sourceTree = "<group>";
 		};
+		8D0DC8531F3D682800A2A8AF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D0DC8571F3D682800A2A8AF /* MGSwipeTableCell.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -484,7 +510,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				8D5D87FB1F2063720050D4BD /* PBXTargetDependency */,
+				8D0DC8591F3D696B00A2A8AF /* PBXTargetDependency */,
 			);
 			name = "Flycut-iOS";
 			productName = "Flycut-iOS";
@@ -549,7 +575,7 @@
 		};
 		8D5D87F21F2063720050D4BD /* CopyExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8D5D87FF1F2063720050D4BD /* Build configuration list for PBXNativeTarget "CopyExtension" */;
+			buildConfigurationList = 8DD058FD1F3989EB00846028 /* Build configuration list for PBXNativeTarget "CopyExtension" */;
 			buildPhases = (
 				8D5D87EF1F2063720050D4BD /* Sources */,
 			);
@@ -607,6 +633,12 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Jumpcut */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 8D0DC8531F3D682800A2A8AF /* Products */;
+					ProjectRef = 8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Flycut */,
@@ -617,6 +649,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		8D0DC8571F3D682800A2A8AF /* MGSwipeTableCell.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MGSwipeTableCell.framework;
+			remoteRef = 8D0DC8561F3D682800A2A8AF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8D0C11A31F171B140046FAA0 /* Resources */ = {
@@ -763,6 +805,11 @@
 			isa = PBXTargetDependency;
 			target = 8D0C11A41F171B140046FAA0 /* Flycut-iOS */;
 			targetProxy = 8D0C11C41F171B140046FAA0 /* PBXContainerItemProxy */;
+		};
+		8D0DC8591F3D696B00A2A8AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MGSwipeTableCell;
+			targetProxy = 8D0DC8581F3D696B00A2A8AF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
