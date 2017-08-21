@@ -22,7 +22,7 @@
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithInt:10],
 		@"displayNum",
-		[NSNumber numberWithInt:40],
+		[NSNumber numberWithInt:140], // do not commit with 140.  Use 40
 		@"displayLen",
 		[NSNumber numberWithInt:40],
 		@"rememberNum",
@@ -44,13 +44,13 @@
 		@"skipPasswordLengthsList",
 		[NSNumber numberWithBool:NO],
 		@"revealPasteboardTypes",
-        [NSNumber numberWithBool:NO],
+        [NSNumber numberWithBool:YES], // do not commit with YES.  Use NO
         @"removeDuplicates",
         [NSNumber numberWithBool:NO],
         @"saveForgottenClippings",
         [NSNumber numberWithBool:YES],
         @"saveForgottenFavorites",
-        [NSNumber numberWithBool:NO],
+        [NSNumber numberWithBool:YES], // do not commit with YES.  Use NO
         @"pasteMovesToTop",
         nil]];
 	return self;
