@@ -71,13 +71,14 @@
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		8D153A091F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h in Headers */ = {isa = PBXBuildFile; fileRef = 8D153A071F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h */; };
-		8D153A0A1F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */; };
 		8D153A0B1F54CD0C006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */; };
+		8D1817F71F72D35400F80B7A /* MJCloudKitUserDefaultsSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */; };
 		8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */; };
 		8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */; };
 		8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */; };
 		8D2E28891B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png */; };
+		8D84B63B1F7412E600DB58F9 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D84B63A1F7412E600DB58F9 /* CloudKit.framework */; };
+		8DC9C99C1F742115003BE8B5 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC9C99B1F742115003BE8B5 /* CloudKit.framework */; };
 		8DCE82681F4550AA00124117 /* MGSwipeTableCell.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D0DC8571F3D682800A2A8AF /* MGSwipeTableCell.framework */; };
 		8DCE82691F4550AA00124117 /* MGSwipeTableCell.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8D0DC8571F3D682800A2A8AF /* MGSwipeTableCell.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AABE497C09FF9CD000A6A239 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = AABE497B09FF9CD000A6A239 /* AppController.m */; };
@@ -218,10 +219,14 @@
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D153A071F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MJCloudKitUserDefaultsSync.h; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h; sourceTree = "<group>"; };
 		8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MJCloudKitUserDefaultsSync.m; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.m; sourceTree = "<group>"; };
+		8D153A0C1F5BB249006A5815 /* Flycut.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Flycut.entitlements; sourceTree = "<group>"; };
 		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
 		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
 		8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.xout.16.png; path = Resources/com.generalarcade.flycut.xout.16.png; sourceTree = "<group>"; };
 		8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.xout.32.png; path = Resources/com.generalarcade.flycut.xout.32.png; sourceTree = "<group>"; };
+		8D84B6361F72FBA900DB58F9 /* Flycut.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Flycut.entitlements; sourceTree = "<group>"; };
+		8D84B63A1F7412E600DB58F9 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.2.sdk/System/Library/Frameworks/CloudKit.framework; sourceTree = DEVELOPER_DIR; };
+		8DC9C99B1F742115003BE8B5 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		AABE497A09FF9CD000A6A239 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		AABE497B09FF9CD000A6A239 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		AAFAC84A0A1BD9DD00DC6025 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
@@ -234,6 +239,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D84B63B1F7412E600DB58F9 /* CloudKit.framework in Frameworks */,
 				8DCE82681F4550AA00124117 /* MGSwipeTableCell.framework in Frameworks */,
 				8D0DC85A1F3D697000A2A8AF /* MGSwipeTableCell.framework in Frameworks */,
 			);
@@ -257,6 +263,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8DC9C99C1F742115003BE8B5 /* CloudKit.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				AAFAC85F0A1BD9DD00DC6025 /* Carbon.framework in Frameworks */,
 			);
@@ -318,6 +325,7 @@
 		29B97314FDCFA39411CA2CEA /* Jumpcut */ = {
 			isa = PBXGroup;
 			children = (
+				8D84B6361F72FBA900DB58F9 /* Flycut.entitlements */,
 				7794D3D4139BF28B0047E862 /* flycut.icns */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -370,6 +378,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8DC9C99B1F742115003BE8B5 /* CloudKit.framework */,
+				8D84B63A1F7412E600DB58F9 /* CloudKit.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
@@ -460,6 +470,7 @@
 		8D0C11A61F171B140046FAA0 /* Flycut-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				8D153A0C1F5BB249006A5815 /* Flycut.entitlements */,
 				8D0C11A71F171B140046FAA0 /* AppDelegate.swift */,
 				8D0C11A91F171B140046FAA0 /* ViewController.swift */,
 				8D0C11AB1F171B140046FAA0 /* Main.storyboard */,
@@ -513,7 +524,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				77A4F3AD139BD72300F39666 /* SGHotKey.h in Headers */,
-				8D153A091F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h in Headers */,
 				77A4F3AF139BD72300F39666 /* SGHotKeyCenter.h in Headers */,
 				77A4F3B1139BD72300F39666 /* SGKeyCodeTranslator.h in Headers */,
 				77A4F3B3139BD72300F39666 /* SGKeyCombo.h in Headers */,
@@ -639,7 +649,16 @@
 				TargetAttributes = {
 					8D0C11A41F171B140046FAA0 = {
 						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = 66X95R6W2D;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Push = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
 					};
 					8D0C11B71F171B140046FAA0 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -652,10 +671,17 @@
 						TestTargetID = 8D0C11A41F171B140046FAA0;
 					};
 					8D1107260486CEB800E47090 = {
-						DevelopmentTeam = S8JLSG5ES7;
+						DevelopmentTeam = 66X95R6W2D;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.Push = {
+								enabled = 1;
+							};
 							com.apple.Sandbox = {
 								enabled = 0;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
 							};
 						};
 					};
@@ -803,7 +829,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8D153A0A1F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */,
+				8D1817F71F72D35400F80B7A /* MJCloudKitUserDefaultsSync.m in Sources */,
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				AABE497C09FF9CD000A6A239 /* AppController.m in Sources */,
 				77A4F3AE139BD72300F39666 /* SGHotKey.m in Sources */,
@@ -913,9 +939,12 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer: mjerde@me.com (J33CFAMHSW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 66X95R6W2D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -972,9 +1001,12 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer: mjerde@me.com (J33CFAMHSW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 66X95R6W2D;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1229,9 +1261,11 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = 66X95R6W2D;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(FRAMEWORK_SEARCH_PATHS)",
 					"$(SRCROOT)",
@@ -1245,8 +1279,9 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_BUNDLE_IDENTIFIER = "-X95R6W2D.com.mark-a-jerde.Flycut-macOS";
 				PRODUCT_NAME = Flycut;
-				PROVISIONING_PROFILE = "3abf5364-dfb4-4792-a5a0-377a74572bcb";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
 			};
@@ -1255,8 +1290,10 @@
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 66X95R6W2D;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(FRAMEWORK_SEARCH_PATHS)",
 					"$(SRCROOT)",
@@ -1268,8 +1305,9 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_BUNDLE_IDENTIFIER = "-X95R6W2D.com.mark-a-jerde.Flycut-macOS";
 				PRODUCT_NAME = Flycut;
-				PROVISIONING_PROFILE = "3abf5364-dfb4-4792-a5a0-377a74572bcb";
+				PROVISIONING_PROFILE = "";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};
