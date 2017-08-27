@@ -20,10 +20,6 @@
 - (id)init
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-		[NSNumber numberWithInt:10],
-		@"displayNum",
-		[NSNumber numberWithInt:140], // do not commit with 140.  Use 40
-		@"displayLen",
 		[NSNumber numberWithInt:40],
 		@"rememberNum",
         [NSNumber numberWithInt:40],
@@ -56,15 +52,17 @@
 	return self;
 }
 
-- (void)awakeFromNib
+- (void)awakeFromNibDisplaying:(int) displayNum withDisplayLength:(int) displayLength withSaveSelector:(SEL) selector forTarget:(NSObject*) target
 {
 	// Initialize the FlycutStore
 	clippingStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
-											   displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
-										withDisplayLength:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayLen"]];
-    favoritesStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
-                                               displaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
-										withDisplayLength:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayLen"]];
+											   displaying:displayNum
+										withDisplayLength:displayLength];
+	favoritesStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
+											   displaying:displayNum
+										withDisplayLength:displayLength];
+	saveSelector = selector;
+	saveTarget = target;
     stashedStore = NULL;
 
     // If our preferences indicate that we are saving, load the dictionary from the saved plist
@@ -547,10 +545,8 @@
                  forKey:@"rememberNum"];
     [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]]
                  forKey:@"favoritesRememberNum"];
-    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayLen"]]
-                 forKey:@"displayLen"];
-    [saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
-                 forKey:@"displayNum"];
+
+	[saveTarget performSelector:saveSelector withObject:saveDict];
 
     [self saveStore:clippingStore toKey:@"jcList" onDict:saveDict];
     [self saveStore:favoritesStore toKey:@"favoritesList" onDict:saveDict];

@@ -27,6 +27,10 @@
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
 		[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:9],[NSNumber numberWithLong:1179648],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]],
 		@"ShortcutRecorder mainHotkey",
+		[NSNumber numberWithInt:10],
+		@"displayNum",
+		[NSNumber numberWithInt:40],
+		@"displayLen",
 		[NSNumber numberWithInt:0],
 		@"menuIcon",
 		[NSNumber numberWithFloat:.25],
@@ -65,7 +69,10 @@
 
 	// Initialize the FlycutOperator
 	flycutOperator = [[FlycutOperator alloc] init];
-	[flycutOperator awakeFromNib];
+	[flycutOperator awakeFromNibDisplaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
+						 withDisplayLength:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayLen"]
+						  withSaveSelector:@selector(savePreferencesOnDict:)
+								 forTarget:self];
 
     [bezel setColor:NO];
     
@@ -124,6 +131,14 @@
     });
 
     [NSApp activateIgnoringOtherApps: YES];
+}
+
+-(void)savePreferencesOnDict:(NSMutableDictionary *)saveDict
+{
+	[saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayLen"]]
+				 forKey:@"displayLen"];
+	[saveDict setObject:[NSNumber numberWithInt:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]]
+				 forKey:@"displayNum"];
 }
 
 -(void)menuWillOpen:(NSMenu *)menu

@@ -26,6 +26,9 @@
     FlycutStore				*favoritesStore;
     FlycutStore				*stashedStore;
 
+	SEL saveSelector;
+	NSObject* saveTarget;
+
     BOOL disableStore;
 }
 
@@ -64,7 +67,7 @@
 
 // Initialization / cleanup related
 -(void)applicationWillTerminate;;
--(void)awakeFromNib;
+-(void)awakeFromNibDisplaying:(int) displayNum withDisplayLength:(int) displayLength withSaveSelector:(SEL) selector forTarget:(NSObject*) target;
 
 // Favorites Store related
 -(bool)favoritesStoreIsSelected;

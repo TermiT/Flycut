@@ -22,11 +22,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		tableView.delegate = self
 		tableView.dataSource = self
 
-		flycut.awakeFromNib()
+		flycut.awake(fromNibDisplaying: 10, withDisplayLength: 140, withSave: #selector(savePreferences(toDict:)), forTarget: self) // The 10 isn't used in iOS right now and 140 characters seems to be enough to cover the width of the largest screen.
 
 		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: .UIPasteboardChanged, object: nil)
 
 		NotificationCenter.default.addObserver(self, selector: #selector(self.applicationWillTerminate), name: .UIApplicationWillTerminate, object: nil)
+	}
+
+	func savePreferences(toDict: NSMutableDictionary)
+	{
 	}
 
 	func checkForClippingAddedToClipboard()
