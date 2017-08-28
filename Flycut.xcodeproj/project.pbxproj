@@ -71,6 +71,9 @@
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		8D153A091F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h in Headers */ = {isa = PBXBuildFile; fileRef = 8D153A071F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h */; };
+		8D153A0A1F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */; };
+		8D153A0B1F54CD0C006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */; };
 		8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */; };
 		8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */; };
 		8D2E28881B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */; };
@@ -213,6 +216,8 @@
 		8D0C11D51F1882B30046FAA0 /* Flycut-iOS_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Flycut-iOS_Prefix.pch"; sourceTree = "<group>"; };
 		8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MGSwipeTableCell.xcodeproj; path = MGSwipeTableCell/MGSwipeTableCell.xcodeproj; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D153A071F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MJCloudKitUserDefaultsSync.h; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h; sourceTree = "<group>"; };
+		8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MJCloudKitUserDefaultsSync.m; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.m; sourceTree = "<group>"; };
 		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
 		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
 		8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.xout.16.png; path = Resources/com.generalarcade.flycut.xout.16.png; sourceTree = "<group>"; };
@@ -263,6 +268,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				8D153A061F54CCD8006A5815 /* MJCloudKitUserDefaultsSync */,
 				AABE497A09FF9CD000A6A239 /* AppController.h */,
 				AABE497B09FF9CD000A6A239 /* AppController.m */,
 				8D0C11A01F147E3C0046FAA0 /* FlycutOperator.h */,
@@ -490,6 +496,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		8D153A061F54CCD8006A5815 /* MJCloudKitUserDefaultsSync */ = {
+			isa = PBXGroup;
+			children = (
+				8D153A071F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h */,
+				8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */,
+			);
+			name = MJCloudKitUserDefaultsSync;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -498,6 +513,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				77A4F3AD139BD72300F39666 /* SGHotKey.h in Headers */,
+				8D153A091F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h in Headers */,
 				77A4F3AF139BD72300F39666 /* SGHotKeyCenter.h in Headers */,
 				77A4F3B1139BD72300F39666 /* SGKeyCodeTranslator.h in Headers */,
 				77A4F3B3139BD72300F39666 /* SGKeyCombo.h in Headers */,
@@ -762,6 +778,7 @@
 				8D0C11AA1F171B140046FAA0 /* ViewController.swift in Sources */,
 				8D0C11D71F1883620046FAA0 /* FlycutClipping.m in Sources */,
 				8D0C11A81F171B140046FAA0 /* AppDelegate.swift in Sources */,
+				8D153A0B1F54CD0C006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */,
 				8D0C11D31F171B240046FAA0 /* FlycutOperator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -786,6 +803,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D153A0A1F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */,
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				AABE497C09FF9CD000A6A239 /* AppController.m in Sources */,
 				77A4F3AE139BD72300F39666 /* SGHotKey.m in Sources */,
