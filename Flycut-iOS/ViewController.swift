@@ -14,6 +14,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	var adjustQuantity:Int = 0
 	var tableView:UITableView!
 
+	// Some buttons we will reuse.
+	var deleteButton:MGSwipeButton? = nil
+	var openURLButton:MGSwipeButton? = nil
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
@@ -21,6 +25,32 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		tableView = self.view.subviews.first as! UITableView
 		tableView.delegate = self
 		tableView.dataSource = self
+
+		tableView.register(MGSwipeTableCell.self, forCellReuseIdentifier: "FlycutCell")
+
+		deleteButton = MGSwipeButton(title: "Delete", backgroundColor: .red, callback: { (cell) -> Bool in
+			let indexPath = self.tableView.indexPath(for: cell)
+			if ( nil != indexPath ) {
+				self.flycut.setStackPositionTo( Int32((indexPath?.row)! ))
+				self.flycut.clearItemAtStackPosition()
+				self.tableView.beginUpdates()
+				self.tableView.deleteRows(at: [indexPath!], with: .left) // Use .left to look better with swiping left to delete.
+				self.tableView.endUpdates()
+			}
+
+			return true;
+		})
+
+		openURLButton = MGSwipeButton(title: "Open", backgroundColor: .blue, callback: { (cell) -> Bool in
+			let indexPath = self.tableView.indexPath(for: cell)
+			if ( nil != indexPath ) {
+				let url = URL(string: self.flycut.clippingString(withCount: Int32((indexPath?.row)!) )! )
+				UIApplication.shared.open(url!, options: [:], completionHandler: nil)
+				self.tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.none)
+			}
+
+			return true;
+		})
 
 		flycut.awake(fromNibDisplaying: 10, withDisplayLength: 140, withSave: #selector(savePreferences(toDict:)), forTarget: self) // The 10 isn't used in iOS right now and 140 characters seems to be enough to cover the width of the largest screen.
 
@@ -95,44 +125,37 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	}
 
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		//let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "UITableViewCell", for: indexPath)
+		let item: MGSwipeTableCell = tableView.dequeueReusableCell(withIdentifier: "FlycutCell", for: indexPath) as! MGSwipeTableCell
 
-		let item = MGSwipeTableCell();
 		item.textLabel?.text = flycut.previousDisplayStrings(indexPath.row + 1, containing: nil).last as! String?
 		let content = flycut.clippingString(withCount: Int32(indexPath.row) )
 
 		//configure left buttons
-		if let url = URL(string: content!) {
+		if URL(string: content!) != nil {
 			if (content?.lowercased().hasPrefix("http"))! {
-				item.leftButtons = [MGSwipeButton(title: "Open", backgroundColor: .blue, callback: { (cell) -> Bool in
-					let indexPath = tableView.indexPath(for: cell)
-					if ( nil != indexPath ) {
-						UIApplication.shared.open(url, options: [:], completionHandler: nil)
-						tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.none)
-					}
-
-					return true;
-				})]
-				item.leftSwipeSettings.transition = .border
-				item.leftExpansion.buttonIndex=0
+				if(!item.leftButtons.contains(openURLButton!))
+				{
+					item.leftButtons.append(openURLButton!)
+					item.leftSwipeSettings.transition = .border
+					item.leftExpansion.buttonIndex=0
+				}
 			}
+			else {
+				item.leftButtons.removeAll()
+			}
+		}
+		else {
+			item.leftButtons.removeAll()
 		}
 
 		//configure right buttons
-		item.rightButtons = [MGSwipeButton(title: "Delete", backgroundColor: .red, callback: { (cell) -> Bool in
-			let indexPath = tableView.indexPath(for: cell)
-			if ( nil != indexPath ) {
-				self.flycut.setStackPositionTo( Int32((indexPath?.row)! ))
-				self.flycut.clearItemAtStackPosition()
-				tableView.beginUpdates()
-				tableView.deleteRows(at: [indexPath!], with: .left) // Use .left to look better with swiping left to delete.
-				tableView.endUpdates()
-			}
-
-			return true;
-		})]
-		item.rightSwipeSettings.transition = .border
-		item.rightExpansion.buttonIndex = 0
+		if ( 0 == item.rightButtons.count )
+		{
+			// Setup the right buttons only if they haven't been before.
+			item.rightButtons.append(deleteButton!)
+			item.rightSwipeSettings.transition = .border
+			item.rightExpansion.buttonIndex = 0
+		}
 
 		return item
 	}
