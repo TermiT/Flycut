@@ -56,10 +56,16 @@
 }
 
 -(int) indexOfClipping:(FlycutClipping*) clipping{
-	if (![jcList containsObject:clipping]) {
+	return [self indexOfClipping:clipping afterIndex:-1];
+}
+
+-(int) indexOfClipping:(FlycutClipping*) clipping afterIndex:(int) after{
+	NSUInteger index = [jcList indexOfObject:clipping
+									 inRange:NSMakeRange(after + 1, [jcList count] - (after + 1) )];
+	if ( NSNotFound == index ) {
 		return -1;
 	}
-	return (int)[jcList indexOfObject:clipping];
+	return (int)index;
 }
 
 // Add a clipping
@@ -83,16 +89,45 @@
 	return YES;
 }
 
+-(bool) removeDuplicates{
+	return [[[NSUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue];
+}
+
 -(void) addClipping:(FlycutClipping*) clipping{
-    if ([jcList containsObject:clipping] && [[[NSUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
+	[self insertClipping:clipping atIndex:0];
+}
+
+-(void) insertClipping:(FlycutClipping*) clipping atIndex:(int) index{
+	[self delegateBeginUpdates];
+
+	int moveFromIndex = -1;
+	if ([jcList containsObject:clipping] && [self removeDuplicates]) {
+		moveFromIndex = (int)[jcList indexOfObject:clipping];
         [jcList removeObject:clipping];
     }
+
     // Push it onto our recent clippings stack
-	[jcList insertObject:clipping atIndex:0];
+	if ( index < [jcList count] ) {
+		[jcList insertObject:clipping atIndex:index];
+	}
+	else {
+		// If the index is beyond the current count then just append it and disregard requested index.
+		// This doesn't alter the remember number and the jcList is self-growing so it is fine to append.
+		index = [jcList count];
+		[jcList addObject:clipping];
+	}
+	if ( moveFromIndex >= 0 )
+		[self delegateMoveClippingAtIndex:moveFromIndex toIndex:index];
+	else
+		[self delegateInsertClippingAtIndex:index];
+
 	// Delete clippings older than jcRememberNum
 	while ( [jcList count] > jcRememberNum ) {
 		[jcList removeObjectAtIndex:jcRememberNum];
+		[self delegateDeleteClippingAtIndex:(jcRememberNum-1)]; // -1 for before-add indexing
 	}
+
+	[self delegateEndUpdates];
 }
 
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type withPBCount:(int *)pbCount
@@ -102,10 +137,17 @@
 
 // Clear remembered and listed
 -(void) clearList {
+    [self delegateBeginUpdates];
+
+    for ( int i = (int)[jcList count] ; i > 0 ; i-- )
+        [self delegateDeleteClippingAtIndex:(i-1)];
+
     NSMutableArray *emptyJCList;
     emptyJCList = [[NSMutableArray alloc] init];
     [jcList release];
     jcList = emptyJCList;
+
+    [self delegateEndUpdates];
 }
 
 -(void) mergeList {
@@ -115,14 +157,29 @@
 
 -(void) clearItem:(int)index
 {
+    [self delegateBeginUpdates];
+
     [jcList removeObjectAtIndex:index];
+    [self delegateDeleteClippingAtIndex:index];
+
+    [self delegateEndUpdates];
 }
 
 -(void) clippingMoveToTop:(int)index
 {
+	[self clippingMoveFrom:index To:0];
+}
+
+-(void) clippingMoveFrom:(int)index To:(int)toIndex
+{
+	[self delegateBeginUpdates];
+
 	FlycutClipping *clipping = [jcList objectAtIndex:index];
-	[jcList insertObject:clipping atIndex:0];
+	[jcList insertObject:clipping atIndex:toIndex];
 	[jcList removeObjectAtIndex:index+1];
+	[self delegateMoveClippingAtIndex:index toIndex:toIndex];
+
+	[self delegateEndUpdates];
 }
 
 // Set various values
@@ -130,8 +187,15 @@
 {
     if ( nowRemembering  > 0 ) {
         jcRememberNum = nowRemembering;
-		while ( [jcList count] > jcRememberNum ) {
-			[jcList removeObjectAtIndex:jcRememberNum];
+
+		if ( [jcList count] > jcRememberNum ) {
+			[self delegateBeginUpdates];
+
+			while ( [jcList count] > jcRememberNum ) {
+				[jcList removeObjectAtIndex:jcRememberNum];
+				[self delegateDeleteClippingAtIndex:jcRememberNum];
+			}
+			[self delegateEndUpdates];
 		}
     }
 }
@@ -293,6 +357,42 @@
             [returnArray addObject:[NSNumber numberWithInt:i]];
     }
     return returnArray;
+}
+
+-(void) delegateBeginUpdates
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(beginUpdates)] )
+		[self.delegate beginUpdates];
+}
+
+-(void) delegateEndUpdates
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(endUpdates)] )
+		[self.delegate endUpdates];
+}
+
+-(void) delegateInsertClippingAtIndex:(int)index
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(insertClippingAtIndex:)] )
+		[self.delegate insertClippingAtIndex:index];
+}
+
+-(void) delegateDeleteClippingAtIndex:(int)index
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(deleteClippingAtIndex:)] )
+		[self.delegate deleteClippingAtIndex:index];
+}
+
+-(void) delegateReloadClippingAtIndex:(int)index
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(reloadClippingAtIndex:)] )
+		[self.delegate reloadClippingAtIndex:index];
+}
+
+-(void) delegateMoveClippingAtIndex:(int)index toIndex:(int)newIndex
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(moveClippingAtIndex:toIndex:)] )
+		[self.delegate moveClippingAtIndex:index toIndex:newIndex];
 }
 
 -(void) dealloc

@@ -19,6 +19,7 @@
 #import "UKLoginItemRegistry.h"
 #import "NSWindow+TrueCenter.h"
 #import "NSWindow+ULIZoomEffect.h"
+#import "MJCloudKitUserDefaultsSync.h"
 
 @implementation AppController
 
@@ -53,7 +54,47 @@
         [NSNumber numberWithBool:YES],
         @"displayClippingSource",
         nil]];
+
+	/* For testing, the ability to force initial values of the sync settings:
+	[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+											 forKey:@"syncSettingsViaICloud"];
+	[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+											 forKey:@"syncClippingsViaICloud"];*/
+
+	settingsSyncList = @[@"displayNum",
+						 @"displayLen",
+						 @"menuIcon",
+						 @"bezelAlpha",
+						 @"stickyBezel",
+						 @"wraparoundBezel",
+						 @"loadOnStartup",
+						 @"menuSelectionPastes",
+						 @"bezelWidth",
+						 @"bezelHeight",
+						 @"popUpAnimation",
+						 @"displayClippingSource"];
+	[settingsSyncList retain];
+
 	return [super init];
+}
+
+- (void)registerOrDeregisterICloudSync
+{
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncSettingsViaICloud"] ) {
+		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationChanges withSelector:@selector(checkPreferencesChanges:) withTarget: self];
+		// Not registering for conflict notifications, since we just sync settings, and if the settings are conflictingly adjusted simultaneously on two systems there is nothing to say which setting is better.
+
+		[MJCloudKitUserDefaultsSync startWithKeyMatchList:settingsSyncList
+					withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
+	}
+	else {
+		[MJCloudKitUserDefaultsSync stopForKeyMatchList:settingsSyncList];
+
+		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+	}
+
+	[flycutOperator registerOrDeregisterICloudSync];
 }
 
 - (void)awakeFromNib
@@ -129,6 +170,8 @@
                                                      forKey:@"loadOnStartup"];
         }
     });
+
+    [self registerOrDeregisterICloudSync];
 
     [NSApp activateIgnoringOtherApps: YES];
 }
@@ -312,52 +355,79 @@
     }
 }
 
+-(NSDictionary*) checkPreferencesChanges:(NSDictionary*)changes
+{
+	if ( [changes valueForKey:@"rememberNum"] )
+		[self checkRememberNumPref:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
+				   forPrimaryStore:YES];
+	if ( [changes valueForKey:@"favoritesRememberNum"] )
+		[self checkFavoritesRememberNumPref:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]];
+	return nil;
+}
+
 -(IBAction) setRememberNumPref:(id)sender
 {
-	int choice;
-	int newRemember = [sender intValue];
+	[self checkRememberNumPref:[sender intValue] forPrimaryStore:YES];
+}
+
+-(void) checkRememberNumPref:(int)newRemember forPrimaryStore:(BOOL) isPrimaryStore
+{
+	int oldRemeber = [flycutOperator rememberNum];
 	if ( newRemember < [flycutOperator jcListCount] &&
 		 ! issuedRememberResizeWarning &&
 		 ! [[NSUserDefaults standardUserDefaults] boolForKey:@"stifleRememberResizeWarning"]
 		 ) {
-		choice = NSRunAlertPanel(@"Resize Stack", 
+		int choice = NSRunAlertPanel(@"Resize Stack",
 								 @"Resizing the stack to a value below its present size will cause clippings to be lost.",
 								 @"Resize", @"Cancel", @"Don't Warn Me Again");
 		if ( choice == NSAlertAlternateReturn ) {
-			// User selected Cancel.  This appears to set the user default to
-			// the current clipping count while not updating the clippingStore,
-			// resulting in truncation in the future.  This condition dates back
-			// to snarkout's original creation of setRememberNumPref on May 17,
-			// 2006.
-			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:[flycutOperator jcListCount]]
-													 forKey:@"rememberNum"];
-			[self updateMenu];
-			return;
+			// Cancel - Change to prior setting.
+			newRemember = oldRemeber;
+			if ( isPrimaryStore ) {
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
+														 forKey:@"rememberNum"];
+				[self updateMenu];
+			} else {
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
+														 forKey:@"favoritesRememberNum"];
+			}
 		} else if ( choice == NSAlertOtherReturn ) {
+			// Don't Warn Me Again
 			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
 													 forKey:@"stifleRememberResizeWarning"];
 		} else {
+			// Resize
 			issuedRememberResizeWarning = YES;
 		}
 	}
 
-	// Trim down the number displayed in the menu if it is greater than the new
-	// number to remember.
-	if ( newRemember < [[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] ) {
-		[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
-												 forKey:@"displayNum"];
+	if ( newRemember < oldRemeber )
+	{
+		// Trim down the number displayed in the menu if it is greater than the new
+		// number to remember.
+		if ( isPrimaryStore ) {
+			if ( newRemember < [[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] ) {
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
+														 forKey:@"displayNum"];
+				[self updateMenu];
+			}
+		}
 	}
 
 	// Set the value.
 	[flycutOperator setRememberNum: newRemember];
-	[self updateMenu];
 }
 
 -(IBAction) setFavoritesRememberNumPref:(id)sender
 {
-    [flycutOperator switchToFavoritesStore];
-    [self setRememberNumPref: sender];
-    [flycutOperator restoreStashedStore];
+	[self checkFavoritesRememberNumPref:[sender intValue]];
+}
+
+-(void) checkFavoritesRememberNumPref:(int)newRemember
+{
+	[flycutOperator switchToFavoritesStore];
+	[self checkRememberNumPref:newRemember forPrimaryStore:NO];
+	[flycutOperator restoreStashedStore];
 }
 
 -(IBAction) setDisplayNumPref:(id)sender
@@ -847,8 +917,31 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
+	// Enable notification from CloudKit
+	[NSApp registerForRemoteNotificationTypes:NSRemoteNotificationTypeNone];// silent push notification!
+
 	//Create our hot key
 	[self toggleMainHotKey:[NSNull null]];
+}
+
+// Remote Notifications (APN, aka Push Notifications) are only available on apps distributed via the App Store.
+// To support building for both distribution channels, include the following two methods to detect if Remote Notifications are available and inform MJCloudKitUserDefaultsSync.
+- (void)application:(NSApplication *)application
+didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+	// Forward the token to your provider, using a custom method.
+	NSLog(@"Registered for remote notifications.");
+	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:YES];
+}
+
+- (void)application:(NSApplication *)application
+didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+	NSLog(@"Remote notification support is unavailable due to error: %@", error);
+	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:NO];
+}
+
+- (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+	[flycutOperator checkCloudKitUpdates];
 }
 
 - (void) updateBezel
@@ -935,6 +1028,89 @@
 	[mainHotKey setTarget: self];
 	[mainHotKey setAction: @selector(hitMainHotKey:)];
 	[[SGHotKeyCenter sharedCenter] registerHotKey:mainHotKey];
+}
+
+- (IBAction)toggleICloudSyncSettings:(id)sender
+{
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncSettingsViaICloud"] ) {
+		NSAlert *alert = [[NSAlert alloc] init];
+		[alert setMessageText:@"Warning"];
+		[alert addButtonWithTitle:@"Ok"];
+		[alert addButtonWithTitle:@"Cancel"];
+		[alert setInformativeText:@"Enabling iCloud Settings Sync will overwrite local settings if your iCloud account already has Flycut settings.  If you have never enabled this in Flycut on any computer, your current settings will be retained and loaded into iCloud."];
+		if ( [alert runModal] != NSAlertFirstButtonReturn )
+		{
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+													 forKey:@"syncSettingsViaICloud"];
+		}
+		[alert release];
+		// Add option to overwrite iCloud.
+	}
+
+	[self registerOrDeregisterICloudSync];
+}
+
+- (IBAction)toggleICloudSyncClippings:(id)sender
+{
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"] ) {
+		if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] < 2 ) {
+			// Must set syncClippingsViaICloud = 2
+			NSAlert *alert = [[NSAlert alloc] init];
+			[alert setMessageText:@"Settings Change"];
+			[alert addButtonWithTitle:@"Ok"];
+			[alert addButtonWithTitle:@"Cancel"];
+			[alert setInformativeText:@"iCloud Clippings Sync will set 'Save: After each clip'."];
+			if ( [alert runModal] == NSAlertFirstButtonReturn )
+			{
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:2]
+														 forKey:@"savePreference"];
+			} else {
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+														 forKey:@"syncClippingsViaICloud"];
+			}
+			[alert release];
+		}
+	}
+
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"] ) {
+		NSAlert *alert = [[NSAlert alloc] init];
+		[alert setMessageText:@"Warning"];
+		[alert addButtonWithTitle:@"Ok"];
+		[alert addButtonWithTitle:@"Cancel"];
+		[alert setInformativeText:@"Enabling iCloud Clippings Sync will overwrite local clippings if your iCloud account already has Flycut clippings.  If you have never enabled this in Flycut on any computer, your current clippings will be retained and loaded into iCloud."];
+		if ( [alert runModal] != NSAlertFirstButtonReturn )
+		{
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+													 forKey:@"syncClippingsViaICloud"];
+		}
+		// Add option to overwrite iCloud.
+	}
+
+	[self registerOrDeregisterICloudSync];
+}
+
+- (IBAction)setSavePreference:(id)sender
+{
+	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] < 2 ) {
+		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"] ) {
+			// Must disable syncClippingsViaICloud
+			NSAlert *alert = [[NSAlert alloc] init];
+			[alert setMessageText:@"Settings Change"];
+			[alert addButtonWithTitle:@"Ok"];
+			[alert addButtonWithTitle:@"Cancel"];
+			[alert setInformativeText:@"Disabling 'Save: After each clip' will disable iCloud Clippings Sync."];
+
+			if ( [alert runModal] == NSAlertFirstButtonReturn )
+			{
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]];
+			}
+			else
+			{
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:2]];
+			}
+			[alert release];
+		}
+	}
 }
 
 -(IBAction)clearClippingList:(id)sender {

@@ -22,7 +22,7 @@
 
 @class SGHotKey;
 
-@interface AppController : NSObject <NSMenuDelegate> {
+@interface AppController : NSObject <NSMenuDelegate, NSApplicationDelegate> {
     BezelWindow					*bezel;
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
@@ -34,6 +34,8 @@
 	BOOL						isBezelPinned; // Currently not used
 	NSString					*currentKeycodeCharacter;
     NSDateFormatter*            dateFormat;
+
+    NSArray *settingsSyncList;
 
     FlycutOperator				*flycutOperator;
 
@@ -105,6 +107,9 @@
 -(IBAction) switchMenuIcon:(id)sender;
 -(IBAction) toggleLoadOnStartup:(id)sender;
 -(IBAction) toggleMainHotKey:(id)sender;
+-(IBAction) toggleICloudSyncSettings:(id)sender;
+-(IBAction) toggleICloudSyncClippings:(id)sender;
+-(IBAction) setSavePreference:(id)sender;
 -(void) setHotKeyPreferenceForRecorder:(SRRecorderControl *)aRecorder;
 
 @end

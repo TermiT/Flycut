@@ -14,6 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "FlycutOperator.h"
+#import "MJCloudKitUserDefaultsSync.h"
 
 @implementation FlycutOperator
 
@@ -48,31 +49,83 @@
         @"saveForgottenFavorites",
         [NSNumber numberWithBool:YES], // do not commit with YES.  Use NO
         @"pasteMovesToTop",
+        [NSNumber numberWithBool:NO],
+        @"syncSettingsViaICloud",
+        [NSNumber numberWithBool:NO],
+        @"syncClippingsViaICloud",
         nil]];
+
+	settingsSyncList = @[@"rememberNum",
+						 @"favoritesRememberNum",
+						 @"savePreference",
+						 @"skipPasswordFields",
+						 @"skipPboardTypes",
+						 @"skipPboardTypesList",
+						 @"skipPasswordLengths",
+						 @"skipPasswordLengthsList",
+						 @"removeDuplicates",
+						 @"saveForgottenClippings",
+						 @"saveForgottenFavorites",
+						 @"pasteMovesToTop"];
+	[settingsSyncList retain];
+
 	return self;
 }
 
-- (void)awakeFromNibDisplaying:(int) displayNum withDisplayLength:(int) displayLength withSaveSelector:(SEL) selector forTarget:(NSObject*) target
+- (void)awakeFromNibDisplaying:(int) dispNum withDisplayLength:(int) dispLength withSaveSelector:(SEL) selector forTarget:(NSObject*) target
 {
-	// Initialize the FlycutStore
-	clippingStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]
-											   displaying:displayNum
-										withDisplayLength:displayLength];
-	favoritesStore = [[FlycutStore alloc] initRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]
-											   displaying:displayNum
-										withDisplayLength:displayLength];
+	displayNum = dispNum;
+	displayLength = dispLength;
 	saveSelector = selector;
 	saveTarget = target;
-    stashedStore = NULL;
 
-    // If our preferences indicate that we are saving, load the dictionary from the saved plist
-    // and use it to get everything set up.
-	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
-		[self loadEngineFromPList];
-	}
+	// Initialize the FlycutStore
+	[self initializeStoresAndLoadContents];
 
 	// Stack position starts @ 0 by default
 	stackPosition = favoritesStackPosition = stashedStackPosition = 0;
+
+	[self registerOrDeregisterICloudSync];
+}
+
+-(FlycutStore*) allocInitFlycutStoreRemembering:(int) remembering
+{
+	return [[FlycutStore alloc] initRemembering:remembering
+									 displaying:displayNum
+							  withDisplayLength:displayLength];
+}
+
+-(void) initializeStores
+{
+	// Fixme - These stores are not released anywhere.
+	if ( !clippingStore )
+		clippingStore = [self allocInitFlycutStoreRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]];
+	else
+	{
+		[clippingStore setDisplayNum:displayNum];
+		[clippingStore setDisplayLen:displayLength];
+	}
+
+	if ( ! favoritesStore )
+		favoritesStore = [self allocInitFlycutStoreRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]];
+	else
+	{
+		[favoritesStore setDisplayNum:displayNum];
+		[favoritesStore setDisplayLen:displayLength];
+	}
+
+	stashedStore = NULL;
+}
+
+-(void) initializeStoresAndLoadContents
+{
+	[self initializeStores];
+
+	// If our preferences indicate that we are saving, load the dictionary from the saved plist
+	// and use it to get everything set up.
+	if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 1 ) {
+		[self loadEngineFromPList];
+	}
 }
 
 -(void) setRememberNum:(int) newRemember
@@ -178,7 +231,7 @@
         }
         // Get text from clipping store.
         [favoritesStore addClipping:[clippingStore clippingAtPosition:stackPosition] ];
-        [clippingStore clearItem:stackPosition];
+        [self clearItemAtStackPosition];
         return YES;
     }
     return NO;
@@ -190,6 +243,8 @@
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"pasteMovesToTop"] ) {
 		[clippingStore clippingMoveToTop:position];
 		stackPosition = 0;
+
+		[self actionAfterListModification];
 	}
 	return clipping;
 }
@@ -215,6 +270,7 @@
 		// Check to see if they want a little help figuring out what types to enter.
 		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
 			[clippingStore addClipping:type ofType:type fromAppLocalizedName:@"Flycut" fromAppBundleURL:nil atTimestamp:0];
+		[self actionAfterListModification];
 
 		__block bool skipClipping = NO;
 
@@ -283,6 +339,20 @@
 	return disableStore;
 }
 
+-(void)setClippingsStoreDelegate:(id<FlycutStoreDelegate>) delegate
+{
+	if ( !clippingStore )
+		[self initializeStores];
+	clippingStore.delegate = delegate;
+}
+
+-(void)setFavoritesStoreDelegate:(id<FlycutStoreDelegate>) delegate
+{
+	if ( !favoritesStore )
+		[self initializeStores];
+	favoritesStore.delegate = delegate;
+}
+
 -(int)indexOfClipping:(NSString*)contents ofType:(NSString*)type fromApp:(NSString *)appName withAppBundleURL:(NSString *)bundleURL
 {
 	return [clippingStore indexOfClipping:contents
@@ -301,7 +371,8 @@
             // clippingStore is full, so save the last entry before it gets lost.
             // Set to last item, save, and restore position.
             int savePosition = stackPosition;
-            stackPosition = [clippingStore rememberNum]-1;
+			stackPosition = [clippingStore rememberNum]-1;
+
             [self saveFromStackWithPrefix:@"Autosave "];
             stackPosition = savePosition;
         }
@@ -311,21 +382,33 @@
 							 fromAppLocalizedName:appName
 								 fromAppBundleURL:bundleURL
 									  atTimestamp:[[NSDate date] timeIntervalSince1970]];
+
 //		The below tracks our position down down down... Maybe as an option?
 //		if ( [clippingStore jcListCount] > 1 ) stackPosition++;
 		stackPosition = 0;
         [selectorTarget performSelector:clippingAddedSelector];
-		if ( [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
-            [self saveEngine];
+		[self actionAfterListModification];
 
 		return success;
     }
 	return  NO;
 }
 
+-(void)actionAfterListModification
+{
+	if ( !inhibitSaveEngineAfterListModification
+		&& [[NSUserDefaults standardUserDefaults] integerForKey:@"savePreference"] >= 2 )
+		[self saveEngine];
+}
+
 -(int)jcListCount
 {
 	return [clippingStore jcListCount];
+}
+
+-(int)rememberNum
+{
+	return [clippingStore rememberNum];
 }
 
 -(int)stackPosition
@@ -374,7 +457,9 @@
     if ([clippingStore jcListCount] == 0)
         return NO;
 
-    [clippingStore clearItem:stackPosition];
+	[clippingStore clearItem:stackPosition];
+	[self actionAfterListModification];
+
     return YES;
 }
 
@@ -404,11 +489,12 @@
 -(void)clearList
 {
     [clippingStore clearList];
+    [self actionAfterListModification];
 }
 
 -(void)mergeList
 {
-    [clippingStore mergeList];
+	[clippingStore mergeList];
 }
 
 -(BOOL) isValidClippingNumber:(NSNumber *)number {
@@ -423,52 +509,173 @@
     }
 }
 
+-(void) registerOrDeregisterICloudSync
+{
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncSettingsViaICloud"] ) {
+		[MJCloudKitUserDefaultsSync startWithKeyMatchList:settingsSyncList
+								  withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
+	}
+	else {
+		[MJCloudKitUserDefaultsSync stopForKeyMatchList:settingsSyncList];
+	}
+
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"] ) {
+		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationChanges withSelector:@selector(checkPreferencesChanges:) withTarget: self];
+
+		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationConflicts forTarget:self];
+		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationConflicts withSelector:@selector(checkPreferencesConflicts:) withTarget: self];
+
+		[MJCloudKitUserDefaultsSync startWithKeyMatchList:@[@"store"]
+								  withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
+	}
+	else {
+		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+
+		[MJCloudKitUserDefaultsSync stopForKeyMatchList:@[@"store"]];
+	}
+}
+
+-(NSDictionary*) checkPreferencesChanges:(NSDictionary*)changes
+{
+	if ( [changes valueForKey:@"store"] )
+	{
+		inhibitSaveEngineAfterListModification = YES;
+
+		[self integrateStoreAtKey:@"jcList" into:clippingStore];
+		[self integrateStoreAtKey:@"favoritesList" into:favoritesStore];
+
+		inhibitSaveEngineAfterListModification = NO;
+		[self actionAfterListModification];
+	}
+	return nil;
+}
+
+-(void) integrateStoreAtKey:(NSString*)listKey into:(FlycutStore*)store
+{
+	FlycutStore *newContent = [self allocInitFlycutStoreRemembering:[clippingStore rememberNum]];
+	NSDictionary *loadDict = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];
+
+	if ( loadDict && [self loadEngineFrom:loadDict key:listKey into:newContent] )
+	{
+		int newCount = [newContent jcListCount];
+		for ( int i = 0 ; i < newCount ; i++ )
+		{
+			FlycutClipping *newClipping = [newContent clippingAtPosition:i];
+			if ( i >= [store jcListCount] )
+			{
+				// Clipping was beyond the end of the store, so just add it.
+				[newClipping setDisplayLength:displayLength];
+				[store insertClipping:newClipping atIndex:i];
+			}
+			else if ( ![newClipping isEqual:[store clippingAtPosition:i]] )
+			{
+				int firstIndex = [store indexOfClipping:newClipping];
+				if ( firstIndex < 0 )
+				{
+					// Clipping wasn't previously in the store, so just add it.
+					[newClipping setDisplayLength:displayLength];
+					[store insertClipping:newClipping atIndex:i];
+				}
+				else if ( [newContent indexOfClipping:[store clippingAtPosition:i]] < 0 )
+				{
+					// Contents in the store at this position didn't exist in the newContent.  Handle deletion.
+					[store clearItem:i];
+					i--;
+				}
+				else if ( [store removeDuplicates] )
+				{
+					if ( i < firstIndex )
+						[store clippingMoveFrom:firstIndex To:i];
+					else
+					{
+						// This can only happen if the remote store allowed duplicates and we do not.  Just delete from the new content and move on.
+						[newContent clearItem:i];
+						i--;
+						newCount--;
+					}
+				}
+				else
+				{
+					[newClipping setDisplayLength:displayLength];
+					[store insertClipping:newClipping atIndex:i];
+				}
+			}
+		}
+		while ( [store jcListCount] > newCount )
+			[store clearItem:newCount];
+
+#ifdef DEBUG
+		[newContent release];
+		newContent = [self allocInitFlycutStoreRemembering:[clippingStore rememberNum]];
+		[self loadEngineFrom:loadDict key:listKey into:newContent];
+		newCount = [newContent jcListCount];
+		if ( newCount != [store jcListCount] )
+			NSLog(@"Error in integrateStoreAtKey with mismatching after counts!");
+		else
+		{
+			for ( int i = 0 ; i < newCount ; i++ )
+			{
+				if ( ![[store clippingAtPosition:i] isEqual:[newContent clippingAtPosition:i]] )
+					NSLog(@"Error in integrateStoreAtKey with mismatching clippings at index %i!", i);
+			}
+		}
+#endif
+	}
+
+	[newContent release];
+}
+
+-(NSDictionary*) checkPreferencesConflicts:(NSDictionary*)changes
+{
+	NSMutableDictionary *corrections = nil;
+	if ( [changes valueForKey:@"store"] )
+	{
+		// Just clobber back, for now.  They already finished their save, so they won't notice and will just think we made a calculated change.
+		NSLog(@"Oh.  My changes were clobbered.  I will clobber back.");
+		if ( !corrections )
+			corrections = [[NSMutableDictionary alloc] init];
+		corrections[@"store"] = [changes valueForKey:@"store"][1]; // We win.
+	}
+	return corrections;
+}
+
+-(void) checkCloudKitUpdates
+{
+	[MJCloudKitUserDefaultsSync checkCloudKitUpdates];
+}
+
+-(bool) loadEngineFrom:(NSDictionary*)loadDict key:(NSString*)listKey into:(FlycutStore*)store
+{
+	NSArray *savedJCList = [loadDict objectForKey:listKey];
+	if ( [savedJCList isKindOfClass:[NSArray class]] ) {
+		// There's probably a nicer way to prevent the range from going out of bounds, but this works.
+		int rangeCap = [savedJCList count] < [store rememberNum] ? [savedJCList count] : [store rememberNum];
+		NSRange loadRange = NSMakeRange(0, rangeCap);
+		NSArray *toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
+		for( NSDictionary *aSavedClipping in toBeRestoredClips)
+			[store addClipping:[aSavedClipping objectForKey:@"Contents"]
+							  ofType:[aSavedClipping objectForKey:@"Type"]
+				fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
+					fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
+						 atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
+		return YES;
+	} else DLog(@"Not array");
+	return NO;
+}
+
 -(bool) loadEngineFromPList
 {
-    NSDictionary *loadDict = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];   
-    NSArray *savedJCList;
-	NSRange loadRange;
+	NSDictionary *loadDict = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];
 
-    int rangeCap;
-
-    if ( loadDict != nil ) {
-
-        savedJCList = [loadDict objectForKey:@"jcList"];
-
-        if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-            int rememberNumPref = [[NSUserDefaults standardUserDefaults] 
-                                   integerForKey:@"rememberNum"];
-            // There's probably a nicer way to prevent the range from going out of bounds, but this works.
-			rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
-			loadRange = NSMakeRange(0, rangeCap);
-            NSArray *toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
-            for( NSDictionary *aSavedClipping in toBeRestoredClips)
-				[clippingStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-									ofType:[aSavedClipping objectForKey:@"Type"]
-					  fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
-						  fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
-							   atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
-
-            // Now for the favorites, same thing.
-            savedJCList =[loadDict objectForKey:@"favoritesList"];
-            if ( [savedJCList isKindOfClass:[NSArray class]] ) {
-            rememberNumPref = [[NSUserDefaults standardUserDefaults]
-                               integerForKey:@"favoritesRememberNum"];
-            rangeCap = [savedJCList count] < rememberNumPref ? [savedJCList count] : rememberNumPref;
-            loadRange = NSMakeRange(0, rangeCap);
-            toBeRestoredClips = [[[savedJCList subarrayWithRange:loadRange] reverseObjectEnumerator] allObjects];
-            for( NSDictionary *aSavedClipping in toBeRestoredClips)
-                [favoritesStore addClipping:[aSavedClipping objectForKey:@"Contents"]
-                                     ofType:[aSavedClipping objectForKey:@"Type"]
-                       fromAppLocalizedName:[aSavedClipping objectForKey:@"AppLocalizedName"]
-                           fromAppBundleURL:[aSavedClipping objectForKey:@"AppBundleURL"]
-                                atTimestamp:[[aSavedClipping objectForKey:@"Timestamp"] integerValue]];
-            }
-        } else DLog(@"Not array");
-        [loadDict release];
-        return YES;
-    }
-    return NO;
+	if ( loadDict != nil ) {
+		bool success = NO;
+		success |= [self loadEngineFrom:loadDict key:@"jcList" into:clippingStore];
+		success |= [self loadEngineFrom:loadDict key:@"favoritesList" into:favoritesStore];
+		[loadDict release];
+		return success;
+	}
+	return NO;
 }
 
 -(bool)setStackPositionToOneLessRecent

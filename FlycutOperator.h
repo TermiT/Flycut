@@ -28,8 +28,13 @@
 
 	SEL saveSelector;
 	NSObject* saveTarget;
+	int displayNum;
+	int displayLength;
+
+	NSArray *settingsSyncList;
 
     BOOL disableStore;
+	BOOL inhibitSaveEngineAfterListModification;
 }
 
 // Basic functionality
@@ -61,6 +66,8 @@
 // Save and load
 -(void) saveEngine;
 -(bool) loadEngineFromPList;
+-(void) registerOrDeregisterICloudSync;
+-(void) checkCloudKitUpdates;
 
 // Preference related
 -(void) setRememberNum:(int)newRemember;
@@ -78,11 +85,14 @@
 
 // Clippings Store related
 -(int)jcListCount;
+-(int)rememberNum;
 -(FlycutClipping*)clippingAtStackPosition;
 -(NSArray *) previousDisplayStrings:(int)howMany containing:(NSString*)search;
 -(NSArray *) previousIndexes:(int)howMany containing:(NSString*)search; // This method is in newest-first order.
 -(void)setDisableStoreTo:(bool) value;
 -(bool)storeDisabled;
+-(void)setClippingsStoreDelegate:(id<FlycutStoreDelegate>) delegate;
+-(void)setFavoritesStoreDelegate:(id<FlycutStoreDelegate>) delegate;
 
 @end
 
