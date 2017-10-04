@@ -1,0 +1,109 @@
+### What is this?
+A library to sync NSUserDefaults to iCloud via CloudKit.  Based on MKiCloudSync,
+by Mugunth Kumar, a clean and simple class to sync NSUserDefaults to iCloud.
+Use of CloudKit removes the "clean and simple" but allows use in apps
+distributed outside of the App Store.
+
+### How to use?
+1. Drag the two classes and #import the header file in your Application Delegate
+2. Call `[MJCloudKitUserDefaultsSync startWithPrefix:@"sync" withContainerIdentifier@"iCloud.com.yourCompany.yourProduct"];`
+3. Register for Remote Notifications in your applicationDidFinishLaunching.
+
+        // macOS
+        - (void)applicationDidFinishLaunching:(NSNotification *)notification
+        {
+        	// Enable notification from CloudKit
+        	[NSApp registerForRemoteNotificationTypes:NSRemoteNotificationTypeNone];// silent push notification!
+        
+        	//Create our hot key
+        	[self toggleMainHotKey:[NSNull null]];
+        }
+4. Add a NotificationCenter receiver and optional registration handlers as follows
+
+        // macOS:
+        - (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+        {
+        	[MJCloudKitUserDefaultsSync checkCloudKitUpdates];
+        }
+        
+        // Remote Notifications (APN, aka Push Notifications) are only available on apps distributed via the App Store.
+        // To support building for both distribution channels, include the following two methods to detect if Remote Notifications are available and inform MJCloudKitUserDefaultsSync.
+        - (void)application:(NSApplication *)application
+        didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+        	// Forward the token to your provider, using a custom method.
+        	NSLog(@"Registered for remote notifications.");
+        	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:YES];
+        }
+        
+        - (void)application:(NSApplication *)application
+        didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+        	NSLog(@"Remote notification support is unavailable due to error: %@", error);
+        	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:NO];
+        }
+
+        // iOS:
+        // TBD
+
+### To Do
+* Create an xcproj and turn this into a framework so it can be used by both ARC and non-ARC projects.  It is currently being used by an old non-ARC project, so it isn't ARC for now.
+* Consider switching to ARC.
+* Evaluate the current model, inherited from MKiCloudSync, of being built on class methods and static variables vs containing the variables in the class and using a singleton vs possibilities of multiple instances of the class.
+* Evaluate capability to synchronize other dictionaries beyond just NSUserDefaults.
+* updateFromiCloud could perhaps include the old and new values in the change list provided to sendChangeNotifications to provide to interested parties.
+
+### Compatibility
+Care has been taken to enable this library to use newer and better CloudKit capabilities introduced in macOS 10.12 (Sierra) while maintaining compatibility with OS X 10.10 (Yosemite) where CloudKit was first introduced.  The initial project using this library targets Mac OS X 10.7 (Lion), though the CloudKit portions of that project won't do anything on that release.
+
+### Notes
+This is currently a beta release.  This initial commit has been demonstrated to
+work but warrants further evaluation and testing.  It includes copious logging
+statements, a bit of debug code, a bit of commented-out stuff that can be
+removed, and a bit of commented-out stuff that should maybe be restored.  It has
+not yet been verified to be of consistent style.
+
+See [Flycut](http://github.com/MarkJerde/Flycut) for an example of
+MJCloudKitUserDefaultsSync in use.
+
+MJCloudKitUserDefaultsSync is based on Mugunth Kumar's MKiCloudSync, though it
+is massively different as a result of using CloudKit and having a few additional
+features.  It does, however, retain about half of Mugunth Kumar's code, owing to
+the simplicity of his original solution.  Given their differences, in use of
+CloudKit vs iCloud key-value store, the two are named and maintained
+independently to avoid confusion.  If you are looking for a simple solution for
+apps distributed through the App Store, MJCloudKitUserDefaultsSync will work but
+consider MKiCloudSync.
+
+Read the [blog post](http://blog.mugunthkumar.com/coding/ios-code-mkicloudsync-sync-your-nsuserdefaults-to-icloud-with-a-single-line-of-code) for more on Mugunth Kumar's original solution.
+### License
+Copyright (C) 2017 by Mark Jerde
+
+Portions Copyright (C) 2011-2020 by Steinlogic
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+As a side note, you might also consider
+
+1) tweeting about this mentioning @mark_a_jerde
+
+2) A paypal donation to mark.a.jerde@gmail.com
+
+3) tweeting about this mentioning @mugunthkumar for his original contributions
+
+4) A paypal donation to mugunth.kumar@gmail.com
+
