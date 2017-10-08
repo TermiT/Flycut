@@ -791,7 +791,7 @@
 				if ( [type isEqualToString:typeString] )
 				{
 					skipClipping = YES;
-					stop = YES;
+					*stop = YES;
 				}
 			}];
 		}
@@ -825,7 +825,7 @@
 							|| NSNotFound != symbol.location ) )
 					{
 						skipClipping = YES;
-						stop = YES;
+						*stop = YES;
 					}
 				}
 			}];
