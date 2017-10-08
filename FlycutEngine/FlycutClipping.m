@@ -25,7 +25,7 @@
     return self;
 }
 
--(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength withAppLocalizedName:(NSString *)localizedName withAppBundleURL:(NSString*)bundleURL withTimestamp:(int)timestamp
+-(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength withAppLocalizedName:(NSString *)localizedName withAppBundleURL:(NSString*)bundleURL withTimestamp:(NSInteger)timestamp
 {
     [super init];
     clipContents = [[[NSString alloc] init] retain];
@@ -124,7 +124,7 @@
     [old release];
 }
 
--(void) setTimestamp:(NSString *)newTimestamp
+-(void) setTimestamp:(NSInteger)newTimestamp
 {
     clipTimestamp = newTimestamp;
 }
@@ -186,7 +186,7 @@
     return appBundleURL;
 }
 
--(int) timestamp
+-(NSInteger) timestamp
 {
     return clipTimestamp;
 }
