@@ -22,7 +22,7 @@
 
 @class SGHotKey;
 
-@interface AppController : NSObject <NSMenuDelegate, NSApplicationDelegate> {
+@interface AppController : NSObject <NSMenuDelegate, NSApplicationDelegate, FlycutStoreDelegate> {
     BezelWindow					*bezel;
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
@@ -49,6 +49,7 @@
     int jcMenuBaseItemsCount;
     IBOutlet NSSearchField *searchBox;
     NSResponder *menuFirstResponder;
+    dispatch_queue_t menuQueue;
     NSRunningApplication *currentRunningApplication;
     NSEvent *menuOpenEvent;
     IBOutlet NSSlider * heightSlider;
@@ -66,6 +67,8 @@
 	NSDictionary *standardPreferences;
     int jcDisplayNum;
 	BOOL issuedRememberResizeWarning;
+	BOOL needBezelUpdate;
+	BOOL needMenuUpdate;
 }
 
 // Basic functionality

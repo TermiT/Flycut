@@ -75,6 +75,8 @@
 						 @"displayClippingSource"];
 	[settingsSyncList retain];
 
+	menuQueue = dispatch_queue_create(@"com.Flycut.menuUpdateQueue", DISPATCH_QUEUE_SERIAL);
+
 	return [super init];
 }
 
@@ -110,6 +112,8 @@
 
 	// Initialize the FlycutOperator
 	flycutOperator = [[FlycutOperator alloc] init];
+	[flycutOperator setClippingsStoreDelegate:self];
+	[flycutOperator setFavoritesStoreDelegate:self];
 	[flycutOperator awakeFromNibDisplaying:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"]
 						 withDisplayLength:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayLen"]
 						  withSaveSelector:@selector(savePreferencesOnDict:)
@@ -1139,54 +1143,62 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 }
 
 - (void)updateMenu {
-    [self updateMenuContaining:nil];
-    // Clear the search box whenever the is reason for updateMenu to be called, since the nil call will produce non-searched results.
-    [searchBox setStringValue:@""];
-    [[[searchBox cell] cancelButtonCell] performClick:self];
+    dispatch_async(dispatch_get_main_queue(), ^{
+    if ( !statusItem || !statusItem.isEnabled )
+        return;
+
+        [self updateMenuContaining:nil];
+        // Clear the search box whenever the is reason for updateMenu to be called, since the nil call will produce non-searched results.
+        [searchBox setStringValue:@""];
+        [[[searchBox cell] cancelButtonCell] performClick:self];
+    });
 }
 
 - (void)updateMenuContaining:(NSString*)search {
-    [jcMenu setMenuChangedMessagesEnabled:NO];
-    
-    NSArray *returnedDisplayStrings = [flycutOperator previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
-    
-    NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
-    
-    NSArray *clipStrings = [[returnedDisplayStrings reverseObjectEnumerator] allObjects];
+	// Use GDC to prevent concurrent modification of the menu, since that would be messy.
+	dispatch_sync(menuQueue, ^{
+		[jcMenu setMenuChangedMessagesEnabled:NO];
 
-    // Figure out if the number of menu items is changing and add or remove entries as necessary.
-    // If we remove all of them and add all new ones, the menu won't redraw if the count is unchanged, so just reuse them by changing their title.
-    int oldItems = [menuItems count]-jcMenuBaseItemsCount;
-    int newItems = [clipStrings count];
+		NSArray *returnedDisplayStrings = [flycutOperator previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
 
-    if ( oldItems > newItems )
-    {
-        for ( int i = newItems; i < oldItems; i++ )
-            [jcMenu removeItemAtIndex:0];
-    }
-    else if ( newItems > oldItems )
-    {
-        for ( int i = oldItems; i < newItems; i++ )
-        {
-            NSMenuItem *item;
-            item = [[NSMenuItem alloc] initWithTitle:@"foo"
-                                              action:@selector(processMenuClippingSelection:)
-                                       keyEquivalent:@""];
-            [item setTarget:self];
-            [item setEnabled:YES];
-            [jcMenu insertItem:item atIndex:0];
-            // Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
-            [item release];
-        }
-    }
-	
-    // Now set the correct titles for each menu item.
-    for(NSString *pbMenuTitle in clipStrings) {
-        newItems--;
-        NSMenuItem *item = [jcMenu itemAtIndex:newItems];
-        item.title = pbMenuTitle;
-        [jcMenu itemChanged: item];
-	}
+		NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
+
+		NSArray *clipStrings = [[returnedDisplayStrings reverseObjectEnumerator] allObjects];
+
+		// Figure out if the number of menu items is changing and add or remove entries as necessary.
+		// If we remove all of them and add all new ones, the menu won't redraw if the count is unchanged, so just reuse them by changing their title.
+		int oldItems = [menuItems count]-jcMenuBaseItemsCount;
+		int newItems = [clipStrings count];
+
+		if ( oldItems > newItems )
+		{
+			for ( int i = newItems; i < oldItems; i++ )
+				[jcMenu removeItemAtIndex:0];
+		}
+		else if ( newItems > oldItems )
+		{
+			for ( int i = oldItems; i < newItems; i++ )
+			{
+				NSMenuItem *item;
+				item = [[NSMenuItem alloc] initWithTitle:@"foo"
+												  action:@selector(processMenuClippingSelection:)
+										   keyEquivalent:@""];
+				[item setTarget:self];
+				[item setEnabled:YES];
+				[jcMenu insertItem:item atIndex:0];
+				// Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
+				[item release];
+			}
+		}
+
+		// Now set the correct titles for each menu item.
+		for(NSString *pbMenuTitle in clipStrings) {
+			newItems--;
+			NSMenuItem *item = [jcMenu itemAtIndex:newItems];
+			[item setTitle:pbMenuTitle];
+			[jcMenu itemChanged: item];
+		}
+	});
 }
 
 -(IBAction)processMenuClippingSelection:(id)sender
@@ -1269,6 +1281,51 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 		[self setHotKeyPreferenceForRecorder: aRecorder];
 	}
 	DLog(@"code: %ld, flags: %lu", (long)newKeyCombo.code, (unsigned long)newKeyCombo.flags);
+}
+
+- (void)beginUpdates {
+	needBezelUpdate = NO;
+	needMenuUpdate = NO;
+}
+
+- (void)endUpdates {
+	DLog(@"ending updates");
+	if ( needBezelUpdate && isBezelDisplayed )
+		[self updateBezel];
+	if ( needMenuUpdate )
+	{
+		DLog(@"launching updateMenu");
+		// Timers attach to the run loop of the process, which isn't present on all processes, so we must dispatch to the main queue to ensure we have a run loop for the timer.
+		dispatch_async(dispatch_get_main_queue(), ^{
+			// Menu updates need to be in NSRunLoopCommonModes to reliably happen.
+			[[NSRunLoop currentRunLoop] performSelector:@selector(updateMenu) target:self argument:nil order:0 modes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+		});
+	}
+	needBezelUpdate = needMenuUpdate = NO;
+}
+
+- (void)insertClippingAtIndex:(int)index {
+	[self noteChangeAtIndex:index];
+}
+
+- (void)deleteClippingAtIndex:(int)index {
+	[self noteChangeAtIndex:index];
+}
+
+- (void)reloadClippingAtIndex:(int)index {
+	[self noteChangeAtIndex:index];
+}
+
+- (void)moveClippingAtIndex:(int)index toIndex:(int)newIndex {
+	[self noteChangeAtIndex:index];
+	[self noteChangeAtIndex:newIndex];
+}
+
+- (void)noteChangeAtIndex:(int)index {
+	// Always give bezel update, since the count may need updating and the possibility of concurrent user bezel navigation and store changes make need detection risky.
+	needBezelUpdate = YES;
+	if ( index < [[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] )
+		needMenuUpdate = YES;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
