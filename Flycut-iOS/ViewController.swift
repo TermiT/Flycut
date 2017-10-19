@@ -64,6 +64,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		// Force to ask to enable sync for test if needed.
 		//UserDefaults.standard.set(false, forKey: "alreadyAskedToEnableSync")
 
+		// Ensure these are false since there isn't a way to access the saved clippings on iOS as this point.
+		UserDefaults.standard.set(NSNumber(value: false), forKey: "saveForgottenClippings")
+		UserDefaults.standard.set(NSNumber(value: false), forKey: "saveForgottenFavorites")
+
 		flycut.setClippingsStoreDelegate(self)
 		flycut.delegate = self
 

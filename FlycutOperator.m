@@ -43,10 +43,6 @@
 		@"revealPasteboardTypes",
         [NSNumber numberWithBool:YES], // do not commit with YES.  Use NO
         @"removeDuplicates",
-        [NSNumber numberWithBool:NO],
-        @"saveForgottenClippings",
-        [NSNumber numberWithBool:YES],
-        @"saveForgottenFavorites",
         [NSNumber numberWithBool:YES], // do not commit with YES.  Use NO
         @"pasteMovesToTop",
         [NSNumber numberWithBool:NO],
@@ -64,8 +60,6 @@
 						 @"skipPasswordLengths",
 						 @"skipPasswordLengthsList",
 						 @"removeDuplicates",
-						 @"saveForgottenClippings",
-						 @"saveForgottenFavorites",
 						 @"pasteMovesToTop"];
 	[settingsSyncList retain];
 

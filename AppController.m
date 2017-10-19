@@ -53,6 +53,10 @@
         @"popUpAnimation",
         [NSNumber numberWithBool:YES],
         @"displayClippingSource",
+        [NSNumber numberWithBool:NO],
+        @"saveForgottenClippings",
+        [NSNumber numberWithBool:YES],
+        @"saveForgottenFavorites",
         nil]];
 
 	/* For testing, the ability to force initial values of the sync settings:
@@ -72,7 +76,9 @@
 						 @"bezelWidth",
 						 @"bezelHeight",
 						 @"popUpAnimation",
-						 @"displayClippingSource"];
+						 @"displayClippingSource"
+						 @"saveForgottenClippings",
+						 @"saveForgottenFavorites",];
 	[settingsSyncList retain];
 
 	menuQueue = dispatch_queue_create(@"com.Flycut.menuUpdateQueue", DISPATCH_QUEUE_SERIAL);
