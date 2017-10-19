@@ -209,6 +209,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 					let pasteboard = UIPasteboard.general.value(forPasteboardType: "public.utf8-plain-text")
 					self.flycut.addClipping(pasteboard as! String!, ofType: "public.utf8-plain-text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
 				}
+				else if ( UIPasteboard.general.types.contains("public.text") )
+				{
+					let pasteboard = UIPasteboard.general.value(forPasteboardType: "public.text")
+					self.flycut.addClipping(pasteboard as! String!, ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+				}
 			}
 		}
 	}
