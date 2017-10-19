@@ -31,6 +31,9 @@
     int jcRememberNum;		// The max we will allow users to display; 20
     int jcDisplayNum;		// How many the user actually wants to display; defaults to 10
     int jcDisplayLen;		// How many characters to display in the menu; defaults to 37
+
+	// Our status information
+	bool modifiedSinceLastSaveStore;
     
     // hash -- key values to clippings
     // initially we will use PasteboardCount as the key value, but this will not be guaranteed
@@ -49,11 +52,13 @@
 -(void) setRememberNum:(int)nowRemembering;
 -(void) setDisplayNum:(int)nowDisplaying;
 -(void) setDisplayLen:(int)newDisplayLength;
+-(void) clearModifiedSinceLastSaveStore;
 
 // Retrieve various values
 -(int) rememberNum;
 -(int) displayLen;
 -(int) jcListCount;
+-(bool) modifiedSinceLastSaveStore;
 -(FlycutClipping *) clippingAtPosition:(int)index;
 -(NSString *) clippingContentsAtPosition:(int)index;
 -(NSString *) clippingDisplayStringAtPosition:(int)index;

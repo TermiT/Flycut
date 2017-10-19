@@ -742,9 +742,15 @@
         [jcListArray addObject:dict];
     }
     [saveDict setObject:jcListArray forKey:key];
+	[store clearModifiedSinceLastSaveStore];
 }
 
 -(void) saveEngine {
+	// saveEngine saves to NSUserDefaults.  If there have been no modifications, just skip this to avoid busy activity for any observers.
+	if ( !([clippingStore modifiedSinceLastSaveStore]
+		   || [favoritesStore modifiedSinceLastSaveStore]) )
+		return;
+
     NSMutableDictionary *saveDict;
     saveDict = [NSMutableDictionary dictionaryWithCapacity:3];
     [saveDict setObject:@"0.7" forKey:@"version"];
