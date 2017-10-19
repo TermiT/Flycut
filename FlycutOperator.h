@@ -17,7 +17,12 @@
 
 #import "FlycutStore.h"
 
-@interface FlycutOperator : NSObject {
+@protocol FlycutOperatorDelegate <NSObject>
+@optional
+- (NSString*)alertWithMessageText:(NSString*)message informationText:(NSString*)information buttonsTexts:(NSArray*)buttons;
+@end
+
+@interface FlycutOperator : NSObject <FlycutStoreDeleteDelegate> {
     int							stackPosition;
     int							favoritesStackPosition;
     int							stashedStackPosition;
@@ -35,6 +40,7 @@
 
     BOOL disableStore;
 	BOOL inhibitSaveEngineAfterListModification;
+	BOOL inhibitAutosaveClippings;
 }
 
 // Basic functionality

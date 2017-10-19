@@ -99,7 +99,10 @@
 {
 	// Fixme - These stores are not released anywhere.
 	if ( !clippingStore )
+	{
 		clippingStore = [self allocInitFlycutStoreRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"rememberNum"]];
+		clippingStore.deleteDelegate = self;
+	}
 	else
 	{
 		[clippingStore setDisplayNum:displayNum];
@@ -107,7 +110,10 @@
 	}
 
 	if ( ! favoritesStore )
+	{
 		favoritesStore = [self allocInitFlycutStoreRemembering:[[NSUserDefaults standardUserDefaults] integerForKey:@"favoritesRememberNum"]];
+		favoritesStore.deleteDelegate = self;
+	}
 	else
 	{
 		[favoritesStore setDisplayNum:displayNum];
@@ -182,9 +188,14 @@
 
 - (bool)saveFromStackWithPrefix:(NSString*) prefix
 {
-    if ( [clippingStore jcListCount] > stackPosition ) {
+	return [self saveFromStore:clippingStore atIndex:stackPosition withPrefix:prefix];
+}
+
+- (bool)saveFromStore:(FlycutStore*)store atIndex:(int)index withPrefix:(NSString*) prefix
+{
+    if ( [store jcListCount] > index ) {
         // Get text from clipping store.
-        NSString *pbFullText = [self clippingStringWithCount:stackPosition];
+        NSString *pbFullText = [self clippingStringWithCount:index inStore:store];
         pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
 
         // Get the Desktop directory:
@@ -200,7 +211,7 @@
 
         // Make a file name to write the data to using the Desktop directory:
         NSString *fileName = [NSString stringWithFormat:@"%@/%@%@Clipping %@.txt",
-                              desktopDirectory, prefix, clippingStore == favoritesStore ? @"Favorite " : @"", dateString];
+                              desktopDirectory, prefix, store == favoritesStore ? @"Favorite " : @"", dateString];
 
         // Save content to the file
         [pbFullText writeToFile:fileName
@@ -215,20 +226,6 @@
 - (bool)saveFromStackToFavorites
 {
     if ( clippingStore != favoritesStore && [clippingStore jcListCount] > stackPosition ) {
-        if ( [favoritesStore rememberNum] == [favoritesStore jcListCount]
-            && [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenFavorites"] boolValue] )
-        {
-            // favoritesStore is full, so save the last entry before it gets lost.
-            [self switchToFavoritesStore];
-
-            // Set to last item, save, and restore position.
-            stackPosition = [favoritesStore rememberNum]-1;
-            [self saveFromStackWithPrefix:@"Autosave "];
-            stackPosition = favoritesStackPosition;
-
-            // Restore prior state.
-            [self restoreStashedStore];
-        }
         // Get text from clipping store.
         [favoritesStore addClipping:[clippingStore clippingAtPosition:stackPosition] ];
         [self clearItemAtStackPosition];
@@ -365,18 +362,6 @@
 -(bool)addClipping:(NSString*)contents ofType:(NSString*)type fromApp:(NSString *)appName withAppBundleURL:(NSString *)bundleURL target:(id)selectorTarget clippingAddedSelector:(SEL)clippingAddedSelector
 {
 	if ( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]]) {
-        if ( [clippingStore rememberNum] == [clippingStore jcListCount]
-            && [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenClippings"] boolValue] )
-        {
-            // clippingStore is full, so save the last entry before it gets lost.
-            // Set to last item, save, and restore position.
-            int savePosition = stackPosition;
-			stackPosition = [clippingStore rememberNum]-1;
-
-            [self saveFromStackWithPrefix:@"Autosave "];
-            stackPosition = savePosition;
-        }
-
 		bool success = [clippingStore addClipping:contents
 										   ofType:type
 							 fromAppLocalizedName:appName
@@ -392,6 +377,18 @@
 		return success;
     }
 	return  NO;
+}
+
+- (void)willDeleteClippingFromStore:(id)store AtIndex:(int)index {
+	if ( (!inhibitAutosaveClippings) // Avoid saving things that the user explicitly deletes.
+		&& ( store == favoritesStore
+		? [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenFavorites"] boolValue]
+		: [[[NSUserDefaults standardUserDefaults] valueForKey:@"saveForgottenClippings"] boolValue] ) )
+	{
+		// clipping is being removed, so save it before it gets lost.
+		// Set to last item, save, and restore position.
+		[self saveFromStore:store atIndex:index withPrefix:@"Autosave "];
+	}
 }
 
 -(void)actionAfterListModification
@@ -457,7 +454,9 @@
     if ([clippingStore jcListCount] == 0)
         return NO;
 
+	inhibitAutosaveClippings = YES; // Avoid saving things that the user explicitly deletes.
 	[clippingStore clearItem:stackPosition];
+	inhibitAutosaveClippings = NO;
 	[self actionAfterListModification];
 
     return YES;
@@ -498,12 +497,20 @@
 }
 
 -(BOOL) isValidClippingNumber:(NSNumber *)number {
-    return ( ([number intValue] + 1) <= [clippingStore jcListCount] );
+	return [self isValidClippingNumber:number inStore:clippingStore];
+}
+
+-(BOOL) isValidClippingNumber:(NSNumber *)number inStore:(FlycutStore*)store {
+    return ( ([number intValue] + 1) <= [store jcListCount] );
 }
 
 -(NSString *) clippingStringWithCount:(int)count {
-    if ( [self isValidClippingNumber:[NSNumber numberWithInt:count]] ) {
-        return [clippingStore clippingContentsAtPosition:count];
+	return [self clippingStringWithCount:count inStore:clippingStore];
+}
+
+-(NSString *) clippingStringWithCount:(int)count inStore:(FlycutStore*)store {
+    if ( [self isValidClippingNumber:[NSNumber numberWithInt:count] inStore:store] ) {
+        return [store clippingContentsAtPosition:count];
     } else { // It fails -- we shouldn't be passed this, but...
         return @"";
     }

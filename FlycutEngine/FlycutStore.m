@@ -123,6 +123,7 @@
 
 	// Delete clippings older than jcRememberNum
 	while ( [jcList count] > jcRememberNum ) {
+		[self delegateWillDeleteClippingAtIndex:jcRememberNum];
 		[jcList removeObjectAtIndex:jcRememberNum];
 		[self delegateDeleteClippingAtIndex:(jcRememberNum-1)]; // -1 for before-add indexing
 	}
@@ -140,7 +141,10 @@
     [self delegateBeginUpdates];
 
     for ( int i = (int)[jcList count] ; i > 0 ; i-- )
+	{
+		[self delegateWillDeleteClippingAtIndex:(i-1)];
         [self delegateDeleteClippingAtIndex:(i-1)];
+	}
 
     NSMutableArray *emptyJCList;
     emptyJCList = [[NSMutableArray alloc] init];
@@ -159,6 +163,7 @@
 {
     [self delegateBeginUpdates];
 
+	[self delegateWillDeleteClippingAtIndex:index];
     [jcList removeObjectAtIndex:index];
     [self delegateDeleteClippingAtIndex:index];
 
@@ -192,6 +197,7 @@
 			[self delegateBeginUpdates];
 
 			while ( [jcList count] > jcRememberNum ) {
+				[self delegateWillDeleteClippingAtIndex:jcRememberNum];
 				[jcList removeObjectAtIndex:jcRememberNum];
 				[self delegateDeleteClippingAtIndex:jcRememberNum];
 			}
@@ -386,6 +392,12 @@
 	modifiedSinceLastSaveStore = YES;
 	if ( self.delegate && [self.delegate respondsToSelector:@selector(insertClippingAtIndex:)] )
 		[self.delegate insertClippingAtIndex:index];
+}
+
+-(void) delegateWillDeleteClippingAtIndex:(int)index
+{
+	if ( self.deleteDelegate && [self.deleteDelegate respondsToSelector:@selector(willDeleteClippingFromStore:AtIndex:)] )
+		[self.deleteDelegate willDeleteClippingFromStore:self AtIndex:index];
 }
 
 -(void) delegateDeleteClippingAtIndex:(int)index

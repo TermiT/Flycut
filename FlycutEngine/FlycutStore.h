@@ -25,6 +25,11 @@
 - (void)moveClippingAtIndex:(int)index toIndex:(int)newIndex;
 @end
 
+@protocol FlycutStoreDeleteDelegate <NSObject>
+@optional
+- (void)willDeleteClippingFromStore:(id)store AtIndex:(int)index;
+@end
+
 @interface FlycutStore : NSObject {
 
     // Our various listener-related preferences
@@ -91,6 +96,9 @@
 
 /** optional delegate (not retained) */
 @property (nonatomic, nullable, assign) id<FlycutStoreDelegate> delegate;
+
+/** optional delegate (not retained) */
+@property (nonatomic, nullable, assign) id<FlycutStoreDeleteDelegate> deleteDelegate;
 
 // Delete all named clippings
 @end
