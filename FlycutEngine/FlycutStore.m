@@ -28,6 +28,8 @@
 {
     [super init];
     jcList = [[NSMutableArray alloc] init];
+	insertionJournal = [[NSMutableArray alloc] init];
+	deletionJournal = [[NSMutableArray alloc] init];
     [self setRememberNum:nowRemembering];
     [self setDisplayNum:nowDisplaying];
     [self setDisplayLen:displayLength];
@@ -227,6 +229,34 @@
 -(void) clearModifiedSinceLastSaveStore
 {
 	modifiedSinceLastSaveStore = NO;
+	insertionJournalCountLastSave = [insertionJournal count];
+	deletionJournalCountLastSave = [deletionJournal count];
+}
+
+-(void) pruneJournals
+{
+	[self clearInsertionJournalCount:insertionJournalCountLastSave];
+	[self clearDeletionJournalCount:deletionJournalCountLastSave];
+}
+
+-(void) clearInsertionJournalCount:(NSUInteger)count
+{
+	while ( count-- > 0 )
+	{
+		[insertionJournal removeLastObject];
+		if ( insertionJournalCountLastSave > 0 )
+			insertionJournalCountLastSave--;
+	}
+}
+
+-(void) clearDeletionJournalCount:(NSUInteger)count
+{
+	while ( count-- > 0 )
+	{
+		[deletionJournal removeLastObject];
+		if ( deletionJournalCountLastSave > 0 )
+			deletionJournalCountLastSave--;
+	}
 }
 
 -(int) rememberNum
@@ -247,6 +277,16 @@
 -(bool) modifiedSinceLastSaveStore
 {
 	return modifiedSinceLastSaveStore;
+}
+
+-(NSArray *) insertionJournal
+{
+	return insertionJournal;
+}
+
+-(NSArray *) deletionJournal
+{
+	return deletionJournal;
 }
 
 -(FlycutClipping *) clippingAtPosition:(int)index
@@ -389,6 +429,10 @@
 
 -(void) delegateInsertClippingAtIndex:(int)index
 {
+	[insertionJournal insertObject:[jcList objectAtIndex:index] atIndex:0];
+	if ( [insertionJournal count] > jcRememberNum )
+		[self clearInsertionJournalCount:( [insertionJournal count] - jcRememberNum )];
+
 	modifiedSinceLastSaveStore = YES;
 	if ( self.delegate && [self.delegate respondsToSelector:@selector(insertClippingAtIndex:)] )
 		[self.delegate insertClippingAtIndex:index];
@@ -396,6 +440,10 @@
 
 -(void) delegateWillDeleteClippingAtIndex:(int)index
 {
+	[deletionJournal insertObject:[jcList objectAtIndex:index] atIndex:0];
+	if ( [deletionJournal count] > jcRememberNum )
+		[self clearDeletionJournalCount:( [deletionJournal count] - jcRememberNum )];
+
 	if ( self.deleteDelegate && [self.deleteDelegate respondsToSelector:@selector(willDeleteClippingFromStore:AtIndex:)] )
 		[self.deleteDelegate willDeleteClippingFromStore:self AtIndex:index];
 }

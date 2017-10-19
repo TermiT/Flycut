@@ -39,6 +39,8 @@
 
 	// Our status information
 	bool modifiedSinceLastSaveStore;
+	NSUInteger insertionJournalCountLastSave;
+	NSUInteger deletionJournalCountLastSave;
     
     // hash -- key values to clippings
     // initially we will use PasteboardCount as the key value, but this will not be guaranteed
@@ -47,6 +49,8 @@
 
     // array -- stores key values for the last jcRememberNum text pasteboard items
     NSMutableArray *jcList;
+	NSMutableArray *insertionJournal;
+	NSMutableArray *deletionJournal;
 }
 
 -(id) initRemembering:(int)nowRemembering
@@ -58,12 +62,17 @@
 -(void) setDisplayNum:(int)nowDisplaying;
 -(void) setDisplayLen:(int)newDisplayLength;
 -(void) clearModifiedSinceLastSaveStore;
+-(void) pruneJournals;
+-(void) clearInsertionJournalCount:(NSUInteger)count;
+-(void) clearDeletionJournalCount:(NSUInteger)count;
 
 // Retrieve various values
 -(int) rememberNum;
 -(int) displayLen;
 -(int) jcListCount;
 -(bool) modifiedSinceLastSaveStore;
+-(NSArray *) insertionJournal;
+-(NSArray *) deletionJournal;
 -(FlycutClipping *) clippingAtPosition:(int)index;
 -(NSString *) clippingContentsAtPosition:(int)index;
 -(NSString *) clippingDisplayStringAtPosition:(int)index;
