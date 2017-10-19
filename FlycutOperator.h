@@ -40,6 +40,7 @@
 
     BOOL disableStore;
 	BOOL inhibitSaveEngineAfterListModification;
+	BOOL firstClippingsSyncAfterEnabling;
 	BOOL inhibitAutosaveClippings;
 }
 
@@ -99,6 +100,9 @@
 -(bool)storeDisabled;
 -(void)setClippingsStoreDelegate:(id<FlycutStoreDelegate>) delegate;
 -(void)setFavoritesStoreDelegate:(id<FlycutStoreDelegate>) delegate;
+
+/** optional delegate (not retained) */
+@property (nonatomic, nullable, assign) id<FlycutOperatorDelegate> delegate;
 
 @end
 

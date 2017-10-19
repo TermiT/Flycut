@@ -526,12 +526,26 @@
 		[MJCloudKitUserDefaultsSync stopForKeyMatchList:settingsSyncList];
 	}
 
-	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"] ) {
+	BOOL syncClippings = [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"];
+	BOOL changedSyncClippings = ( ![[NSUserDefaults standardUserDefaults] objectForKey:@"previousSyncClippingsViaICloud"]
+								 || syncClippings != [[NSUserDefaults standardUserDefaults] boolForKey:@"previousSyncClippingsViaICloud"] );
+
+	[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:syncClippings]
+											 forKey:@"previousSyncClippingsViaICloud"];
+
+	// We will enable / disable regardless of changedSyncClippings because this gets called at app launch, where the feature was previously enabled but needs to be registered.
+	if ( syncClippings ) {
+		if ( changedSyncClippings )
+			firstClippingsSyncAfterEnabling = YES;
+
 		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
 		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationChanges withSelector:@selector(checkPreferencesChanges:) withTarget: self];
 
 		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationConflicts forTarget:self];
 		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationConflicts withSelector:@selector(checkPreferencesConflicts:) withTarget: self];
+
+		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationSaveSuccess forTarget:self];
+		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationSaveSuccess withSelector:@selector(checkPreferencesSaveSuccess:) withTarget: self];
 
 		[MJCloudKitUserDefaultsSync startWithKeyMatchList:@[@"store"]
 								  withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
@@ -547,53 +561,222 @@
 {
 	if ( [changes valueForKey:@"store"] )
 	{
-		inhibitSaveEngineAfterListModification = YES;
-
-		[self integrateStoreAtKey:@"jcList" into:clippingStore];
-		[self integrateStoreAtKey:@"favoritesList" into:favoritesStore];
-
-		inhibitSaveEngineAfterListModification = NO;
-		[self actionAfterListModification];
+		[self integrateAllStores];
 	}
 	return nil;
 }
 
--(void) integrateStoreAtKey:(NSString*)listKey into:(FlycutStore*)store
+-(void) integrateAllStores
+{
+	DLog(@"integrating stores");
+	inhibitSaveEngineAfterListModification = YES;
+
+	[self integrateStoreAtKey:@"jcList" into:clippingStore descriptiveName:@""];
+	// It is possible that the user would disable sync rather than merge the main clippings store.  They would have a poor user experience if they were then asked the same question about the favorites store after believing that they had disabled sync, so check setting before integrating.
+	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"] )
+		[self integrateStoreAtKey:@"favoritesList" into:favoritesStore descriptiveName:@"favorites "];
+	DLog(@"integrating stores complete");
+
+	inhibitSaveEngineAfterListModification = NO;
+	firstClippingsSyncAfterEnabling = NO;
+	[self actionAfterListModification];
+}
+
+-(void) integrateStoreAtKey:(NSString*)listKey into:(FlycutStore*)store descriptiveName:(NSString*)name
 {
 	FlycutStore *newContent = [self allocInitFlycutStoreRemembering:[clippingStore rememberNum]];
 	NSDictionary *loadDict = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"store"] copy];
 
 	if ( loadDict && [self loadEngineFrom:loadDict key:listKey into:newContent] )
 	{
+		BOOL mergeLists = NO;
+		if ( firstClippingsSyncAfterEnabling )
+		{
+			if ( 0 == [store jcListCount] )
+			{
+				// Just accept whatever iCloud has.
+				[store clearInsertionJournalCount:[[store insertionJournal] count]];
+				[store clearDeletionJournalCount:[[store deletionJournal] count]];
+			}
+			else if ( 0 == [newContent jcListCount] )
+			{
+				// We have something.  iCloud has nothing.  Ignore iCloud this time.
+				[newContent release];
+				[self actionAfterListModification]; // To overwrite what sync put in the defaults.
+				return;
+			}
+			else
+			{
+				int newCount = [newContent jcListCount];
+				int ourCount = [store jcListCount];
+				int newDistinct = 0;
+				int ourDistinct = 0;
+				for ( int i = 0 ; i < newCount ; i++ )
+				{
+					if ( 0 > [store indexOfClipping:[newContent clippingAtPosition:i]] )
+					{
+						newDistinct++;
+					}
+				}
+				for ( int i = 0 ; i < ourCount ; i++ )
+				{
+					if ( 0 > [newContent indexOfClipping:[store clippingAtPosition:i]] )
+					{
+						ourDistinct++;
+					}
+				}
+
+				BOOL promptUser = NO;
+				if ( 0 == ourDistinct )
+				{
+					// Just accept whatever iCloud has.
+					[store clearInsertionJournalCount:[[store insertionJournal] count]];
+					[store clearDeletionJournalCount:[[store deletionJournal] count]];
+				}
+				else if ( 0 == newDistinct )
+				{
+					// We have something.  iCloud has nothing.  Ignore iCloud this time.
+					[newContent release];
+					[self actionAfterListModification]; // To overwrite what sync put in the defaults.
+					return;
+				}
+				else
+				{
+					// Policy: For sake of user experience, the user will not be asked to merge or overwrite if one is a superset of the other and they have just said that they want sync.  Assume they meant, "I want sync and I want it to include all content."
+					promptUser = YES;
+				}
+
+				while ( promptUser )
+				{
+					promptUser = NO;
+
+					NSString *choice = [self delegateAlertWithMessageText:@"First Sync"
+														  informationText:[NSString stringWithFormat:@"Flycut found %i %@clipping%@ shared by both iCloud and this device, %i only in iCloud, and \%i only on this device.  How can I handle these for you?",
+																		   (ourCount-ourDistinct),
+																		   name,
+																		   ((ourCount-ourDistinct)!=1?@"s":@""),
+																		   newDistinct,ourDistinct]
+															 buttonsTexts:@[@"Merge Lists",
+																			@"Overwrite Device List",
+																			@"Overwrite iCloud List",
+																			@"Disable Sync"]];
+
+					if (!choice )
+					{
+						// This most likely means the UI wasn't implemented, so cover it with merge.
+						choice = @"Merge Lists";
+					}
+
+					if ( [choice isEqualToString:@"Merge Lists"] )
+					{
+						mergeLists = YES;
+					}
+					else if ( [choice isEqualToString:@"Disable Sync"] )
+					{
+						[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
+																 forKey:@"syncClippingsViaICloud"];
+						[newContent release];
+						[self registerOrDeregisterICloudSync];
+						[self actionAfterListModification]; // To overwrite what sync put in the defaults.
+						return;
+					}
+					else
+					{
+						NSString *okCancel = [self delegateAlertWithMessageText:@"Warning"
+																informationText:[NSString stringWithFormat:@"%@ will cause clippings to be lost!", choice]
+																   buttonsTexts:@[@"Ok", @"Cancel"]];
+
+						if ( [okCancel isEqualToString:@"Ok"] )
+						{
+							if ( [choice isEqualToString:@"Overwrite Device List"] )
+							{
+								// Just accept whatever iCloud has.
+								[store clearInsertionJournalCount:[[store insertionJournal] count]];
+								[store clearDeletionJournalCount:[[store deletionJournal] count]];
+							}
+							else if ( [choice isEqualToString:@"Overwrite iCloud List"] )
+							{
+								// Ignore iCloud this time.
+								[newContent release];
+								[self actionAfterListModification]; // To overwrite what sync put in the defaults.
+								return;
+							}
+							else
+							{
+								// This should be impossible, so cover it with disabling sync.
+								[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO] forKey:@"syncClippingsViaICloud"];
+								[newContent release];
+								[self registerOrDeregisterICloudSync];
+								[self actionAfterListModification]; // To overwrite what sync put in the defaults.
+								return;
+							}
+						}
+						else
+						{
+							promptUser = YES;
+						}
+					}
+				}
+			}
+		}
 		int newCount = [newContent jcListCount];
+		int offsetForMerge = 0;
 		for ( int i = 0 ; i < newCount ; i++ )
 		{
 			FlycutClipping *newClipping = [newContent clippingAtPosition:i];
 			if ( i >= [store jcListCount] )
 			{
 				// Clipping was beyond the end of the store, so just add it.
-				[newClipping setDisplayLength:displayLength];
-				[store insertClipping:newClipping atIndex:i];
+				[self integrateInsertClipping:newClipping toStore:store atIndex:(i+offsetForMerge) withMerge:mergeLists];
 			}
-			else if ( ![newClipping isEqual:[store clippingAtPosition:i]] )
+			else if ( ![newClipping isEqual:[store clippingAtPosition:(i+offsetForMerge)]] )
 			{
+				BOOL contentAtThisStorePositionNotInNewContent = (i+offsetForMerge) < [store jcListCount] && [newContent indexOfClipping:[store clippingAtPosition:(i+offsetForMerge)]] < 0;
 				int firstIndex = [store indexOfClipping:newClipping];
-				if ( firstIndex < 0 )
+				if ( firstIndex < 0 && [[store deletionJournal] containsObject:newClipping] )
+				{
+					// Clipping was deleted locally, so delete from the new content and move on.
+					[newContent clearItem:i];
+					i--;
+					newCount--;
+				}
+				else if ( firstIndex < 0 )
 				{
 					// Clipping wasn't previously in the store, so just add it.
-					[newClipping setDisplayLength:displayLength];
-					[store insertClipping:newClipping atIndex:i];
+					if ( mergeLists && contentAtThisStorePositionNotInNewContent )
+					{
+						// Give priority to local items so they end up at the top of the list.
+						// Look to the next store item.
+						offsetForMerge++;
+						// While checking this newContent item again.
+						i--;
+					}
+					else
+					{
+						[self integrateInsertClipping:newClipping toStore:store atIndex:(i+offsetForMerge) withMerge:mergeLists];
+					}
 				}
-				else if ( [newContent indexOfClipping:[store clippingAtPosition:i]] < 0 )
+				else if ( contentAtThisStorePositionNotInNewContent )
 				{
 					// Contents in the store at this position didn't exist in the newContent.  Handle deletion.
-					[store clearItem:i];
-					i--;
+					if ( mergeLists
+						|| [[store insertionJournal] containsObject:[store clippingAtPosition:(i+offsetForMerge)]] )
+					{
+						// Look to the next store item.
+						offsetForMerge++;
+						// While checking this newContent item again.
+						i--;
+					}
+					else
+					{
+						[store clearItem:(i+offsetForMerge)];
+						i--;
+					}
 				}
 				else if ( [store removeDuplicates] )
 				{
 					if ( i < firstIndex )
-						[store clippingMoveFrom:firstIndex To:i];
+						[store clippingMoveFrom:firstIndex To:(i+offsetForMerge)];
 					else
 					{
 						// This can only happen if the remote store allowed duplicates and we do not.  Just delete from the new content and move on.
@@ -604,27 +787,29 @@
 				}
 				else
 				{
-					[newClipping setDisplayLength:displayLength];
-					[store insertClipping:newClipping atIndex:i];
+					[self integrateInsertClipping:newClipping toStore:store atIndex:(i+offsetForMerge) withMerge:mergeLists];
 				}
 			}
 		}
-		while ( [store jcListCount] > newCount )
-			[store clearItem:newCount];
+		while ( [store jcListCount] > newCount + offsetForMerge )
+			[store clearItem:(newCount + offsetForMerge)];
 
 #ifdef DEBUG
-		[newContent release];
-		newContent = [self allocInitFlycutStoreRemembering:[clippingStore rememberNum]];
-		[self loadEngineFrom:loadDict key:listKey into:newContent];
-		newCount = [newContent jcListCount];
-		if ( newCount != [store jcListCount] )
-			NSLog(@"Error in integrateStoreAtKey with mismatching after counts!");
-		else
+		if ( !mergeLists )
 		{
-			for ( int i = 0 ; i < newCount ; i++ )
+			[newContent release];
+			newContent = [self allocInitFlycutStoreRemembering:[clippingStore rememberNum]];
+			[self loadEngineFrom:loadDict key:listKey into:newContent];
+			newCount = [newContent jcListCount];
+			if ( newCount != [store jcListCount] )
+				NSLog(@"Error in integrateStoreAtKey with mismatching after counts!");
+			else
 			{
-				if ( ![[store clippingAtPosition:i] isEqual:[newContent clippingAtPosition:i]] )
-					NSLog(@"Error in integrateStoreAtKey with mismatching clippings at index %i!", i);
+				for ( int i = 0 ; i < newCount ; i++ )
+				{
+					if ( ![[store clippingAtPosition:i] isEqual:[newContent clippingAtPosition:i]] )
+						NSLog(@"Error in integrateStoreAtKey with mismatching clippings at index %i!", i);
+				}
 			}
 		}
 #endif
@@ -633,18 +818,57 @@
 	[newContent release];
 }
 
+-(void) integrateInsertClipping:(FlycutClipping*)clipping toStore:(FlycutStore*)store atIndex:(int)index withMerge:(BOOL)mergeLists
+{
+	[clipping setDisplayLength:displayLength];
+
+	if ( mergeLists && [store jcListCount] == [store rememberNum] )
+	{
+		// Grow the rememberNum if needed in merge.
+		int newRememberNum = [store rememberNum] + 1;
+		[store setRememberNum:newRememberNum];
+		if ( store == favoritesStore )
+		{
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRememberNum]
+													 forKey:@"favoritesRememberNum"];
+		}
+		else
+		{
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRememberNum]
+													 forKey:@"rememberNum"];
+		}
+	}
+
+	[store insertClipping:clipping atIndex:index];
+}
+
 -(NSDictionary*) checkPreferencesConflicts:(NSDictionary*)changes
 {
 	NSMutableDictionary *corrections = nil;
 	if ( [changes valueForKey:@"store"] )
 	{
-		// Just clobber back, for now.  They already finished their save, so they won't notice and will just think we made a calculated change.
-		NSLog(@"Oh.  My changes were clobbered.  I will clobber back.");
+		// Load the version that the other party pushed.
+		[[NSUserDefaults standardUserDefaults] setObject:[changes valueForKey:@"store"][2] forKey:@"store"];
+
+		// Integrate stores to apply journaled changes to conflict resolution.
+		[self integrateAllStores];
+
+		// Load the resolution into corrections.
 		if ( !corrections )
 			corrections = [[NSMutableDictionary alloc] init];
-		corrections[@"store"] = [changes valueForKey:@"store"][1]; // We win.
+		corrections[@"store"] = [[NSUserDefaults standardUserDefaults] objectForKey: @"store"];
 	}
 	return corrections;
+}
+
+-(NSDictionary*) checkPreferencesSaveSuccess:(NSDictionary*)changes
+{
+	if ( [changes valueForKey:@"store"] )
+	{
+		[clippingStore pruneJournals];
+		[favoritesStore pruneJournals];
+	}
+	return nil;
 }
 
 -(void) checkCloudKitUpdates
@@ -795,6 +1019,13 @@
 -(NSArray *) previousDisplayStrings:(int)howMany containing:(NSString*)search
 {
 	return [clippingStore previousDisplayStrings:howMany containing:search];
+}
+
+-(NSString*) delegateAlertWithMessageText:(NSString*)message informationText:(NSString*)information buttonsTexts:(NSArray*)buttons
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(alertWithMessageText:informationText:buttonsTexts:)] )
+		return [self.delegate alertWithMessageText:message informationText:information buttonsTexts:buttons];
+	return nil;
 }
 
 @end

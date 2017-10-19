@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FlycutStoreDelegate {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FlycutStoreDelegate, FlycutOperatorDelegate {
 
 	let flycut:FlycutOperator = FlycutOperator()
 	var activeUpdates:Int = 0
@@ -17,6 +17,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	var pbCount:Int = -1
 
 	let pasteboardInteractionQueue = DispatchQueue(label: "com.Flycut.pasteboardInteractionQueue")
+	let alertHandlingQueue = DispatchQueue(label: "com.Flycut.alertHandlingQueue")
+
 
 	// Some buttons we will reuse.
 	var deleteButton:MGSwipeButton? = nil
@@ -56,17 +58,41 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 			return true;
 		})
 
-		// Enable sync by default on iOS until we have a mechanism to adjust preferences on-device.
-		UserDefaults.standard.set(NSNumber(value: true), forKey: "syncSettingsViaICloud")
-		UserDefaults.standard.set(NSNumber(value: true), forKey: "syncClippingsViaICloud")
+		// Force sync disable for test if needed.
+		//UserDefaults.standard.set(NSNumber(value: false), forKey: "syncSettingsViaICloud")
+		//UserDefaults.standard.set(NSNumber(value: false), forKey: "syncClippingsViaICloud")
+		// Force to ask to enable sync for test if needed.
+		//UserDefaults.standard.set(false, forKey: "alreadyAskedToEnableSync")
 
-		flycut.setClippingsStoreDelegate(self);
+		flycut.setClippingsStoreDelegate(self)
+		flycut.delegate = self
 
 		flycut.awake(fromNibDisplaying: 10, withDisplayLength: 140, withSave: #selector(savePreferences(toDict:)), forTarget: self) // The 10 isn't used in iOS right now and 140 characters seems to be enough to cover the width of the largest screen.
 
 		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: .UIPasteboardChanged, object: nil)
 
 		NotificationCenter.default.addObserver(self, selector: #selector(self.applicationWillTerminate), name: .UIApplicationWillTerminate, object: nil)
+	}
+
+	override func viewDidAppear(_ animated: Bool) {
+		// Ask once to enable Sync.  The syntax below will take the else unless alreadyAnswered is non-nil and true.
+		let alreadyAsked = UserDefaults.standard.value(forKey: "alreadyAskedToEnableSync")
+		if let answer = alreadyAsked, answer as! Bool
+		{
+		}
+		else
+		{
+			// Don't use DispatchQueue.main.async since that will still end up blocking the UI draw until the user responds to what hasn't been drawn yet.  Just create a queue to get us away from main, since this is a one-time code path.
+			DispatchQueue(label: "com.Flycut.alertHandlingQueue", qos: .userInitiated ).async {
+				let selection = self.alert(withMessageText: "iCloud Sync", informationText: "Would you like to enable Flycut's iCloud Sync for Settings and Clippings?", buttonsTexts: ["Yes", "No"])
+
+				let response = (selection == "Yes");
+				UserDefaults.standard.set(NSNumber(value: response), forKey: "syncSettingsViaICloud")
+				UserDefaults.standard.set(NSNumber(value: response), forKey: "syncClippingsViaICloud")
+				UserDefaults.standard.set(true, forKey: "alreadyAskedToEnableSync")
+				self.flycut.registerOrDeregisterICloudSync()
+			}
+		}
 	}
 
 	func savePreferences(toDict: NSMutableDictionary)
@@ -144,6 +170,31 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		}
 		print("Moving row \(index) to \(newIndex)")
 		tableView.moveRow(at: IndexPath(row: Int(index), section: 0), to: IndexPath(row: Int(newIndex), section: 0))
+	}
+
+	func alert(withMessageText message: String!, informationText information: String!, buttonsTexts buttons: [Any]!) -> String! {
+		// Don't use DispatchQueue.main.async since that will still end up blocking the UI draw until the user responds to what hasn't been drawn yet.  This isn't a great check, as it is OS-version-limited and results in a EXC_BAD_INSTRUCTION if it fails, but is good enough for development / test.
+		if #available(iOS 10.0, *) {
+			__dispatch_assert_queue_not(DispatchQueue.main)
+		}
+
+		let alertController = UIAlertController(title: message, message: information, preferredStyle: .alert)
+		var selection:String? = nil
+		for option in buttons
+		{
+			alertController.addAction(UIAlertAction(title: option as? String, style: .default) { action in
+				selection = action.title
+				self.alertHandlingQueue.resume()
+			})
+		}
+
+		// Transform the asynchronous UIAlertController into a synchronous alert by suspending a GCD serial queue before presenting then placing an empty sync on that queue to block until it is resumed, and resuming after selection.  The GCD sync can't complete until the selection resumes the queue.
+
+		alertHandlingQueue.suspend()
+		self.present(alertController, animated: true)
+		alertHandlingQueue.sync { } // To wait for queue to resume.
+
+		return selection
 	}
 
 	func checkForClippingAddedToClipboard()
