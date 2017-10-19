@@ -150,12 +150,16 @@
 	}
 
 	// Build our listener timer
-    pollPBTimer = [[NSTimer scheduledTimerWithTimeInterval:(1.0)
-													target:self
-												  selector:@selector(pollPB:)
-												  userInfo:nil
-												   repeats:YES] retain];
-	
+	NSDate *oneSecondFromNow = [NSDate dateWithTimeIntervalSinceNow:1.0];
+	pollPBTimer = [[NSTimer alloc] initWithFireDate:oneSecondFromNow
+										   interval:(1.0)
+											 target:self
+										   selector:@selector(pollPB:)
+										   userInfo:nil
+											repeats:YES];
+	// Assign it to NSRunLoopCommonModes so that it will still poll while the menu is open.  Using a simple NSTimer scheduledTimerWithTimeInterval: would result in polling that stops while the menu is active.  In the past this was okay but with Universal Clipboard a new clipping an arrive while the user has the menu open.
+	[[NSRunLoop currentRunLoop] addTimer:pollPBTimer forMode:NSRunLoopCommonModes];
+
     // Finish up
 	srTransformer = [[[SRKeyCodeTransformer alloc] init] retain];
     pbBlockCount = [[NSNumber numberWithInt:0] retain];
