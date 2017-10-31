@@ -27,6 +27,7 @@
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
 	IBOutlet NSPanel			*prefsPanel;
+	IBOutlet NSTextView			*acknowledgementsView;
 	IBOutlet NSBox			  *appearancePanel;
 	int							mainHotkeyModifiers;
 	SRKeyCodeTransformer        *srTransformer;
@@ -66,7 +67,6 @@
     //Preferences
 	NSDictionary *standardPreferences;
     int jcDisplayNum;
-	BOOL issuedRememberResizeWarning;
 	BOOL needBezelUpdate;
 	BOOL needMenuUpdate;
 }

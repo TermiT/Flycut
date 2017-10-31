@@ -22,6 +22,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 		}
 		application.registerForRemoteNotifications()
 
+		let fileRoot = Bundle.main.path(forResource: "acknowledgements", ofType: "txt")
+		let contents = try? String.init(contentsOfFile: fileRoot!, encoding: String.Encoding.utf8)
+		UserDefaults.standard.set(contents, forKey: "acknowledgementsText")
+
 		return true
 	}
 

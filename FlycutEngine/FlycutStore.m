@@ -26,6 +26,10 @@
         displaying:(int)nowDisplaying
         withDisplayLength:(int)displayLength
 {
+	// Ensure that we don't remember zero or fewer clippings.  Very unlikely, but this provides a safeguard just in case.
+	if ( nowRemembering <= 0 )
+		nowRemembering = 40;
+
     [super init];
     jcList = [[NSMutableArray alloc] init];
 	insertionJournal = [[NSMutableArray alloc] init];

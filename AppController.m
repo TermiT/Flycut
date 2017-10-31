@@ -385,52 +385,30 @@
 	[self checkRememberNumPref:[sender intValue] forPrimaryStore:YES];
 }
 
--(void) checkRememberNumPref:(int)newRemember forPrimaryStore:(BOOL) isPrimaryStore
+-(int) checkRememberNumPref:(int)newRemember forPrimaryStore:(BOOL) isPrimaryStore
 {
-	int oldRemeber = [flycutOperator rememberNum];
-	if ( newRemember < [flycutOperator jcListCount] &&
-		 ! issuedRememberResizeWarning &&
-		 ! [[NSUserDefaults standardUserDefaults] boolForKey:@"stifleRememberResizeWarning"]
-		 ) {
-		int choice = NSRunAlertPanel(@"Resize Stack",
-								 @"Resizing the stack to a value below its present size will cause clippings to be lost.",
-								 @"Resize", @"Cancel", @"Don't Warn Me Again");
-		if ( choice == NSAlertAlternateReturn ) {
-			// Cancel - Change to prior setting.
-			newRemember = oldRemeber;
-			if ( isPrimaryStore ) {
-				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
-														 forKey:@"rememberNum"];
-				[self updateMenu];
-			} else {
-				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
-														 forKey:@"favoritesRememberNum"];
-			}
-		} else if ( choice == NSAlertOtherReturn ) {
-			// Don't Warn Me Again
-			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
-													 forKey:@"stifleRememberResizeWarning"];
-		} else {
-			// Resize
-			issuedRememberResizeWarning = YES;
-		}
-	}
+	int oldRemember = [flycutOperator rememberNum];
+	int setRemember = [flycutOperator setRememberNum:newRemember forPrimaryStore:YES];
 
-	if ( newRemember < oldRemeber )
+	if ( isPrimaryStore )
 	{
-		// Trim down the number displayed in the menu if it is greater than the new
-		// number to remember.
-		if ( isPrimaryStore ) {
-			if ( newRemember < [[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] ) {
-				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
-														 forKey:@"displayNum"];
-				[self updateMenu];
+		if ( setRemember == oldRemember )
+		{
+			[self updateMenu];
+		}
+		else if ( setRemember < oldRemember )
+		{
+			// Trim down the number displayed in the menu if it is greater than the new
+			// number to remember.
+			if ( isPrimaryStore ) {
+				if ( setRemember < [[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] ) {
+					[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:setRemember]
+															 forKey:@"displayNum"];
+					[self updateMenu];
+				}
 			}
 		}
 	}
-
-	// Set the value.
-	[flycutOperator setRememberNum: newRemember];
 }
 
 -(IBAction) setFavoritesRememberNumPref:(id)sender
@@ -634,7 +612,12 @@
 		[prefsPanel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
 	[NSApp activateIgnoringOtherApps: YES];
 	[prefsPanel makeKeyAndOrderFront:self];
-	issuedRememberResizeWarning = NO;
+	NSString *fileRoot = [[NSBundle mainBundle] pathForResource:@"acknowledgements" ofType:@"txt"];
+	NSString *contents = [NSString stringWithContentsOfFile:fileRoot
+												   encoding:NSUTF8StringEncoding
+													  error:NULL];
+	[acknowledgementsView setString:contents];
+	[flycutOperator willShowPreferences];
 }
 
 -(IBAction)toggleLoadOnStartup:(id)sender {

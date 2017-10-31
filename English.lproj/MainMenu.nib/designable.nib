@@ -96,6 +96,7 @@
         </menu>
         <customObject id="213" userLabel="AppController" customClass="AppController">
             <connections>
+                <outlet property="acknowledgementsView" destination="357" id="2y8-wF-wPX"/>
                 <outlet property="appearancePanel" destination="EFy-pc-aKl" id="NYD-Y7-bfQ"/>
                 <outlet property="jcMenu" destination="206" id="215"/>
                 <outlet property="mainRecorder" destination="555" id="556"/>
@@ -580,42 +581,7 @@
                                                                     <size key="minSize" width="474" height="344"/>
                                                                     <size key="maxSize" width="551" height="10000000"/>
                                                                     <attributedString key="textStorage">
-                                                                        <fragment>
-                                                                            <string key="content">Flycut developed by General Arcade (http://www.generalarcade.com/). Flycut is a fork of Jumpcut. Source code avilable on GitHub: http://github.com/TermiT/Flycut
-© General Arcade, 2011.
-
-</string>
-                                                                            <attributes>
-                                                                                <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                                                                <font key="NSFont" metaFont="user"/>
-                                                                                <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
-                                                                            </attributes>
-                                                                        </fragment>
-                                                                        <fragment>
-                                                                            <mutableString key="content" base64-UTF8="YES">
-FhZKdW1wY3V0IGlzIG9wZW4gc291cmNlIGNvZGUgYnVpbHQgd2l0aCBvcGVuIHNvdXJjZSBjb2RlLiBK
-dW1wY3V0IGluY29ycG9yYXRlcyB0aGUKZm9sbG93aW5nIGxpYnJhcmllcywgdXNlZCB3aXRoIGdyYXRp
-dHVkZToKCeKAoiBQVEhvdEtleSBieSBRdWVudGluIENhcm5pY2VsbGkgKDxodHRwOi8vcm9ndWVhbW9l
-YmEuY29tLz4pCgnigKIgU2hvcnRjdXRSZWNvcmRlciBieSBKZXNwZXIgZXQgYWwuICg8aHR0cDovL3dh
-ZmZsZXNvZnR3YXJlLm5ldC8+KQoJ4oCiIFNwYXJrbGUgYnkgQW5keSBNYXR1c2NoYWsgKDxodHRwOi8v
-d3d3LmFuZHltYXR1c2NoYWsub3JnLz4pCgnigKIgYSBtb2RpZmllZCB2ZXJzaW9uIG9mIFVLUHJlZnNQ
-YW5lbCBieSBVbGkgS3VzdGVyZXIgKDxodHRwOi8vd3d3LnphdGhyYXMuZGUvPikgCgpBZGRpdGlvbmFs
-bHksIG11Y2ggb2YgdGhlIG9yaWdpbmFsIGNvZGUgZm9yIEp1bXBjdXQgd2FzIGRlcml2ZWQgZnJvbSBC
-cmV0dCBTaW1tb25zJyAKVGlnZXJMYXVuY2ggKDxodHRwOi8vcmFuY2hlcm8uY29tL3RpZ2VybGF1bmNo
-Lz4pIGFuZCBjb25zdGFudCByZWZlcnJhbCB0byB0aGUgZXhhbXBsZXMgYW5kCmRpc2N1c3Npb24gYXQg
-Q29jb2FEZXYuY29tLgoKSnVtcGN1dCBpcyBzdWJqZWN0IHRvIHRoZSBNSVQgTGljZW5zZS4gU291cmNl
-IGNvZGUgYW5kIGxpY2Vuc2UgZGV0YWlscyBhcmUgYXZhaWxhYmxlIGF0IGl0cwpob21lcGFnZSwgKDxo
-dHRwOi8vanVtcGN1dC5zb3VyY2Vmb3JnZS5uZXQ+KS4gVW5sZXNzIG90aGVyd2lzZSBub3RlZCwgSnVt
-cGN1dCBpcyAKY29weXJpZ2h0IMKpIFN0ZXZlIENvb2ssIDIwMDIg4oCTIDIwMDguCg
-</mutableString>
-                                                                            <attributes>
-                                                                                <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                                                                <font key="NSFont" metaFont="user"/>
-                                                                            </attributes>
-                                                                        </fragment>
-                                                                        <fragment>
-                                                                            <string key="content">
-Thanks to Clare Bates Congdon, Joshua Davis, Brad Graham, David Jacobs, John Kenzie, Adam Rice, Finn Smith, Vera Tobin, and Andre Torrez for early and ongoing feedback, advice, and encouragement.</string>
+                                                                        <fragment content="This text is loaded from acknowledgements.txt">
                                                                             <attributes>
                                                                                 <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                                                                 <font key="NSFont" metaFont="user"/>

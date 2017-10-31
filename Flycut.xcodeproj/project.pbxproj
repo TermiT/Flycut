@@ -71,7 +71,14 @@
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		8D151CC21FAC2B38005132F0 /* acknowledgements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8D151CC11FAC2B38005132F0 /* acknowledgements.txt */; };
+		8D151CC51FAC2F25005132F0 /* acknowledgements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8D151CC11FAC2B38005132F0 /* acknowledgements.txt */; };
 		8D153A0B1F54CD0C006A5815 /* MJCloudKitUserDefaultsSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */; };
+		8D180DFE1F9CD0580001F912 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8D180DFD1F9CD0580001F912 /* Settings.bundle */; };
+		8D180E221F9FD3D70001F912 /* InAppSettingsKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D180E211F9FD3320001F912 /* InAppSettingsKit.framework */; };
+		8D180E231F9FD3D70001F912 /* InAppSettingsKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8D180E211F9FD3320001F912 /* InAppSettingsKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8D180E271F9FD4B70001F912 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D180E261F9FD4B70001F912 /* SettingsViewController.swift */; };
+		8D180E291FA8CECD0001F912 /* 20-gear2.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D180E281FA8CECD0001F912 /* 20-gear2.png */; };
 		8D1817F71F72D35400F80B7A /* MJCloudKitUserDefaultsSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */; };
 		8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */; };
 		8D2E28871B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */; };
@@ -116,6 +123,34 @@
 			remoteGlobalIDString = C63EE56A1BBA07ED008F46BB;
 			remoteInfo = MGSwipeTableCell;
 		};
+		8D180E1C1F9FD3320001F912 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E42ADA8F168202D700295D85;
+			remoteInfo = InAppSettingsKit;
+		};
+		8D180E1E1F9FD3320001F912 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E42ADAA2168202D700295D85;
+			remoteInfo = InAppSettingsKitTests;
+		};
+		8D180E201F9FD3320001F912 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DAC156231B54533D00655031;
+			remoteInfo = InAppSettingsKitFramework;
+		};
+		8D180E241F9FD3D70001F912 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = DAC156221B54533D00655031;
+			remoteInfo = InAppSettingsKitFramework;
+		};
 		8DCE826A1F4550AA00124117 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */;
@@ -133,6 +168,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				8DCE82691F4550AA00124117 /* MGSwipeTableCell.framework in Embed Frameworks */,
+				8D180E231F9FD3D70001F912 /* InAppSettingsKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -217,9 +253,14 @@
 		8D0C11D51F1882B30046FAA0 /* Flycut-iOS_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Flycut-iOS_Prefix.pch"; sourceTree = "<group>"; };
 		8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MGSwipeTableCell.xcodeproj; path = MGSwipeTableCell/MGSwipeTableCell.xcodeproj; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Flycut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flycut.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D151CC11FAC2B38005132F0 /* acknowledgements.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = acknowledgements.txt; sourceTree = "<group>"; };
 		8D153A071F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MJCloudKitUserDefaultsSync.h; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h; sourceTree = "<group>"; };
 		8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MJCloudKitUserDefaultsSync.m; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.m; sourceTree = "<group>"; };
 		8D153A0C1F5BB249006A5815 /* Flycut.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Flycut.entitlements; sourceTree = "<group>"; };
+		8D180DFD1F9CD0580001F912 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = InAppSettingsKit.xcodeproj; path = InAppSettingsKit/InAppSettingsKit.xcodeproj; sourceTree = "<group>"; };
+		8D180E261F9FD4B70001F912 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		8D180E281FA8CECD0001F912 /* 20-gear2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "20-gear2.png"; path = "InAppSettingsKit/InAppSettingsKitSampleApp/20-gear2.png"; sourceTree = "<group>"; };
 		8D2E28821B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.16.png; path = Resources/com.generalarcade.flycut.black.16.png; sourceTree = "<group>"; };
 		8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.black.32.png; path = Resources/com.generalarcade.flycut.black.32.png; sourceTree = "<group>"; };
 		8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = com.generalarcade.flycut.xout.16.png; path = Resources/com.generalarcade.flycut.xout.16.png; sourceTree = "<group>"; };
@@ -243,6 +284,7 @@
 				8D84B63B1F7412E600DB58F9 /* CloudKit.framework in Frameworks */,
 				8DCE82681F4550AA00124117 /* MGSwipeTableCell.framework in Frameworks */,
 				8D0DC85A1F3D697000A2A8AF /* MGSwipeTableCell.framework in Frameworks */,
+				8D180E221F9FD3D70001F912 /* InAppSettingsKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,7 +318,6 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				8D153A061F54CCD8006A5815 /* MJCloudKitUserDefaultsSync */,
 				AABE497A09FF9CD000A6A239 /* AppController.h */,
 				AABE497B09FF9CD000A6A239 /* AppController.m */,
 				8D0C11A01F147E3C0046FAA0 /* FlycutOperator.h */,
@@ -288,6 +329,8 @@
 				7761C880139BDE94000FB3AB /* LoginItem */,
 				7761C877139BDE7F000FB3AB /* FlycutEngine */,
 				77A4F3A4139BD72300F39666 /* SGHotKeysLib */,
+				8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */,
+				8D153A061F54CCD8006A5815 /* MJCloudKitUserDefaultsSync */,
 				8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */,
 			);
 			name = Classes;
@@ -360,6 +403,7 @@
 				8D2E28831B0669F500AE62C8 /* com.generalarcade.flycut.black.32.png */,
 				8D2E28841B0669F500AE62C8 /* com.generalarcade.flycut.xout.16.png */,
 				8D2E28851B0669F500AE62C8 /* com.generalarcade.flycut.xout.32.png */,
+				8D180E281FA8CECD0001F912 /* 20-gear2.png */,
 				7761C8D1139BE06B000FB3AB /* jumpcut.icns */,
 				7761C8EB139BE09D000FB3AB /* Info.plist */,
 				7761C8D2139BE06B000FB3AB /* net.sf.jumpcut.ghost_scissors_small.png */,
@@ -372,6 +416,7 @@
 				7761C8D9139BE06B000FB3AB /* RemoveShortcutPressed.tif */,
 				7761C8DA139BE06B000FB3AB /* RemoveShortcutRollover.tif */,
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
+				8D151CC11FAC2B38005132F0 /* acknowledgements.txt */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -472,6 +517,7 @@
 		8D0C11A61F171B140046FAA0 /* Flycut-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				8D180DFD1F9CD0580001F912 /* Settings.bundle */,
 				8D153A0C1F5BB249006A5815 /* Flycut.entitlements */,
 				8D0C11A71F171B140046FAA0 /* AppDelegate.swift */,
 				8D0C11A91F171B140046FAA0 /* ViewController.swift */,
@@ -479,6 +525,7 @@
 				8D0C11AE1F171B140046FAA0 /* Assets.xcassets */,
 				8D0C11B01F171B140046FAA0 /* LaunchScreen.storyboard */,
 				8D0C11B31F171B140046FAA0 /* Info.plist */,
+				8D180E261F9FD4B70001F912 /* SettingsViewController.swift */,
 			);
 			path = "Flycut-iOS";
 			sourceTree = "<group>";
@@ -516,6 +563,16 @@
 				8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */,
 			);
 			name = MJCloudKitUserDefaultsSync;
+			sourceTree = "<group>";
+		};
+		8D180E171F9FD3320001F912 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D180E1D1F9FD3320001F912 /* libInAppSettingsKit.a */,
+				8D180E1F1F9FD3320001F912 /* InAppSettingsKitTests.xctest */,
+				8D180E211F9FD3320001F912 /* InAppSettingsKit.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -564,6 +621,7 @@
 			dependencies = (
 				8D0DC8591F3D696B00A2A8AF /* PBXTargetDependency */,
 				8DCE826B1F4550AA00124117 /* PBXTargetDependency */,
+				8D180E251F9FD3D70001F912 /* PBXTargetDependency */,
 			);
 			name = "Flycut-iOS";
 			productName = "Flycut-iOS";
@@ -707,6 +765,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 8D180E171F9FD3320001F912 /* Products */;
+					ProjectRef = 8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */;
+				},
+				{
 					ProductGroup = 8D0DC8531F3D682800A2A8AF /* Products */;
 					ProjectRef = 8D0DC8391F3D4B6A00A2A8AF /* MGSwipeTableCell.xcodeproj */;
 				},
@@ -730,6 +792,27 @@
 			remoteRef = 8D0DC8561F3D682800A2A8AF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		8D180E1D1F9FD3320001F912 /* libInAppSettingsKit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libInAppSettingsKit.a;
+			remoteRef = 8D180E1C1F9FD3320001F912 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		8D180E1F1F9FD3320001F912 /* InAppSettingsKitTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = InAppSettingsKitTests.xctest;
+			remoteRef = 8D180E1E1F9FD3320001F912 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		8D180E211F9FD3320001F912 /* InAppSettingsKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = InAppSettingsKit.framework;
+			remoteRef = 8D180E201F9FD3320001F912 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -737,9 +820,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D180DFE1F9CD0580001F912 /* Settings.bundle in Resources */,
 				8D0C11B21F171B140046FAA0 /* LaunchScreen.storyboard in Resources */,
 				8D0C11AF1F171B140046FAA0 /* Assets.xcassets in Resources */,
 				8D0C11AD1F171B140046FAA0 /* Main.storyboard in Resources */,
+				8D180E291FA8CECD0001F912 /* 20-gear2.png in Resources */,
+				8D151CC51FAC2F25005132F0 /* acknowledgements.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -777,6 +863,7 @@
 				8D2E28861B0669F500AE62C8 /* com.generalarcade.flycut.black.16.png in Resources */,
 				7761C8E6139BE06B000FB3AB /* RemoveShortcut.tif in Resources */,
 				7761C8E7139BE06B000FB3AB /* RemoveShortcutPressed.tif in Resources */,
+				8D151CC21FAC2B38005132F0 /* acknowledgements.txt in Resources */,
 				7761C8E8139BE06B000FB3AB /* RemoveShortcutRollover.tif in Resources */,
 				7794D3D5139BF28B0047E862 /* flycut.icns in Resources */,
 			);
@@ -805,6 +892,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D180E271F9FD4B70001F912 /* SettingsViewController.swift in Sources */,
 				8D0C11D61F18835F0046FAA0 /* FlycutStore.m in Sources */,
 				8D0C11AA1F171B140046FAA0 /* ViewController.swift in Sources */,
 				8D0C11D71F1883620046FAA0 /* FlycutClipping.m in Sources */,
@@ -884,6 +972,11 @@
 			isa = PBXTargetDependency;
 			name = MGSwipeTableCell;
 			targetProxy = 8D0DC8581F3D696B00A2A8AF /* PBXContainerItemProxy */;
+		};
+		8D180E251F9FD3D70001F912 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = InAppSettingsKitFramework;
+			targetProxy = 8D180E241F9FD3D70001F912 /* PBXContainerItemProxy */;
 		};
 		8DCE826B1F4550AA00124117 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -967,6 +1060,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
+				HEADER_SEARCH_PATHS = "InAppSettingsKit/InAppSettingsKit/**";
 				INFOPLIST_FILE = "Flycut-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1023,6 +1117,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
+				HEADER_SEARCH_PATHS = "InAppSettingsKit/InAppSettingsKit/**";
 				INFOPLIST_FILE = "Flycut-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

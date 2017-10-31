@@ -1,0 +1,25 @@
+Flycut, developed by General Arcade (http://www.generalarcade.com/). Flycut is a fork of Jumpcut. Source code avilable on GitHub: http://github.com/TermiT/Flycut
+© General Arcade, 2011 - 2017.
+
+Flycut macOS incorporates the following libraries, used with gratitude:
+	• ShortcutRecorder by Jesper et al. (<http://wafflesoftware.net/>)
+	• a modified version of UKPrefsPanel by Uli Kusterer (<http://www.zathras.de/>)
+	• SGHotKeysLib by Justin Williams (<https://github.com/agilebits/SGHotKeysLib>)
+Flycut iOS incorporates the following libraries, used with gratitude:
+	• MGSwipeTableCell by Imanol Fernandez (<https://github.com/MortimerGoro/MGSwipeTableCell>)
+	• a modified version of InAppSettingsKit by Luc Vandal and Ortwin Gentz (<https://github.com/futuretap/InAppSettingsKit>)
+Flycut macOS & iOS incorporates the following libraries, used with gratitude:
+	• MJCloudKitUserDefaultsSync by Mark Jerde (<https://github.com/MarkJerde/MJCloudKitUserDefaultsSync>)
+
+Jumpcut is open source code built with open source code. Jumpcut incorporates the
+following libraries, used with gratitude:
+	• PTHotKey by Quentin Carnicelli (<http://rogueamoeba.com/>)
+	• ShortcutRecorder by Jesper et al. (<http://wafflesoftware.net/>)
+	• Sparkle by Andy Matuschak (<http://www.andymatuschak.org/>)
+	• a modified version of UKPrefsPanel by Uli Kusterer (<http://www.zathras.de/>) 
+
+Additionally, much of the original code for Jumpcut was derived from Brett Simmons' TigerLaunch (<http://ranchero.com/tigerlaunch/>) and constant referral to the examples and discussion at CocoaDev.com.
+
+Jumpcut is subject to the MIT License. Source code and license details are available at its homepage, (<http://jumpcut.sourceforge.net>). Unless otherwise noted, Jumpcut is copyright © Steve Cook, 2002 – 2008.
+
+Thanks to Clare Bates Congdon, Joshua Davis, Brad Graham, David Jacobs, John Kenzie, Adam Rice, Finn Smith, Vera Tobin, and Andre Torrez for early and ongoing feedback, advice, and encouragement.

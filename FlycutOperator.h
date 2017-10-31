@@ -42,6 +42,9 @@
 	BOOL inhibitSaveEngineAfterListModification;
 	BOOL firstClippingsSyncAfterEnabling;
 	BOOL inhibitAutosaveClippings;
+
+	//Preferences
+	BOOL issuedRememberResizeWarning;
 }
 
 // Basic functionality
@@ -77,7 +80,8 @@
 -(void) checkCloudKitUpdates;
 
 // Preference related
--(void) setRememberNum:(int)newRemember;
+-(void) willShowPreferences;
+-(int) setRememberNum:(int)newRemember forPrimaryStore:(BOOL) isPrimaryStore;
 
 // Initialization / cleanup related
 -(void)applicationWillTerminate;;

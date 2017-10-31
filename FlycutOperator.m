@@ -128,9 +128,55 @@
 	}
 }
 
--(void) setRememberNum:(int) newRemember
+-(void) willShowPreferences
 {
+	issuedRememberResizeWarning = NO;
+}
+
+-(int) setRememberNum:(int)newRemember forPrimaryStore:(BOOL) isPrimaryStore
+{
+	int oldRemeber = [self rememberNum];
+
+	// Ensure that we don't remember zero or fewer clippings.
+	if ( newRemember <= 0 )
+	{
+		newRemember = oldRemeber;
+		if ( newRemember <= 0 )
+			newRemember = 40;
+	}
+
+	if ( newRemember < [self jcListCount] &&
+		! issuedRememberResizeWarning &&
+		! [[NSUserDefaults standardUserDefaults] boolForKey:@"stifleRememberResizeWarning"]
+		) {
+
+		NSString *choice = [self delegateAlertWithMessageText:@"Resize Stack"
+											  informationText:@"Resizing the stack to a value below its present size will cause clippings to be lost."
+												 buttonsTexts:@[@"Resize", @"Cancel", @"Don't Warn Me Again"]];
+		if ( [choice isEqualToString:@"Cancel"] ) {
+			// Cancel - Change to prior setting.
+			newRemember = oldRemeber;
+			if ( isPrimaryStore ) {
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
+														 forKey:@"rememberNum"];
+			} else {
+				[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInt:newRemember]
+														 forKey:@"favoritesRememberNum"];
+			}
+		} else if ( [choice isEqualToString:@"Don't Warn Me Again"] ) {
+			// Don't Warn Me Again
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+													 forKey:@"stifleRememberResizeWarning"];
+		} else {
+			// Resize
+			issuedRememberResizeWarning = YES;
+		}
+	}
+
+	// Set the value.
 	[clippingStore setRememberNum:newRemember];
+
+	return newRemember;
 }
 
 -(void)toggleToFromFavoritesStore
@@ -524,8 +570,9 @@
 	BOOL changedSyncClippings = ( ![[NSUserDefaults standardUserDefaults] objectForKey:@"previousSyncClippingsViaICloud"]
 								 || syncClippings != [[NSUserDefaults standardUserDefaults] boolForKey:@"previousSyncClippingsViaICloud"] );
 
-	[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:syncClippings]
-											 forKey:@"previousSyncClippingsViaICloud"];
+	if ( changedSyncClippings )
+		[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:syncClippings]
+												 forKey:@"previousSyncClippingsViaICloud"];
 
 	// We will enable / disable regardless of changedSyncClippings because this gets called at app launch, where the feature was previously enabled but needs to be registered.
 	if ( syncClippings ) {

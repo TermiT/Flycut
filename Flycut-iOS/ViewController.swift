@@ -15,9 +15,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	var tableView:UITableView!
 	var currentAnimation = UITableViewRowAnimation.none
 	var pbCount:Int = -1
+	var rememberedSyncSettings:Bool = false
+	var rememberedSyncClippings:Bool = false
 
 	let pasteboardInteractionQueue = DispatchQueue(label: "com.Flycut.pasteboardInteractionQueue")
 	let alertHandlingQueue = DispatchQueue(label: "com.Flycut.alertHandlingQueue")
+	let defaultsChangeHandlingQueue = DispatchQueue(label: "com.Flycut.defaultsChangeHandlingQueue")
 
 
 	// Some buttons we will reuse.
@@ -91,6 +94,36 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 			                                       name: notification,
 			                                       object: nil)
 		}
+
+		NotificationCenter.default.addObserver(self, selector: #selector(self.defaultsChanged), name: UserDefaults.didChangeNotification, object: nil)
+	}
+
+	func defaultsChanged() {
+		// This seems to be the only way to respond to Settings changes, though it doesn't inform us what changed so we will have to check each to see if they were the one(s).
+
+		// Don't use DispatchQueue.main.async since that will still end up blocking the UI draw until the user responds to what hasn't been drawn yet.
+		// Use async on a sequential queue to avoid concurrent response to the same change.  This allows enqueuing of defaultsChanged calls in reponse to changes made within the handling, but using sync causes EXC_BAD_ACCESS in this case.
+		defaultsChangeHandlingQueue.async {
+			let newRememberNum = Int32(UserDefaults.standard.integer(forKey: "rememberNum"))
+			if ( UserDefaults.standard.value(forKey: "rememberNum") is String )
+			{
+				// Reset the value, since TextField will make it a String and CloudKit sync will object to changing the type.  Check this independent of value change, since the type could be changed without a change in value and we don't want it left around causing confusion.
+				UserDefaults.standard.set(newRememberNum, forKey: "rememberNum")
+			}
+			if ( self.flycut.rememberNum() != newRememberNum ) {
+				self.flycut.setRememberNum(newRememberNum, forPrimaryStore: true)
+			}
+
+			let syncSettings = UserDefaults.standard.bool(forKey: "syncSettingsViaICloud")
+			let syncClippings = UserDefaults.standard.bool(forKey: "syncClippingsViaICloud")
+			if ( syncSettings != self.rememberedSyncSettings
+				|| syncClippings != self.rememberedSyncClippings )
+			{
+				self.rememberedSyncSettings = syncSettings
+				self.rememberedSyncClippings = syncClippings
+				self.flycut.registerOrDeregisterICloudSync()
+			}
+		}
 	}
 
 	override func viewDidAppear(_ animated: Bool) {
@@ -112,6 +145,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 				self.flycut.registerOrDeregisterICloudSync()
 			}
 		}
+
+		// This is a suitable place to prepare to possible eventual display of preferences, resetting values that should reset before each display of preferences.
+		flycut.willShowPreferences()
 	}
 
 	func savePreferences(toDict: NSMutableDictionary)
@@ -207,11 +243,21 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 			})
 		}
 
-		// Transform the asynchronous UIAlertController into a synchronous alert by suspending a GCD serial queue before presenting then placing an empty sync on that queue to block until it is resumed, and resuming after selection.  The GCD sync can't complete until the selection resumes the queue.
+		if var topController = UIApplication.shared.keyWindow?.rootViewController {
+			while let presentedViewController = topController.presentedViewController {
+				topController = presentedViewController
+			}
 
-		alertHandlingQueue.suspend()
-		self.present(alertController, animated: true)
-		alertHandlingQueue.sync { } // To wait for queue to resume.
+			// topController should now be your topmost view controller
+
+			// Transform the asynchronous UIAlertController into a synchronous alert by suspending a GCD serial queue before presenting then placing an empty sync on that queue to block until it is resumed, and resuming after selection.  The GCD sync can't complete until the selection resumes the queue.
+
+			alertHandlingQueue.suspend()
+			DispatchQueue.main.async {
+				topController.present(alertController, animated: true)
+			}
+			alertHandlingQueue.sync { } // To wait for queue to resume.
+		}
 
 		return selection
 	}
@@ -219,6 +265,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	func checkForClippingAddedToClipboard()
 	{
 		pasteboardInteractionQueue.async {
+			// This is a suitable place to prepare to possible eventual display of preferences, resetting values that should reset before each display of preferences.
+			self.flycut.willShowPreferences()
+
 			if ( UIPasteboard.general.changeCount != self.pbCount )
 			{
 				self.pbCount = UIPasteboard.general.changeCount;
