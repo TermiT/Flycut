@@ -76,6 +76,21 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: .UIPasteboardChanged, object: nil)
 
 		NotificationCenter.default.addObserver(self, selector: #selector(self.applicationWillTerminate), name: .UIApplicationWillTerminate, object: nil)
+
+		// Check for clipping whenever we become active.
+		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: .UIApplicationDidBecomeActive, object: nil)
+		checkForClippingAddedToClipboard() // Since the first-launch notification will occur before we add observer.
+
+		// Register for notifications for the scenarios in which we should save the engine.
+		[ Notification.Name.UIApplicationWillResignActive,
+		  Notification.Name.UIApplicationDidEnterBackground,
+		  Notification.Name.UIApplicationWillTerminate ]
+			.forEach { (notification) in
+			NotificationCenter.default.addObserver(self,
+			                                       selector: #selector(self.saveEngine),
+			                                       name: notification,
+			                                       object: nil)
+		}
 	}
 
 	override func viewDidAppear(_ animated: Bool) {
