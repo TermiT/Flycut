@@ -55,7 +55,6 @@ CGRect IASKCGRectSwap(CGRect rect);
 @property (nonatomic, strong) id currentFirstResponder;
 @property (nonatomic, strong) NSMutableDictionary *rowHeights;
 
-- (void)_textChanged:(id)sender;
 - (void)synchronizeSettings;
 - (void)userDefaultsDidChange;
 - (void)reload;
@@ -513,7 +512,6 @@ CGRect IASKCGRectSwap(CGRect rect);
 	}
 	else if ([identifier hasPrefix:kIASKPSTextFieldSpecifier]) {
 		cell = [[IASKPSTextFieldSpecifierViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:kIASKPSTextFieldSpecifier];
-		[((IASKPSTextFieldSpecifierViewCell*)cell).textField addTarget:self action:@selector(_textChanged:) forControlEvents:UIControlEventEditingChanged];
 	}
 	else if ([identifier hasPrefix:kIASKTextViewSpecifier]) {
         cell = [[IASKTextViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:kIASKTextViewSpecifier];
@@ -919,13 +917,14 @@ CGRect IASKCGRectSwap(CGRect rect);
 	self.currentFirstResponder = textField;
 }
 
-- (void)_textChanged:(id)sender {
-    IASKTextField *text = sender;
-    [_settingsStore setObject:[text text] forKey:[text key]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kIASKAppSettingChanged
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionaryWithObject:[text text]
-                                                                                           forKey:[text key]]];
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+	// This will be called when the user taps somewhere in the Settings View other than within the field being edited or when changing any toggle.  It will also be called when the Settings View is closed unless it has already been called due to the user tapping elsewhere.
+	IASKTextField *text = (IASKTextField*)textField;
+	[_settingsStore setObject:[text text] forKey:[text key]];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kIASKAppSettingChanged
+														object:self
+													  userInfo:[NSDictionary dictionaryWithObject:[text text]
+																						   forKey:[text key]]];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
