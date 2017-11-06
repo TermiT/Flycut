@@ -16,9 +16,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 		// Override point for customization after application launch.
-		let center = UNUserNotificationCenter.current()
-		center.requestAuthorization(options:[]) { (granted, error) in
-			// Enable or disable features based on authorization.
+		if #available(iOS 10.0, *) {
+			let center = UNUserNotificationCenter.current()
+			center.requestAuthorization(options:[]) { (granted, error) in
+				// Enable or disable features based on authorization.
+			}
+		} else {
+			// Run without remote notifications for earlier versions
+			MJCloudKitUserDefaultsSync.setRemoteNotificationsEnabled(false)
 		}
 		application.registerForRemoteNotifications()
 
