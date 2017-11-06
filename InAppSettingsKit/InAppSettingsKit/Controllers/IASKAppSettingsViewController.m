@@ -476,7 +476,12 @@ CGRect IASKCGRectSwap(CGRect rect);
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-	NSString *footerText = [self.settingsReader footerTextForSection:section];
+	IASKSpecifier *specifier = [self.settingsReader headerSpecifierForSection:section];
+	NSString *key = (nil == specifier
+					 || ![specifier.type isEqualToString:kIASKPSGroupSpecifier])
+	? nil
+	: specifier.key;
+	NSString *footerText = [self.settingsReader titleForId:(nil != key && [self.settingsStore objectForKey:key] != nil) ? [self.settingsStore objectForKey:key] : specifier.footerText];
 	if (_showCreditsFooter && (section == [self.settingsReader numberOfSections]-1)) {
 		// show credits since this is the last section
 		if ((footerText == nil) || ([footerText length] == 0)) {
