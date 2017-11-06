@@ -19,7 +19,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	var rememberedSyncClippings:Bool = false
 
 	let pasteboardInteractionQueue = DispatchQueue(label: "com.Flycut.pasteboardInteractionQueue")
-	let alertHandlingQueue = DispatchQueue(label: "com.Flycut.alertHandlingQueue")
+	let alertHandlingSemaphore = DispatchSemaphore(value: 0)
 	let defaultsChangeHandlingQueue = DispatchQueue(label: "com.Flycut.defaultsChangeHandlingQueue")
 
 
@@ -239,7 +239,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		{
 			alertController.addAction(UIAlertAction(title: option as? String, style: .default) { action in
 				selection = action.title
-				self.alertHandlingQueue.resume()
+				self.alertHandlingSemaphore.signal()
 			})
 		}
 
@@ -250,13 +250,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
 			// topController should now be your topmost view controller
 
-			// Transform the asynchronous UIAlertController into a synchronous alert by suspending a GCD serial queue before presenting then placing an empty sync on that queue to block until it is resumed, and resuming after selection.  The GCD sync can't complete until the selection resumes the queue.
+			// Transform the asynchronous UIAlertController into a synchronous alert by waiting, after presenting, on a semaphore that is initialized to zero and only signaled in the selection handler.
 
-			alertHandlingQueue.suspend()
 			DispatchQueue.main.async {
 				topController.present(alertController, animated: true)
 			}
-			alertHandlingQueue.sync { } // To wait for queue to resume.
+			alertHandlingSemaphore.wait() // To wait for queue to resume.
 		}
 
 		return selection
