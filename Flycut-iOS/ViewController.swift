@@ -32,6 +32,21 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
 
+		// Uncomment the following line to load the demo state for screenshots.
+		//UserDefaults.standard.set(NSNumber(value: true), forKey: "demoForAppStoreScreenshots")
+		// Use this command to get screenshots:
+		// while true; do xcrun simctl io booted screenshot;sleep 1;done
+
+		if ( UserDefaults.standard.bool(forKey: "demoForAppStoreScreenshots") )
+		{
+			// Ensure we will not load or save clippings in demo mode.
+			let savePref = UserDefaults.standard.integer(forKey: "savePreference")
+			if ( 0 < savePref )
+			{
+				UserDefaults.standard.set(0, forKey: "savePreference")
+			}
+		}
+
 		tableView = self.view.subviews.first as! UITableView
 		tableView.delegate = self
 		tableView.dataSource = self
@@ -102,6 +117,32 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		}
 
 		NotificationCenter.default.addObserver(self, selector: #selector(self.defaultsChanged), name: UserDefaults.didChangeNotification, object: nil)
+
+		if ( UserDefaults.standard.bool(forKey: "demoForAppStoreScreenshots") )
+		{
+			// Make sure we won't send these change to iCloud.
+			UserDefaults.standard.set(NSNumber(value: false), forKey: "syncSettingsViaICloud")
+			UserDefaults.standard.set(NSNumber(value: false), forKey: "syncClippingsViaICloud")
+			self.flycut.registerOrDeregisterICloudSync()
+			NotificationCenter.default.removeObserver(self)
+
+			// Load sample content, reverse order.
+			self.flycut.addClipping("https://www.apple.com", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("App Store is a digital distribution platform, developed and maintained by Apple Inc., for mobile apps on its iOS operating system.", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("https://itunesconnect.apple.com/", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("The party is at 123 Main St. 6 PM. Please bring some chips to share.", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("You are going to love this new design I found. It takes half the effort and resonates with today's hottest trends. With our throughput up we can now keep up with demand.", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("http://www.makeuseof.com/tag/5-best-mac-clipboard-manager-apps-improve-workflow/", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("Swipe left to delete", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("Swipe right to open web links", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("Tap to copy", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("Manage your clippings in iOS", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("Flycut has made the leap from macOS to iOS", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+			self.flycut.addClipping("Flycut has made the leap from OS X to iOS", ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+
+			// Unset the demo setting.
+			UserDefaults.standard.set(NSNumber(value: false), forKey: "demoForAppStoreScreenshots")
+		}
 	}
 
 	func defaultsChanged() {
