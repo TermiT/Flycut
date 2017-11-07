@@ -256,7 +256,7 @@
 		8D151CC11FAC2B38005132F0 /* acknowledgements.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = acknowledgements.txt; sourceTree = "<group>"; };
 		8D153A071F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MJCloudKitUserDefaultsSync.h; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h; sourceTree = "<group>"; };
 		8D153A081F54CCF7006A5815 /* MJCloudKitUserDefaultsSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MJCloudKitUserDefaultsSync.m; path = MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.m; sourceTree = "<group>"; };
-		8D153A0C1F5BB249006A5815 /* Flycut.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Flycut.entitlements; sourceTree = "<group>"; };
+		8D153A0C1F5BB249006A5815 /* Flycut-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Flycut-iOS.entitlements"; sourceTree = "<group>"; };
 		8D180DFD1F9CD0580001F912 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8D180E161F9FD3320001F912 /* InAppSettingsKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = InAppSettingsKit.xcodeproj; path = InAppSettingsKit/InAppSettingsKit.xcodeproj; sourceTree = "<group>"; };
 		8D180E261F9FD4B70001F912 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -518,7 +518,7 @@
 			isa = PBXGroup;
 			children = (
 				8D180DFD1F9CD0580001F912 /* Settings.bundle */,
-				8D153A0C1F5BB249006A5815 /* Flycut.entitlements */,
+				8D153A0C1F5BB249006A5815 /* Flycut-iOS.entitlements */,
 				8D0C11A71F171B140046FAA0 /* AppDelegate.swift */,
 				8D0C11A91F171B140046FAA0 /* ViewController.swift */,
 				8D0C11AB1F171B140046FAA0 /* Main.storyboard */,
@@ -1037,7 +1037,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "Flycut-iOS/Flycut-iOS.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer: mjerde@me.com (J33CFAMHSW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
@@ -1100,7 +1100,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "Flycut-iOS/Flycut-iOS.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer: mjerde@me.com (J33CFAMHSW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
