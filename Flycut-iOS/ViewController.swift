@@ -168,6 +168,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 			{
 				self.rememberedSyncSettings = syncSettings
 				self.rememberedSyncClippings = syncClippings
+
+				if ( self.rememberedSyncClippings )
+				{
+					if ( 2 > UserDefaults.standard.integer(forKey: "savePreference") )
+					{
+						UserDefaults.standard.set(2, forKey: "savePreference")
+					}
+
+				}
 				self.flycut.registerOrDeregisterICloudSync()
 			}
 		}
