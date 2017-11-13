@@ -41,9 +41,9 @@
 		@"skipPasswordLengthsList",
 		[NSNumber numberWithBool:NO],
 		@"revealPasteboardTypes",
-        [NSNumber numberWithBool:YES], // do not commit with YES.  Use NO
+        [NSNumber numberWithBool:NO],
         @"removeDuplicates",
-        [NSNumber numberWithBool:YES], // do not commit with YES.  Use NO
+        [NSNumber numberWithBool:NO],
         @"pasteMovesToTop",
         [NSNumber numberWithBool:NO],
         @"syncSettingsViaICloud",
