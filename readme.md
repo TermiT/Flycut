@@ -19,10 +19,10 @@ Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboa
 Note: the Mac App Store version is not up to date - if you want the latest version with all the features, you will have to download DRM-Free version or compile Flycut yourself.
 
 **DRM-Free:**
-Download latest DRM-Free version [here](https://github.com/TermiT/Flycut/releases)
+Download latest DRM-Free version [here](https://github.com/MarkJerde/Flycut/releases/latest)
 
 **iOS App Store:**
-Submission pending to the App Store
+Download from the App Store [here](https://itunes.apple.com/us/app/flycut/id1273639655?mt=8)
 
 ## Use
 **Documentation:**
@@ -39,4 +39,3 @@ MIT
 
 * Big refactoring
 * Expose-like view of all clips
-* iCloud sync
