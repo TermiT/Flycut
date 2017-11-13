@@ -39,6 +39,7 @@
 static NSString *prefix = nil;
 static NSArray *matchList = nil;
 static NSTimer *pollCloudKitTimer = nil;
+static NSTimer *monitorSubscriptionTimer = nil;
 static NSString *databaseContainerIdentifier = nil;
 static CKRecordZone *recordZone = nil;
 static CKRecordZoneID *recordZoneID = nil;
@@ -72,6 +73,8 @@ static dispatch_queue_t startStopQueue = nil;
 // Diagnostic information.
 static BOOL productionMode = NO;
 static CKRecord *lastRecordReceived = nil;
+static CFAbsoluteTime lastResubscribeTime;
+static int resubscribeCount = 0;
 static CFAbsoluteTime lastReceiveTime;
 
 @implementation MJCloudKitUserDefaultsSync
@@ -476,6 +479,13 @@ static CFAbsoluteTime lastReceiveTime;
 	// If we are already running and add criteria while updating to iCloud, we could push to iCloud before pulling the existing value from iCloud.  Avoid this by dispatching into another thread that will wait pause existing activity and wait for it to stop before adding new criteria.
 	dispatch_async(startStopQueue, ^{
 		DLog(@"Actually starting with prefix");
+
+		if ( nil == prefixToSync || [prefixToSync isEqualToString:prefix] )
+		{
+			DLog(@"Starting no new prefix.  No action will be taken.");
+			return;
+		}
+
 		[self commonStartInitialStepsOnContainerIdentifier:containerIdentifier];
 
 		if ( prefix )
@@ -499,18 +509,32 @@ static CFAbsoluteTime lastReceiveTime;
 	// If we are already running and add criteria while updating to iCloud, we could push to iCloud before pulling the existing value from iCloud.  Avoid this by dispatching into another thread that will wait pause existing activity and wait for it to stop before adding new criteria.
 	dispatch_async(startStopQueue, ^{
 		DLog(@"Actually starting with match list length %lu atop %lu", (unsigned long)[keyMatchList count], (unsigned long)[matchList count]);
-		[self commonStartInitialStepsOnContainerIdentifier:containerIdentifier];
+
+		if ( nil == keyMatchList || 0 == [keyMatchList count] )
+		{
+			DLog(@"Starting no new keys.  No action will be taken.");
+			return;
+		}
 
 		if ( !matchList )
 			matchList = [[NSArray alloc] init];
-		NSArray *toRelease = matchList;
 
 		// Add to existing array.
-		matchList = [matchList arrayByAddingObjectsFromArray:keyMatchList];
+		NSArray *newList = [matchList arrayByAddingObjectsFromArray:keyMatchList];
 		// Remove duplicates.
-		matchList = [[NSSet setWithArray:matchList] allObjects];
+		newList = [[NSSet setWithArray:newList] allObjects];
 
-		[matchList retain];
+		if ( [newList count] == [matchList count] )
+		{
+			DLog(@"Starting no additional new keys.  No action will be taken.");
+			return;
+		}
+
+		[self commonStartInitialStepsOnContainerIdentifier:containerIdentifier];
+
+		// Install new array.
+		NSArray *toRelease = matchList;
+		matchList = [newList retain];
 		[toRelease release];
 
 		DLog(@"Match list length is now %lu", (unsigned long)[matchList count]);
@@ -555,6 +579,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 	else
 	{
+		// Question: Rather than stopping observing here, and later enabling again, would it be better to just set a flag for updateTo / updateFrom to do nothing?  The latter would require something to ensure that we notice changes that happened while paused, so the idea is non-trivial.
 		[self stopObservingActivity];
 		[self stopObservingIdentityChanges];
 	}
@@ -872,9 +897,40 @@ static CFAbsoluteTime lastReceiveTime;
 			}
 			else
 				dispatch_resume(startStopQueue);
-			[subscription release];
+
+			if ( nil == monitorSubscriptionTimer )
+			{
+				dispatch_async(dispatch_get_main_queue(), ^{
+					NSDate *oneSecondFromNow = [NSDate dateWithTimeIntervalSinceNow:1.0];
+					alreadyPolling = NO;
+					monitorSubscriptionTimer = [[NSTimer alloc] initWithFireDate:oneSecondFromNow
+																		interval:(60.0)
+																		  target:self
+																		selector:@selector(monitorSubscription:)
+																		userInfo:nil
+																		 repeats:YES];
+					// Assign it to NSRunLoopCommonModes so that it will still poll while the menu is open.  Using a simple NSTimer scheduledTimerWithTimeInterval: would result in polling that stops while the menu is active.  In the past this was okay but with Universal Clipboard a new clipping an arrive while the user has the menu open.
+					[[NSRunLoop currentRunLoop] addTimer:monitorSubscriptionTimer forMode:NSRunLoopCommonModes];
+					[subscription release];
+				});
+			}
+			else
+				[subscription release];
 		}];
 	}
+}
+
++(void)monitorSubscription:(NSTimer *)timer {
+	[privateDB fetchSubscriptionWithID:subscriptionID completionHandler:^(CKSubscription * _Nullable existingSubscription, NSError * _Nullable error) {
+		BOOL noSubscription = (nil == existingSubscription);
+		if ( observingActivity && noSubscription )
+			dispatch_async(startStopQueue, ^{
+				dispatch_suspend(startStopQueue);
+				lastResubscribeTime = CFAbsoluteTimeGetCurrent();
+				resubscribeCount++;
+				[self subscribeToDatabase];
+			});
+	}];
 }
 
 +(void) stopObservingActivity {
@@ -1039,7 +1095,8 @@ static CFAbsoluteTime lastPollPokeTime;
 + (NSString *) diagnosticData {
 	NSString *lastPollPoke = [self cfAbsoluteTimeToString:lastPollPokeTime];
 	NSString *lastReceive = [self cfAbsoluteTimeToString:lastReceiveTime];
-	return [NSString stringWithFormat:@"Observing Activity: %@\nObserving Identity: %@\nRemote Notifications Enabled: %@\nProduction: %@\nToken: %@\nLast Poll: %@\nLast Record: %@\nLast Receive: %@",
+	NSString *lastResubscribe = [self cfAbsoluteTimeToString:lastResubscribeTime];
+	return [NSString stringWithFormat:@"Observing Activity: %@\nObserving Identity: %@\nRemote Notifications Enabled: %@\nProduction: %@\nToken: %@\nLast Poll: %@\nLast Record: %@\nLast Receive: %@\nLast Resubscribe: %@\nResubscribe count:%i",
 			observingActivity ? @"YES" : @"NO",
 			observingIdentityChanges ? @"YES" : @"NO",
 			remoteNotificationsEnabled ? @"YES" : @"NO",
@@ -1047,7 +1104,9 @@ static CFAbsoluteTime lastPollPokeTime;
 			previousChangeToken ? previousChangeToken : @"n/a",
 			lastPollPoke ? lastPollPoke : @"n/a",
 			lastRecordReceived ? lastRecordReceived.recordChangeTag : @"n/a",
-			lastReceive ? lastReceive : @"n/a"];
+			lastReceive ? lastReceive : @"n/a",
+			lastResubscribe ? lastResubscribe : @"n/a",
+			resubscribeCount];
 }
 
 + (NSString *) cfAbsoluteTimeToString:(CFAbsoluteTime) value
