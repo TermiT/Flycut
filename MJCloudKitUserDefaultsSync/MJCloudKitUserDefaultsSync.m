@@ -69,6 +69,11 @@ static dispatch_queue_t syncQueue = nil;
 static dispatch_queue_t pollQueue = nil;
 static dispatch_queue_t startStopQueue = nil;
 
+// Diagnostic information.
+static BOOL productionMode = NO;
+static CKRecord *lastRecordReceived = nil;
+static CFAbsoluteTime lastReceiveTime;
+
 @implementation MJCloudKitUserDefaultsSync
 
 +(void) updateToiCloud:(NSNotification*) notificationObject {
@@ -245,6 +250,12 @@ static dispatch_queue_t startStopQueue = nil;
 													// If we had a conflict on the conflict resolution, just give up for now.
 													DLog(@"CloudKit conflict-resolution Save failure: %@", saveError.localizedDescription);
 												}
+												else
+												{
+													// Save counts as receive, since we have seen what we put in there.
+													[self updateLastRecordReceived:savedRecord];
+
+												}
 
 												[self completeUpdateToiCloudWithChanges:changes];
 											}];
@@ -256,6 +267,9 @@ static dispatch_queue_t startStopQueue = nil;
 							}
 							else
 							{
+								// Save counts as receive, since we have seen what we put in there.
+								[self updateLastRecordReceived:savedRecord];
+
 								[self sendNotificationsFor:MJSyncNotificationSaveSuccess onKeys:changes];
 								[self completeUpdateToiCloudWithChanges:changes];
 							}
@@ -343,6 +357,8 @@ static dispatch_queue_t startStopQueue = nil;
 				DLog(@"CloudKit Fetch failure: %@", error.localizedDescription);
 			}
 			else {
+				[self updateLastRecordReceived:record];
+
 				DLog(@"Updating from iCloud completion");
 
 				// prevent NSUserDefaultsDidChangeNotification from being posted while we update from iCloud
@@ -350,7 +366,6 @@ static dispatch_queue_t startStopQueue = nil;
 																name:NSUserDefaultsDidChangeNotification
 															  object:nil];
 
-				lastUpdateRecordChangeTagReceived = [[record recordChangeTag] retain];
 				DLog(@"Got record -%@-_-%@-_-%@-_-%@-",[[[record recordID] zoneID] zoneName],[[[record recordID] zoneID] ownerName],[[record recordID] recordName],[record recordChangeTag]);
 
 				__block int additions = 0, modifications = 0;
@@ -721,6 +736,8 @@ static dispatch_queue_t startStopQueue = nil;
 
 		// Setup database connections.
 		CKContainer *container = [CKContainer containerWithIdentifier:databaseContainerIdentifier];
+		int environmentValue = ((NSNumber*)[[container valueForKey:@"containerID"] valueForKey:@"environment"]).intValue;
+		productionMode = (1 == environmentValue);
 		publicDB = [container publicCloudDatabase];
 		privateDB = [container privateCloudDatabase];
 
@@ -1006,6 +1023,49 @@ static CFAbsoluteTime lastPollPokeTime;
 			[operation release];
 		}
 	});
+}
+
++ (void) updateLastRecordReceived:(CKRecord*)record
+{
+	if ( lastRecordReceived )
+		[lastRecordReceived release];
+	lastRecordReceived = [record retain];
+
+	if ( lastUpdateRecordChangeTagReceived )
+		[lastUpdateRecordChangeTagReceived release];
+	lastUpdateRecordChangeTagReceived = [[record recordChangeTag] retain];
+}
+
++ (NSString *) diagnosticData {
+	NSString *lastPollPoke = [self cfAbsoluteTimeToString:lastPollPokeTime];
+	NSString *lastReceive = [self cfAbsoluteTimeToString:lastReceiveTime];
+	return [NSString stringWithFormat:@"Observing Activity: %@\nObserving Identity: %@\nRemote Notifications Enabled: %@\nProduction: %@\nToken: %@\nLast Poll: %@\nLast Record: %@\nLast Receive: %@",
+			observingActivity ? @"YES" : @"NO",
+			observingIdentityChanges ? @"YES" : @"NO",
+			remoteNotificationsEnabled ? @"YES" : @"NO",
+			(productionMode ? @"YES" : @"NO"),
+			previousChangeToken ? previousChangeToken : @"n/a",
+			lastPollPoke ? lastPollPoke : @"n/a",
+			lastRecordReceived ? lastRecordReceived.recordChangeTag : @"n/a",
+			lastReceive ? lastReceive : @"n/a"];
+}
+
++ (NSString *) cfAbsoluteTimeToString:(CFAbsoluteTime) value
+{
+	if ( 0 == value )
+		return nil; // In our case, we know that the uninitialized value will never be the value assigned, so return nil for that.
+
+	CFStringRef dateString = nil;
+	CFDateRef cfDate = CFDateCreate(kCFAllocatorDefault, value);
+	CFDateFormatterRef dateFormatter = CFDateFormatterCreate(kCFAllocatorDefault, CFLocaleCopyCurrent(), kCFDateFormatterFullStyle, kCFDateFormatterFullStyle);
+	dateString = CFDateFormatterCreateStringWithDate(kCFAllocatorDefault, dateFormatter, cfDate);
+	CFRelease(dateFormatter);
+	CFRelease(cfDate);
+
+	if ( !dateString )
+		return nil;
+
+	return [NSString stringWithFormat:@"%@",dateString];
 }
 
 + (void) dealloc {

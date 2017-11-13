@@ -59,4 +59,5 @@ static inline MJSyncNotificationType MJSyncNotificationTypeLast() { return MJSyn
 +(void) addNotificationFor:(MJSyncNotificationType)type withSelector:(SEL)aSelector withTarget:(nullable id)aTarget;
 +(void) removeNotificationsFor:(MJSyncNotificationType)type forTarget:(nullable id) aTargetadd;
 +(void) checkCloudKitUpdates;
++(NSString *) diagnosticData;
 @end
