@@ -78,6 +78,14 @@
 			<key>File</key>
 			<string>Acknowledgements</string>
 		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Diagnostics</string>
+			<key>File</key>
+			<string>Diagnostics</string>
+		</dict>
 	</array>
 </dict>
 </plist>
