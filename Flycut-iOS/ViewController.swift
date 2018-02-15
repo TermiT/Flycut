@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FlycutStoreDelegate, FlycutOperatorDelegate {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FlycutStoreDelegate, FlycutOperatorDelegate, MJCloudKitUserDefaultsSyncDelegate {
 
 	let flycut:FlycutOperator = FlycutOperator()
 	var activeUpdates:Int = 0
@@ -17,6 +17,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	var pbCount:Int = -1
 	var rememberedSyncSettings:Bool = false
 	var rememberedSyncClippings:Bool = false
+	var ignoreCKAccountStatusNoAccount = false
 
 	let pasteboardInteractionQueue = DispatchQueue(label: "com.Flycut.pasteboardInteractionQueue")
 	let alertHandlingSemaphore = DispatchSemaphore(value: 0)
@@ -36,6 +37,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		//UserDefaults.standard.set(NSNumber(value: true), forKey: "demoForAppStoreScreenshots")
 		// Use this command to get screenshots:
 		// while true; do xcrun simctl io booted screenshot;sleep 1;done
+
+		MJCloudKitUserDefaultsSync.setDelegate(self)
 
 		if ( UserDefaults.standard.bool(forKey: "demoForAppStoreScreenshots") )
 		{
@@ -438,6 +441,28 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 					self.pbCount = UIPasteboard.general.changeCount
 				}
 			}
+		}
+	}
+
+	func notifyCKAccountStatusNoAccount() {
+		if ( !ignoreCKAccountStatusNoAccount )
+		{
+			let alert = UIAlertController(title: "No iCloud Account", message: "An iCloud account with iCloud Drive enabled is required for iCloud sync.", preferredStyle: .alert)
+			alert.addAction(UIAlertAction(title: "Preferences", style: .default, handler: { (_) in
+				if #available(iOS 10.0, *)
+				{
+					// Opens iCloud Prefs < iOS 11.0, main Prefs >= iOS 11.0
+					UIApplication.shared.openURL(URL(string: "App-Prefs:root=CASTLE")!)
+				}
+				else
+				{
+					UIApplication.shared.openURL(URL(string: "prefs:root=CASTLE")!)
+				}
+			}))
+			alert.addAction(UIAlertAction(title: "Ignore", style: .cancel, handler: { (_) in
+				self.ignoreCKAccountStatusNoAccount = true
+			}))
+			self.present(alert, animated: true, completion: nil)
 		}
 	}
 }
