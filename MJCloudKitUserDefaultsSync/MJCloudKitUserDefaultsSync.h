@@ -42,6 +42,15 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol MJCloudKitUserDefaultsSyncDelegate <NSObject>
+@optional
+// notifyCKAccountStatusNoAccount is called when:
+// * Not signed in to iCloud
+// * iCloud Drive is not enabled
+// * other?
+- (void)notifyCKAccountStatusNoAccount;
+@end
+
 typedef NS_ENUM(NSUInteger, MJSyncNotificationType) {
 	MJSyncNotificationChanges = 0,
 	MJSyncNotificationConflicts,
@@ -52,6 +61,7 @@ static inline MJSyncNotificationType MJSyncNotificationTypeLast() { return MJSyn
 
 @interface MJCloudKitUserDefaultsSync : NSObject
 
++(void) setDelegate:(id<MJCloudKitUserDefaultsSyncDelegate>) aDelegate;
 +(void) setRemoteNotificationsEnabled:(bool) enabled;
 +(void) startWithPrefix:(NSString*) prefixToSync withContainerIdentifier:(NSString*) containerIdentifier;
 +(void) startWithKeyMatchList:(NSArray*) keyMatchList withContainerIdentifier:(NSString*) containerIdentifier;

@@ -51,6 +51,7 @@ static NSString *lastUpdateRecordChangeTagReceived = nil;
 // Things we don't retain.
 static CKDatabase *publicDB;
 static CKDatabase *privateDB;
+static id<MJCloudKitUserDefaultsSyncDelegate> delegate;
 
 // Status flags.
 static BOOL observingIdentityChanges = NO;
@@ -454,6 +455,11 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
++(void) setDelegate:(id<MJCloudKitUserDefaultsSyncDelegate>) aDelegate
+{
+	delegate = aDelegate;
+}
+
 +(void) setRemoteNotificationsEnabled:(bool) enabled
 {
 	if ( enabled != remoteNotificationsEnabled )
@@ -731,6 +737,8 @@ static CFAbsoluteTime lastReceiveTime;
 
 			case CKAccountStatusNoAccount:
 				DLog(@"No iCloud account");
+				if ( delegate && [delegate respondsToSelector:@selector(notifyCKAccountStatusNoAccount)] )
+					[delegate notifyCKAccountStatusNoAccount];
 				[self stopObservingActivity];
 				dispatch_resume(startStopQueue);
 				break;
