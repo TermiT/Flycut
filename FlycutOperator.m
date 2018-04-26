@@ -559,11 +559,11 @@
 -(void) registerOrDeregisterICloudSync
 {
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncSettingsViaICloud"] ) {
-		[MJCloudKitUserDefaultsSync startWithKeyMatchList:settingsSyncList
+		[[MJCloudKitUserDefaultsSync sharedSync] startWithKeyMatchList:settingsSyncList
 								  withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
 	}
 	else {
-		[MJCloudKitUserDefaultsSync stopForKeyMatchList:settingsSyncList];
+		[[MJCloudKitUserDefaultsSync sharedSync] stopForKeyMatchList:settingsSyncList];
 	}
 
 	BOOL syncClippings = [[NSUserDefaults standardUserDefaults] boolForKey:@"syncClippingsViaICloud"];
@@ -579,22 +579,22 @@
 		if ( changedSyncClippings )
 			firstClippingsSyncAfterEnabling = YES;
 
-		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
-		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationChanges withSelector:@selector(checkPreferencesChanges:) withTarget: self];
+		[[MJCloudKitUserDefaultsSync sharedSync] removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+		[[MJCloudKitUserDefaultsSync sharedSync] addNotificationFor:MJSyncNotificationChanges withSelector:@selector(checkPreferencesChanges:) withTarget: self];
 
-		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationConflicts forTarget:self];
-		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationConflicts withSelector:@selector(checkPreferencesConflicts:) withTarget: self];
+		[[MJCloudKitUserDefaultsSync sharedSync] removeNotificationsFor:MJSyncNotificationConflicts forTarget:self];
+		[[MJCloudKitUserDefaultsSync sharedSync] addNotificationFor:MJSyncNotificationConflicts withSelector:@selector(checkPreferencesConflicts:) withTarget: self];
 
-		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationSaveSuccess forTarget:self];
-		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationSaveSuccess withSelector:@selector(checkPreferencesSaveSuccess:) withTarget: self];
+		[[MJCloudKitUserDefaultsSync sharedSync] removeNotificationsFor:MJSyncNotificationSaveSuccess forTarget:self];
+		[[MJCloudKitUserDefaultsSync sharedSync] addNotificationFor:MJSyncNotificationSaveSuccess withSelector:@selector(checkPreferencesSaveSuccess:) withTarget: self];
 
-		[MJCloudKitUserDefaultsSync startWithKeyMatchList:@[@"store"]
+		[[MJCloudKitUserDefaultsSync sharedSync] startWithKeyMatchList:@[@"store"]
 								  withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
 	}
 	else {
-		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+		[[MJCloudKitUserDefaultsSync sharedSync] removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
 
-		[MJCloudKitUserDefaultsSync stopForKeyMatchList:@[@"store"]];
+		[[MJCloudKitUserDefaultsSync sharedSync] stopForKeyMatchList:@[@"store"]];
 	}
 }
 
@@ -914,7 +914,7 @@
 
 -(void) checkCloudKitUpdates
 {
-	[MJCloudKitUserDefaultsSync checkCloudKitUpdates];
+	[[MJCloudKitUserDefaultsSync sharedSync] checkCloudKitUpdates];
 }
 
 -(bool) loadEngineFrom:(NSDictionary*)loadDict key:(NSString*)listKey into:(FlycutStore*)store

@@ -38,7 +38,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		// Use this command to get screenshots:
 		// while true; do xcrun simctl io booted screenshot;sleep 1;done
 
-		MJCloudKitUserDefaultsSync.setDelegate(self)
+		MJCloudKitUserDefaultsSync.shared()?.setDelegate(self)
 
 		if ( UserDefaults.standard.bool(forKey: "demoForAppStoreScreenshots") )
 		{

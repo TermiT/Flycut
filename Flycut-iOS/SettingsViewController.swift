@@ -27,7 +27,7 @@ class SettingsViewController: IASKAppSettingsViewController {
 		let contents = try? String.init(contentsOfFile: fileRoot!, encoding: String.Encoding.utf8)
 		UserDefaults.standard.set(contents, forKey: "acknowledgementsText")
 
-		let data = MJCloudKitUserDefaultsSync.diagnosticData()
+		let data = MJCloudKitUserDefaultsSync.shared()?.diagnosticData()
 		UserDefaults.standard.set(data, forKey: "diagnosticsText")
 	}
 }

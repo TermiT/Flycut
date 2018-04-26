@@ -89,17 +89,17 @@
 - (void)registerOrDeregisterICloudSync
 {
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncSettingsViaICloud"] ) {
-		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
-		[MJCloudKitUserDefaultsSync addNotificationFor:MJSyncNotificationChanges withSelector:@selector(checkPreferencesChanges:) withTarget: self];
+		[[MJCloudKitUserDefaultsSync sharedSync] removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+		[[MJCloudKitUserDefaultsSync sharedSync] addNotificationFor:MJSyncNotificationChanges withSelector:@selector(checkPreferencesChanges:) withTarget: self];
 		// Not registering for conflict notifications, since we just sync settings, and if the settings are conflictingly adjusted simultaneously on two systems there is nothing to say which setting is better.
 
-		[MJCloudKitUserDefaultsSync startWithKeyMatchList:settingsSyncList
+		[[MJCloudKitUserDefaultsSync sharedSync] startWithKeyMatchList:settingsSyncList
 					withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
 	}
 	else {
-		[MJCloudKitUserDefaultsSync stopForKeyMatchList:settingsSyncList];
+		[[MJCloudKitUserDefaultsSync sharedSync] stopForKeyMatchList:settingsSyncList];
 
-		[MJCloudKitUserDefaultsSync removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
+		[[MJCloudKitUserDefaultsSync sharedSync] removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
 	}
 
 	[flycutOperator registerOrDeregisterICloudSync];
@@ -928,13 +928,13 @@
 didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 	// Forward the token to your provider, using a custom method.
 	NSLog(@"Registered for remote notifications.");
-	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:YES];
+	[[MJCloudKitUserDefaultsSync sharedSync] setRemoteNotificationsEnabled:YES];
 }
 
 - (void)application:(NSApplication *)application
 didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 	NSLog(@"Remote notification support is unavailable due to error: %@", error);
-	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:NO];
+	[[MJCloudKitUserDefaultsSync sharedSync] setRemoteNotificationsEnabled:NO];
 }
 
 - (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
