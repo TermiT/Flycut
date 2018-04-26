@@ -4,9 +4,12 @@ by Mugunth Kumar, a clean and simple class to sync NSUserDefaults to iCloud.
 Use of CloudKit removes the "clean and simple" but allows use in apps
 distributed outside of the App Store.
 
+### Note:
+MJCloudKitUserDefaultsSync was recently converted to not be a mess of static members (a style inherited from MKiCloudSync).  The [Recent Changes](#recent-changes) section below describes how to update your code for this change.
+
 ### How to use?
 1. Drag the two classes and #import the header file in your Application Delegate
-2. Call `[MJCloudKitUserDefaultsSync startWithPrefix:@"sync" withContainerIdentifier@"iCloud.com.yourCompany.yourProduct"];`
+2. Call `[[MJCloudKitUserDefaultsSync sharedSync] startWithPrefix:@"sync" withContainerIdentifier@"iCloud.com.yourCompany.yourProduct"];`
 3. Register for Remote Notifications in your applicationDidFinishLaunching.
 
         // macOS
@@ -23,7 +26,7 @@ distributed outside of the App Store.
         // macOS:
         - (void)application:(NSApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
         {
-        	[MJCloudKitUserDefaultsSync checkCloudKitUpdates];
+        	[[MJCloudKitUserDefaultsSync sharedSync] checkCloudKitUpdates];
         }
         
         // Remote Notifications (APN, aka Push Notifications) are only available on apps distributed via the App Store.
@@ -32,17 +35,31 @@ distributed outside of the App Store.
         didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
         	// Forward the token to your provider, using a custom method.
         	NSLog(@"Registered for remote notifications.");
-        	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:YES];
+        	[[MJCloudKitUserDefaultsSync sharedSync] setRemoteNotificationsEnabled:YES];
         }
         
         - (void)application:(NSApplication *)application
         didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
         	NSLog(@"Remote notification support is unavailable due to error: %@", error);
-        	[MJCloudKitUserDefaultsSync setRemoteNotificationsEnabled:NO];
+        	[[MJCloudKitUserDefaultsSync sharedSync] setRemoteNotificationsEnabled:NO];
         }
 
         // iOS:
         // TBD
+
+### Recent Changes
+MJCloudKitUserDefaultsSync recently abandoned the everything-static design it inherited from MKiCloudSync.  Developers now have the option to use a singleton instance or unique instances of the class.  To update your code for this change, using the singleton, use the following changes.
+
+Objective-C
+`[MJCloudKitUserDefaultsSync checkCloudKitUpdates];`
+to 
+`[[MJCloudKitUserDefaultsSync sharedSync] checkCloudKitUpdates];`
+(sharedSync is nullable, so beware and pick your comfort level.)
+
+Swift
+`MJCloudKitUserDefaultsSync.checkCloudKitUpdates()`
+to
+`MJCloudKitUserDefaultsSync.shared()?.checkCloudKitUpdates()`
 
 ### To Do
 * Create an xcproj and turn this into a framework so it can be used by both ARC and non-ARC projects.  It is currently being used by an old non-ARC project, so it isn't ARC for now.

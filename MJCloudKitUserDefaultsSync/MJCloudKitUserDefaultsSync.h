@@ -61,13 +61,17 @@ static inline MJSyncNotificationType MJSyncNotificationTypeLast() { return MJSyn
 
 @interface MJCloudKitUserDefaultsSync : NSObject
 
-+(void) setDelegate:(id<MJCloudKitUserDefaultsSyncDelegate>) aDelegate;
-+(void) setRemoteNotificationsEnabled:(bool) enabled;
-+(void) startWithPrefix:(NSString*) prefixToSync withContainerIdentifier:(NSString*) containerIdentifier;
-+(void) startWithKeyMatchList:(NSArray*) keyMatchList withContainerIdentifier:(NSString*) containerIdentifier;
-+(void) stopForKeyMatchList:(NSArray*) keyMatchList;
-+(void) addNotificationFor:(MJSyncNotificationType)type withSelector:(SEL)aSelector withTarget:(nullable id)aTarget;
-+(void) removeNotificationsFor:(MJSyncNotificationType)type forTarget:(nullable id) aTargetadd;
-+(void) checkCloudKitUpdates;
-+(NSString *) diagnosticData;
++ (nullable instancetype)sharedSync;
+
+- (nullable instancetype)init;
+
+-(void) setDelegate:(id<MJCloudKitUserDefaultsSyncDelegate>) aDelegate;
+-(void) setRemoteNotificationsEnabled:(bool) enabled;
+-(void) startWithPrefix:(NSString*) prefixToSync withContainerIdentifier:(NSString*) containerIdentifier;
+-(void) startWithKeyMatchList:(NSArray*) keyMatchList withContainerIdentifier:(NSString*) containerIdentifier;
+-(void) stopForKeyMatchList:(NSArray*) keyMatchList;
+-(void) addNotificationFor:(MJSyncNotificationType)type withSelector:(SEL)aSelector withTarget:(nullable id)aTarget;
+-(void) removeNotificationsFor:(MJSyncNotificationType)type forTarget:(nullable id) aTargetadd;
+-(void) checkCloudKitUpdates;
+-(NSString *) diagnosticData;
 @end

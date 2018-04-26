@@ -35,52 +35,86 @@
 #import "MJCloudKitUserDefaultsSync.h"
 #import <CloudKit/CloudKit.h>
 
-// Things we retain and better release.
-static NSString *prefix = nil;
-static NSArray *matchList = nil;
-static NSTimer *pollCloudKitTimer = nil;
-static NSTimer *monitorSubscriptionTimer = nil;
-static NSString *databaseContainerIdentifier = nil;
-static CKRecordZone *recordZone = nil;
-static CKRecordZoneID *recordZoneID = nil;
-static CKRecordID *recordID = nil;
-static NSMutableArray *changeNotificationHandlers[] = {nil,nil,nil};
-static CKServerChangeToken *previousChangeToken = nil;
-static NSString *lastUpdateRecordChangeTagReceived = nil;
+// String constants we use.
+static NSString *const recordZoneName = @"MJCloudKitUserDefaultsSync";
+static NSString *const subscriptionID = @"UserDefaultSubscription";
+static NSString *const recordType = @"UserDefault";
+static NSString *const recordName = @"UserDefaults";
 
-// Things we don't retain.
-static CKDatabase *publicDB;
-static CKDatabase *privateDB;
-static id<MJCloudKitUserDefaultsSyncDelegate> delegate;
+@implementation MJCloudKitUserDefaultsSync {
 
-// Status flags.
-static BOOL observingIdentityChanges = NO;
-static BOOL observingActivity = NO;
-static BOOL remoteNotificationsEnabled = YES;
+	// Things we retain and better release.
+	NSString *prefix;
+	NSArray *matchList;
+	NSTimer *pollCloudKitTimer;
+	NSTimer *monitorSubscriptionTimer;
+	NSString *databaseContainerIdentifier;
+	CKRecordZone *recordZone;
+	CKRecordZoneID *recordZoneID;
+	CKRecordID *recordID;
+	NSMutableArray *changeNotificationHandlers[3];
+	CKServerChangeToken *previousChangeToken;
+	NSString *lastUpdateRecordChangeTagReceived;
 
-// Strings we use.
-static NSString *recordZoneName = @"MJCloudKitUserDefaultsSync";
-static NSString *subscriptionID = @"UserDefaultSubscription";
-static NSString *recordType = @"UserDefault";
-static NSString *recordName = @"UserDefaults";
+	// Things we don't retain.
+	CKDatabase *publicDB;
+	CKDatabase *privateDB;
+	id<MJCloudKitUserDefaultsSyncDelegate> delegate;
 
-// Flow controls.
-static BOOL refuseUpdateToICloudUntilAfterUpdateFromICloud = NO;
-static BOOL oneTimeDeleteZoneFromICloud = NO; // To clear the user's sync data from iCloud for testing first-time scenario.
-static dispatch_queue_t syncQueue = nil;
-static dispatch_queue_t pollQueue = nil;
-static dispatch_queue_t startStopQueue = nil;
+	// Status flags and state.
+	BOOL observingIdentityChanges;
+	BOOL observingActivity;
+	BOOL remoteNotificationsEnabled;
+	bool alreadyPolling;
+	CFAbsoluteTime lastPollPokeTime;
 
-// Diagnostic information.
-static BOOL productionMode = NO;
-static CKRecord *lastRecordReceived = nil;
-static CFAbsoluteTime lastResubscribeTime;
-static int resubscribeCount = 0;
-static CFAbsoluteTime lastReceiveTime;
+	// Flow controls.
+	BOOL refuseUpdateToICloudUntilAfterUpdateFromICloud;
+	BOOL oneTimeDeleteZoneFromICloud; // To clear the user's sync data from iCloud for testing first-time scenario.
+	dispatch_queue_t syncQueue;
+	dispatch_queue_t pollQueue;
+	dispatch_queue_t startStopQueue;
 
-@implementation MJCloudKitUserDefaultsSync
+	// Diagnostic information.
+	BOOL productionMode;
+	CKRecord *lastRecordReceived;
+	CFAbsoluteTime lastResubscribeTime;
+	int resubscribeCount;
+	CFAbsoluteTime lastReceiveTime;
+}
 
-+(void) updateToiCloud:(NSNotification*) notificationObject {
++ (nullable instancetype)sharedSync {
+	static MJCloudKitUserDefaultsSync *sharedMJCloudKitUserDefaultsSync = nil;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		sharedMJCloudKitUserDefaultsSync = [[self alloc] init];
+	});
+	return sharedMJCloudKitUserDefaultsSync;
+}
+
+- (nullable instancetype)init
+{
+	self = [super init];
+	if (self) {
+		// Status flags.
+		observingIdentityChanges = NO;
+		observingActivity = NO;
+		remoteNotificationsEnabled = YES;
+
+		// Flow controls.
+		refuseUpdateToICloudUntilAfterUpdateFromICloud = NO;
+		oneTimeDeleteZoneFromICloud = NO; // To clear the user's sync data from iCloud for testing first-time scenario.
+
+		// Status flags and state.
+		alreadyPolling = NO;
+
+		// Diagnostic information.
+		productionMode = NO;
+	}
+	return self;
+}
+
+-(void) updateToiCloud:(NSNotification*) notificationObject {
 	dispatch_async(syncQueue, ^{
 		DLog(@"Update to iCloud?");
 		if ( refuseUpdateToICloudUntilAfterUpdateFromICloud )
@@ -139,7 +173,7 @@ static CFAbsoluteTime lastReceiveTime;
 
 							if ( nil != obj )
 							{
-								obj = [self serialize:obj forKey:key];
+								obj = [MJCloudKitUserDefaultsSync serialize:obj forKey:key];
 								if ( nil == obj )
 									skip = YES;
 							}
@@ -206,7 +240,7 @@ static CFAbsoluteTime lastReceiveTime;
 											id fromObj = [obj firstObject];
 											if ( nil != fromObj )
 											{
-												fromObj = [self deserialize:fromObj forKey:key similarTo:originalObj];
+												fromObj = [MJCloudKitUserDefaultsSync deserialize:fromObj forKey:key similarTo:originalObj];
 												if ( nil == fromObj )
 												{
 													// Failed to deserialize.  Put our value in.
@@ -216,7 +250,7 @@ static CFAbsoluteTime lastReceiveTime;
 											id remoteObj = [newRecord objectForKey:key];
 											if ( nil != remoteObj )
 											{
-												remoteObj = [self deserialize:remoteObj forKey:key similarTo:originalObj];
+												remoteObj = [MJCloudKitUserDefaultsSync deserialize:remoteObj forKey:key similarTo:originalObj];
 												if ( nil == remoteObj )
 												{
 													// Failed to deserialize.  Put our value in.
@@ -237,7 +271,7 @@ static CFAbsoluteTime lastReceiveTime;
 												Boolean skip = NO;
 												if ( nil != obj )
 												{
-													obj = [self serialize:obj forKey:key];
+													obj = [MJCloudKitUserDefaultsSync serialize:obj forKey:key];
 													if ( nil == obj )
 														skip = YES;
 												}
@@ -291,7 +325,7 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
-+(void) completeUpdateToiCloudWithChanges:(NSMutableDictionary*) changes
+-(void) completeUpdateToiCloudWithChanges:(NSMutableDictionary*) changes
 {
 	// Resume before releasing memory, since there's nothing shared about the memory.
 	dispatch_resume(syncQueue);
@@ -346,7 +380,7 @@ static CFAbsoluteTime lastReceiveTime;
 	return remoteObj;
 }
 
-+(void) updateFromiCloud:(NSNotification*) notificationObject {
+-(void) updateFromiCloud:(NSNotification*) notificationObject {
 	dispatch_async(syncQueue, ^{
 		if ( nil == privateDB )
 		{
@@ -384,7 +418,7 @@ static CFAbsoluteTime lastReceiveTime;
 
 						if ( nil != obj )
 						{
-							obj = [self serialize:obj forKey:key];
+							obj = [MJCloudKitUserDefaultsSync serialize:obj forKey:key];
 							if ( nil == obj )
 								skip = YES;
 						}
@@ -415,7 +449,7 @@ static CFAbsoluteTime lastReceiveTime;
 
 							if ( nil != remoteObj )
 							{
-								remoteObj = [self deserialize:remoteObj forKey:key similarTo:originalObj];
+								remoteObj = [MJCloudKitUserDefaultsSync deserialize:remoteObj forKey:key similarTo:originalObj];
 								if ( nil == remoteObj )
 									skip = YES;
 							}
@@ -455,12 +489,12 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
-+(void) setDelegate:(id<MJCloudKitUserDefaultsSyncDelegate>) aDelegate
+-(void) setDelegate:(id<MJCloudKitUserDefaultsSyncDelegate>) aDelegate
 {
 	delegate = aDelegate;
 }
 
-+(void) setRemoteNotificationsEnabled:(bool) enabled
+-(void) setRemoteNotificationsEnabled:(bool) enabled
 {
 	if ( enabled != remoteNotificationsEnabled )
 	{
@@ -473,7 +507,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-+(void) startWithPrefix:(NSString*) prefixToSync withContainerIdentifier:(NSString*) containerIdentifier {
+-(void) startWithPrefix:(NSString*) prefixToSync withContainerIdentifier:(NSString*) containerIdentifier {
 	DLog(@"Starting with prefix");
 
 	if ( !startStopQueue )
@@ -503,7 +537,7 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
-+(void) startWithKeyMatchList:(NSArray*) keyMatchList withContainerIdentifier:(NSString*) containerIdentifier {
+-(void) startWithKeyMatchList:(NSArray*) keyMatchList withContainerIdentifier:(NSString*) containerIdentifier {
 	DLog(@"Starting with match list length %lu atop %lu", (unsigned long)[keyMatchList count], (unsigned long)[matchList count]);
 
 	if ( !startStopQueue )
@@ -549,7 +583,7 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
-+(void) commonStartInitialStepsOnContainerIdentifier:(NSString*) containerIdentifier {
+-(void) commonStartInitialStepsOnContainerIdentifier:(NSString*) containerIdentifier {
 	[self pause];
 
 	DLog(@"Waiting for sync queue to clear before adding new criteria.");
@@ -569,7 +603,7 @@ static CFAbsoluteTime lastReceiveTime;
 	[databaseContainerIdentifier retain];
 }
 
-+(void) pause {
+-(void) pause {
 	if ( !startStopQueue )
 	{
 		startStopQueue = dispatch_queue_create("com.MJCloudKitUserDefaultsSync.startStopQueue", DISPATCH_QUEUE_SERIAL);
@@ -591,7 +625,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-+(void) resume {
+-(void) resume {
 	if ( !startStopQueue )
 	{
 		startStopQueue = dispatch_queue_create("com.MJCloudKitUserDefaultsSync.startStopQueue", DISPATCH_QUEUE_SERIAL);
@@ -602,7 +636,7 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
-+(void) stopForKeyMatchList:(NSArray*) keyMatchList {
+-(void) stopForKeyMatchList:(NSArray*) keyMatchList {
 	DLog(@"Stopping match list length %lu from %lu", (unsigned long)[keyMatchList count], (unsigned long)[matchList count]);
 
 	if ( !startStopQueue )
@@ -630,7 +664,7 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
-+(void) stop {
+-(void) stop {
 	DLog(@"Stopping.");
 
 	if ( !startStopQueue )
@@ -669,7 +703,7 @@ static CFAbsoluteTime lastReceiveTime;
 	});
 }
 
-+(void) addNotificationFor:(MJSyncNotificationType)type withSelector:(SEL)aSelector withTarget:(nullable id)aTarget {
+-(void) addNotificationFor:(MJSyncNotificationType)type withSelector:(SEL)aSelector withTarget:(nullable id)aTarget {
 	DLog(@"Registering change notification selector.");
 	if ( !changeNotificationHandlers[type] )
 		changeNotificationHandlers[type] = [[NSMutableArray alloc] init];
@@ -677,7 +711,7 @@ static CFAbsoluteTime lastReceiveTime;
 	[changeNotificationHandlers[type] addObject:[NSValue valueWithPointer:aSelector]];
 }
 
-+(void) removeNotificationsFor:(MJSyncNotificationType)type forTarget:(nullable id) aTarget {
+-(void) removeNotificationsFor:(MJSyncNotificationType)type forTarget:(nullable id) aTarget {
 	DLog(@"Removing change notification selector(s).");
 	while ( changeNotificationHandlers[type] )
 	{
@@ -690,7 +724,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-+(NSDictionary*) sendNotificationsFor:(MJSyncNotificationType)type onKeys:(NSDictionary*) changes {
+-(NSDictionary*) sendNotificationsFor:(MJSyncNotificationType)type onKeys:(NSDictionary*) changes {
 	DLog(@"Sending change notification selector(s).");
 	__block NSMutableDictionary *corrections = nil;
 	if (changeNotificationHandlers[type])
@@ -713,19 +747,19 @@ static CFAbsoluteTime lastReceiveTime;
 	return corrections;
 }
 
-+(void) identityDidChange:(NSNotification*) notificationObject {
+-(void) identityDidChange:(NSNotification*) notificationObject {
 	DLog(@"iCloud Identity Change Detected");
 	dispatch_async(startStopQueue, ^{
 		[self attemptToEnable];
 	});
 }
 
-+(void) checkCloudKitUpdates {
+-(void) checkCloudKitUpdates {
 	DLog(@"Got checkCloudKitUpdates");
 	[self updateFromiCloud:nil];
 }
 
-+(void) attemptToEnable {
+-(void) attemptToEnable {
 	dispatch_suspend(startStopQueue);
 	DLog(@"Attempting to enable");
 	[[CKContainer defaultContainer] accountStatusWithCompletionHandler: ^(CKAccountStatus accountStatus, NSError *error) {
@@ -760,7 +794,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}];
 }
 
-+(void) startObservingActivity {
+-(void) startObservingActivity {
 	DLog(@"Should start observing activity?");
 	if ( !observingActivity )
 	{
@@ -839,7 +873,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-+(void) subscribeToDatabase {
+-(void) subscribeToDatabase {
 	DLog(@"Subscribing to database.");
 	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"TRUEPREDICATE" ];
 	CKQuerySubscription *subscription =
@@ -928,7 +962,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-+(void)monitorSubscription:(NSTimer *)timer {
+-(void)monitorSubscription:(NSTimer *)timer {
 	[privateDB fetchSubscriptionWithID:subscriptionID completionHandler:^(CKSubscription * _Nullable existingSubscription, NSError * _Nullable error) {
 		BOOL noSubscription = (nil == existingSubscription);
 		if ( observingActivity && noSubscription )
@@ -941,7 +975,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}];
 }
 
-+(void) stopObservingActivity {
+-(void) stopObservingActivity {
 	DLog(@"Should stop observing activity?");
 	if ( observingActivity )
 	{
@@ -994,7 +1028,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-+(void) startObservingIdentityChanges {
+-(void) startObservingIdentityChanges {
 	DLog(@"Should start observing identity changes?");
 	if ( !observingIdentityChanges )
 	{
@@ -1007,7 +1041,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-+(void) stopObservingIdentityChanges {
+-(void) stopObservingIdentityChanges {
 	DLog(@"Should stop observing identity changes?");
 	if ( observingIdentityChanges )
 	{
@@ -1019,9 +1053,7 @@ static CFAbsoluteTime lastReceiveTime;
 	}
 }
 
-static bool alreadyPolling = NO;
-static CFAbsoluteTime lastPollPokeTime;
-+(void)pollCloudKit:(NSTimer *)timer {
+-(void)pollCloudKit:(NSTimer *)timer {
 	// The fetchRecordChangesCompletionBlock below doesn't get called until after the recordChangedBlock below completes.  The former block provides the change token which the poll uses to identify if changes have happened.  Prevent use of the old change token while processing changes, which would of course detect changes and cause excess evaluation, by setting / checking a flag in a serial queue until the completion block which occurs on a different queue causes it to be cleared in the original serial queue.
 	// This is preferable to using a dispatch_suspend / dispatch_resume because it prevents amassing a long queue of serial GCD operations in the event that the CloudKit CKFetchRecordChangesOperation takes more than the polling interval.
 
@@ -1089,7 +1121,7 @@ static CFAbsoluteTime lastPollPokeTime;
 	});
 }
 
-+ (void) updateLastRecordReceived:(CKRecord*)record
+- (void) updateLastRecordReceived:(CKRecord*)record
 {
 	if ( lastRecordReceived )
 		[lastRecordReceived release];
@@ -1100,10 +1132,10 @@ static CFAbsoluteTime lastPollPokeTime;
 	lastUpdateRecordChangeTagReceived = [[record recordChangeTag] retain];
 }
 
-+ (NSString *) diagnosticData {
-	NSString *lastPollPoke = [self cfAbsoluteTimeToString:lastPollPokeTime];
-	NSString *lastReceive = [self cfAbsoluteTimeToString:lastReceiveTime];
-	NSString *lastResubscribe = [self cfAbsoluteTimeToString:lastResubscribeTime];
+- (NSString *) diagnosticData {
+	NSString *lastPollPoke = [MJCloudKitUserDefaultsSync cfAbsoluteTimeToString:lastPollPokeTime];
+	NSString *lastReceive = [MJCloudKitUserDefaultsSync cfAbsoluteTimeToString:lastReceiveTime];
+	NSString *lastResubscribe = [MJCloudKitUserDefaultsSync cfAbsoluteTimeToString:lastResubscribeTime];
 	return [NSString stringWithFormat:@"Observing Activity: %@\nObserving Identity: %@\nRemote Notifications Enabled: %@\nProduction: %@\nToken: %@\nLast Poll: %@\nLast Record: %@\nLast Receive: %@\nLast Resubscribe: %@\nResubscribe count:%i",
 			observingActivity ? @"YES" : @"NO",
 			observingIdentityChanges ? @"YES" : @"NO",
@@ -1135,9 +1167,10 @@ static CFAbsoluteTime lastPollPokeTime;
 	return [NSString stringWithFormat:@"%@",dateString];
 }
 
-+ (void) dealloc {
+- (void) dealloc {
 	DLog(@"Deallocating");
 	[self stop];
+	[super dealloc];
 	DLog(@"Deallocated");
 }
 @end
