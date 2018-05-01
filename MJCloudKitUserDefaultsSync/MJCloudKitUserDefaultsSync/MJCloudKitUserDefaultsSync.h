@@ -42,6 +42,15 @@
 
 #import <Foundation/Foundation.h>
 
+//! Project version number for MJCloudKitUserDefaultsSync.
+FOUNDATION_EXPORT double MJCloudKitUserDefaultsSyncVersionNumber;
+
+//! Project version string for MJCloudKitUserDefaultsSync.
+FOUNDATION_EXPORT const unsigned char MJCloudKitUserDefaultsSyncVersionString[];
+
+// In this header, you should import all the public headers of your framework using statements like #import <MJCloudKitUserDefaultsSync/PublicHeader.h>
+
+
 @protocol MJCloudKitUserDefaultsSyncDelegate <NSObject>
 @optional
 // notifyCKAccountStatusNoAccount is called when:
@@ -63,15 +72,15 @@ static inline MJSyncNotificationType MJSyncNotificationTypeLast() { return MJSyn
 
 + (nullable instancetype)sharedSync;
 
-- (nullable instancetype)init;
+- (nonnull instancetype)init;
 
--(void) setDelegate:(id<MJCloudKitUserDefaultsSyncDelegate>) aDelegate;
--(void) setRemoteNotificationsEnabled:(bool) enabled;
--(void) startWithPrefix:(NSString*) prefixToSync withContainerIdentifier:(NSString*) containerIdentifier;
--(void) startWithKeyMatchList:(NSArray*) keyMatchList withContainerIdentifier:(NSString*) containerIdentifier;
--(void) stopForKeyMatchList:(NSArray*) keyMatchList;
--(void) addNotificationFor:(MJSyncNotificationType)type withSelector:(SEL)aSelector withTarget:(nullable id)aTarget;
--(void) removeNotificationsFor:(MJSyncNotificationType)type forTarget:(nullable id) aTargetadd;
--(void) checkCloudKitUpdates;
--(NSString *) diagnosticData;
+- (void)setDelegate:(nonnull id<MJCloudKitUserDefaultsSyncDelegate>)newDelegate;
+- (void)setRemoteNotificationsEnabled:(bool)enabled;
+- (void)startWithPrefix:(nonnull NSString *)prefixToSync
+withContainerIdentifier:(nonnull NSString *)containerIdentifier;
+- (void)startWithKeyMatchList:(nonnull NSArray *)keyMatchList
+	  withContainerIdentifier:(nonnull NSString *)containerIdentifier;
+- (void)stopForKeyMatchList:(nonnull NSArray *)keyMatchList;
+- (void)addNotificationFor:(MJSyncNotificationType)type;
+
 @end

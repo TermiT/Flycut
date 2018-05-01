@@ -14,7 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "FlycutOperator.h"
-#import "MJCloudKitUserDefaultsSync.h"
+#import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
 
 @implementation FlycutOperator
 

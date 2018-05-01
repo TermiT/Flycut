@@ -19,7 +19,7 @@
 #import "UKLoginItemRegistry.h"
 #import "NSWindow+TrueCenter.h"
 #import "NSWindow+ULIZoomEffect.h"
-#import "MJCloudKitUserDefaultsSync.h"
+#import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
 
 @implementation AppController
 

@@ -9,7 +9,7 @@ MJCloudKitUserDefaultsSync was recently converted to not be a mess of static mem
 
 ### How to use?
 1. Drag the two classes and #import the header file in your Application Delegate
-2. Call `[[MJCloudKitUserDefaultsSync sharedSync] startWithPrefix:@"sync" withContainerIdentifier@"iCloud.com.yourCompany.yourProduct"];`
+2. Call `[[MJCloudKitUserDefaultsSync sharedSync] startWithPrefix:@"sync" withContainerIdentifier:@"iCloud.com.yourCompany.yourProduct"];`
 3. Register for Remote Notifications in your applicationDidFinishLaunching.
 
         // macOS
@@ -54,7 +54,7 @@ Objective-C
 `[MJCloudKitUserDefaultsSync checkCloudKitUpdates];`
 to 
 `[[MJCloudKitUserDefaultsSync sharedSync] checkCloudKitUpdates];`
-(sharedSync is nullable, so beware and pick your comfort level.)
+(sharedSync is nullable but Objective-C doesn't mind messages sent to nil, so if sharedSync failed to allocate it would run like that line wasn't there.)
 
 Swift
 `MJCloudKitUserDefaultsSync.checkCloudKitUpdates()`

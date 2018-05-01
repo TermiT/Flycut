@@ -6,5 +6,5 @@
 #import "FlycutOperator.h"
 #import "MGSwipeTableCell/MGSwipeTableCell/MGSwipeTableCell.h"
 #import "MGSwipeTableCell/MGSwipeTableCell/MGSwipeButton.h"
-#import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
+#import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
 #import "IASKAppSettingsViewController.h"
