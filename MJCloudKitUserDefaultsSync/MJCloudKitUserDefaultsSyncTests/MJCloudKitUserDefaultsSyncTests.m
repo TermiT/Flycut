@@ -26,58 +26,7 @@
 }
 
 - (void)testSetAndRestoreValueThroughCloudKit {
-
-	// Ensure the key is removed from defaults and verify it is gone.
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"ckSyncFiveFourThree"];
-
-	XCTAssertEqual(0, [[NSUserDefaults standardUserDefaults] integerForKey:@"ckSyncFiveFourThree"], @"Value not cleared from NSUserDefaults");
-
-	// Create a sync, add a key to defaults, quit sync.
-	{
-		MJCloudKitUserDefaultsSync *ckSync = [[MJCloudKitUserDefaultsSync alloc] init];
-
-		[ckSync startWithPrefix:@"ckSync"
-		withContainerIdentifier:@"iCloud.com.MJCloudKitUserDefaultsSync.tests"];
-
-		// Should sync within two seconds.
-		[NSThread sleepForTimeInterval:2.0f];
-
-		XCTAssertEqual(0, [[NSUserDefaults standardUserDefaults] integerForKey:@"ckSyncFiveFourThree"], @"Value not absent in CloudKit.");
-
-		[[NSUserDefaults standardUserDefaults] setInteger:(NSInteger)543 forKey:@"ckSyncFiveFourThree"];
-
-		XCTAssertEqual(543, [[NSUserDefaults standardUserDefaults] integerForKey:@"ckSyncFiveFourThree"], @"Value not set in NSUserDefaults");
-
-		[ckSync release];
-		ckSync = nil;
-	}
-
-	// Remove the key from defaults and verify it is gone.
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"ckSyncFiveFourThree"];
-
-	XCTAssertEqual(0, [[NSUserDefaults standardUserDefaults] integerForKey:@"ckSyncFiveFourThree"], @"Value not cleared from NSUserDefaults");
-
-	// Create a sync, check for key in defaults, quit sync.
-	{
-		MJCloudKitUserDefaultsSync *ckSync = [[MJCloudKitUserDefaultsSync alloc] init];
-
-		[ckSync startWithPrefix:@"ckSync"
-		withContainerIdentifier:@"iCloud.com.MJCloudKitUserDefaultsSync.tests"];
-
-		// Should sync within two seconds.
-		[NSThread sleepForTimeInterval:2.0f];
-
-		XCTAssertEqual(543, [[NSUserDefaults standardUserDefaults] integerForKey:@"ckSyncFiveFourThree"], @"Value not loaded from CloudKit.");
-
-		[ckSync release];
-		ckSync = nil;
-	}
-
-	XCTAssertEqual(543, [[NSUserDefaults standardUserDefaults] integerForKey:@"ckSyncFiveFourThree"], @"Value not persisted after CloudKit.");
-
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"ckSyncFiveFourThree"];
-
-	XCTAssertEqual(0, [[NSUserDefaults standardUserDefaults] integerForKey:@"ckSyncFiveFourThree"], @"Value not absent in CloudKit.");
+	XCTAssertEqual(0, 1, @"Please see UNIT_TEST_MEMORY_LEAKS in MJCloudKitUserDefaultsSync.m for unit test since this framework requires entitlements.");
 }
 
 - (void)testPerformanceExample {

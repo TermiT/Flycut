@@ -107,6 +107,11 @@ static NSString *const recordName = @"UserDefaults";
 	dispatch_queue_t pollQueue;
 	dispatch_queue_t startStopQueue;
 
+	// Count user actions so we can provide completion when all user actions are complete.
+	dispatch_queue_t userActionsCountingQueue;
+	int pendingUserActions;
+	NSMutableArray *completionsWhenNoPendingUserActions;
+
 	// Diagnostic information.
 	BOOL productionMode;
 	CFAbsoluteTime lastResubscribeTime;
@@ -114,10 +119,236 @@ static NSString *const recordName = @"UserDefaults";
 	CFAbsoluteTime lastReceiveTime;
 }
 
+#if UNIT_TEST_MEMORY_LEAKS
+// MJCloudKitUserDefaultsSync requires CloudKit entitlements and user logged in for testing, so rather than take the time to wrap that up in xctest it is currently just here controlled by "#if UNIT_TEST_MEMORY_LEAKS", so as to piggyback on existing app configuration.
+
+#define XCTAssertEqual(expression1, expression2, ...) \
+{ if ( expression1 != expression2 )   [NSException raise:@"XCTAssertEqualFailure" format:@"Values of %@ and %@ not equal (%i and %i): %@",@#expression1,@#expression2,expression1,expression2,__VA_ARGS__]; }
+
++ (void)testSetRestoreAndClearValueThroughCloudKit {
+	NSLog(@"Testing set, restore, and clear value through CloudKit.");
+
+	NSString *containerIdentifier = @"iCloud.com.mark-a-jerde.Flycut";
+	NSTimeInterval sleepInterval = 2.0f;
+	NSNumber *correctValue = [NSNumber numberWithInt:543];
+	NSNumber *incorrectValue = [NSNumber numberWithInt:144];
+	NSNumber *clearedValue = [NSNumber numberWithInt:0];
+
+	dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+
+	// Ensure the key is invalid in defaults.
+	[[NSUserDefaults standardUserDefaults] setObject:incorrectValue forKey:@"ckSyncFiveFourThree"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+
+	XCTAssertEqual([incorrectValue intValue],
+				   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"] intValue],
+				   @"Value not invalid in NSUserDefaults");
+
+	// Create a sync, ensure key is clear, quit sync.
+	{
+		MJCloudKitUserDefaultsSync *ckSync = [[MJCloudKitUserDefaultsSync alloc] init];
+
+		[ckSync startWithPrefix:@"ckSync"
+		withContainerIdentifier:containerIdentifier];
+
+		// Ensure it gets up and running before we continue.
+		[ckSync finishPendingAPICallsWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+
+		// Should sync within two seconds.
+		[NSThread sleepForTimeInterval:sleepInterval];
+
+		DLog(@"Clear value.");
+
+		// MJCloudKitUserDefaultsSync does not yet support removing objects, so set it to zero.
+		[[NSUserDefaults standardUserDefaults] setObject:clearedValue
+												  forKey:@"ckSyncFiveFourThree"];
+		//[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"ckSyncFiveFourThree"];
+		[[NSUserDefaults standardUserDefaults] synchronize];
+
+		XCTAssertEqual([clearedValue intValue],
+					   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"] intValue],
+					   @"Value not cleared in NSUserDefaults");
+
+		// Should sync within two seconds.
+		[NSThread sleepForTimeInterval:sleepInterval];
+
+		// Ensure stop completes before we move on.
+		[ckSync stopWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+
+		DLog(@"Clear value release.");
+		[ckSync release];
+		ckSync = nil;
+		DLog(@"Clear value release done.");
+	}
+
+	// Create a sync, add a key to defaults, quit sync.
+	{
+		MJCloudKitUserDefaultsSync *ckSync = [[MJCloudKitUserDefaultsSync alloc] init];
+
+		[ckSync startWithPrefix:@"ckSync"
+		withContainerIdentifier:containerIdentifier];
+
+		// Ensure it gets up and running before we continue.
+		[ckSync finishPendingAPICallsWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+
+		// Should sync within two seconds.
+		[NSThread sleepForTimeInterval:sleepInterval];
+
+		XCTAssertEqual([clearedValue intValue],
+					   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"] intValue],
+					   @"Value not absent in CloudKit.");
+
+		[[NSUserDefaults standardUserDefaults] setObject:correctValue forKey:@"ckSyncFiveFourThree"];
+		[[NSUserDefaults standardUserDefaults] synchronize];
+
+		XCTAssertEqual([correctValue intValue],
+					   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"] intValue],
+					   @"Value not set in NSUserDefaults");
+
+		// Should sync within two seconds.
+		[NSThread sleepForTimeInterval:sleepInterval];
+
+		// Ensure stop completes before we move on.
+		dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+		[ckSync stopWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+		dispatch_release(sema);
+
+		[ckSync release];
+		ckSync = nil;
+	}
+
+	NSLog(@"Local clear start.");
+	// Remove the key from defaults and verify it is gone.
+	// MJCloudKitUserDefaultsSync does not yet support removing objects, so set it to zero.
+	[[NSUserDefaults standardUserDefaults] setObject:clearedValue
+											  forKey:@"ckSyncFiveFourThree"];
+	//[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"ckSyncFiveFourThree"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+
+	XCTAssertEqual([clearedValue intValue],
+				   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"]  intValue],
+				   @"Value not cleared from NSUserDefaults");
+	NSLog(@"Local clear checked.");
+
+	// Wait to ensure notifications are handled before a new sync is created.
+	[NSThread sleepForTimeInterval:sleepInterval];
+
+	// Create a sync, check for key in defaults, quit sync.
+	{
+		NSLog(@"Local clear remote start.");
+		MJCloudKitUserDefaultsSync *ckSync = [[MJCloudKitUserDefaultsSync alloc] init];
+
+		[ckSync startWithPrefix:@"ckSync"
+		withContainerIdentifier:containerIdentifier];
+
+		// Ensure it gets up and running before we continue.
+		[ckSync finishPendingAPICallsWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+
+		// Should sync within two seconds.
+		[NSThread sleepForTimeInterval:sleepInterval];
+
+		NSLog(@"Local clear remote check.");
+		XCTAssertEqual([correctValue intValue],
+					   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"]  intValue],
+					   @"Value not loaded from CloudKit after local clear.");
+
+		NSLog(@"Local clear remote release.");
+
+		// Ensure stop completes before we move on.
+		dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+		[ckSync stopWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+		dispatch_release(sema);
+
+		[ckSync release];
+		ckSync = nil;
+	}
+
+	XCTAssertEqual([correctValue intValue],
+				   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"] intValue],
+				   @"Value not persisted after CloudKit.");
+
+	// Create a sync, remove key from defaults, quit sync.
+	{
+		MJCloudKitUserDefaultsSync *ckSync = [[MJCloudKitUserDefaultsSync alloc] init];
+
+		[ckSync startWithPrefix:@"ckSync"
+		withContainerIdentifier:containerIdentifier];
+
+		// Ensure it gets up and running before we continue.
+		[ckSync finishPendingAPICallsWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+
+		// Should sync within two seconds.
+		[NSThread sleepForTimeInterval:sleepInterval];
+
+		XCTAssertEqual([correctValue intValue],
+					   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"] intValue],
+					   @"Value not loaded from CloudKit before clear.");
+
+		// MJCloudKitUserDefaultsSync does not yet support removing objects, so set it to zero.
+		[[NSUserDefaults standardUserDefaults] setObject:clearedValue
+												  forKey:@"ckSyncFiveFourThree"];
+		//[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"ckSyncFiveFourThree"];
+		[[NSUserDefaults standardUserDefaults] synchronize];
+
+		XCTAssertEqual([clearedValue intValue],
+					   [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey:@"ckSyncFiveFourThree"] intValue],
+					   @"Value not cleared from NSUserDefaults");
+
+		// Should sync within two seconds.
+		[NSThread sleepForTimeInterval:sleepInterval];
+
+		// Ensure stop completes before we move on.
+		dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+		[ckSync stopWithCompletionHandler:^{
+			dispatch_semaphore_signal(sema);
+		}];
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+		dispatch_release(sema);
+
+		[ckSync release];
+		ckSync = nil;
+	}
+
+	dispatch_release(sema);
+
+	NSLog(@"Completed testing set, restore, and clear value through CloudKit.");
+}
+#endif
+
 + (nullable instancetype)sharedSync {
 	static MJCloudKitUserDefaultsSync *sharedMJCloudKitUserDefaultsSync = nil;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
+#if UNIT_TEST_MEMORY_LEAKS
+		// Run ten times for leak checking.  Each run should create, use, and clean-up several instances of this class.
+		NSLog(@"Testing for function and leaks.");
+		for ( int i = 0 ; i < 10 ; i++ ) {
+			[MJCloudKitUserDefaultsSync testSetRestoreAndClearValueThroughCloudKit];
+		}
+		NSLog(@"Completed testing for function and leaks.");
+#endif
+
 		sharedMJCloudKitUserDefaultsSync = [[self alloc] init];
 	});
 	return sharedMJCloudKitUserDefaultsSync;
@@ -142,6 +373,58 @@ static NSString *const recordName = @"UserDefaults";
 		productionMode = NO;
 	}
 	return self;
+}
+
+- (void)createUserActionsCountingQueue {
+	if ( !userActionsCountingQueue ) {
+		userActionsCountingQueue = dispatch_queue_create("com.MJCloudKitUserDefaultsSync.userActionsCounting", DISPATCH_QUEUE_SERIAL);
+	}
+}
+
+- (void)finishPendingAPICallsWithCompletionHandler:(void (^)(void))completionHandler {
+	[self createUserActionsCountingQueue];
+
+	dispatch_sync(userActionsCountingQueue, ^{
+		if ( !completionsWhenNoPendingUserActions )
+			completionsWhenNoPendingUserActions = [[NSMutableArray alloc] init];
+		[completionsWhenNoPendingUserActions addObject:completionHandler];
+		
+		[self executeCompletionsIfNoPendingUserActions];
+	});
+}
+
+- (void)incrementUserActions {
+	[self createUserActionsCountingQueue];
+
+	dispatch_sync(userActionsCountingQueue, ^{
+		pendingUserActions++;
+	});
+}
+
+- (void)decrementUserActions {
+	[self createUserActionsCountingQueue];
+
+	dispatch_sync(userActionsCountingQueue, ^{
+		if ( pendingUserActions > 0 ) {
+			pendingUserActions--;
+
+			[self executeCompletionsIfNoPendingUserActions];
+		}
+		else {
+			NSLog(@"User Actions Underflow. This indicates a missing incrementUserActions call.");
+		}
+	});
+}
+
+- (void)executeCompletionsIfNoPendingUserActions {
+	if ( 0 == pendingUserActions
+		&& [completionsWhenNoPendingUserActions count] > 0 ) {
+		for ( int i = 0 ; i < completionsWhenNoPendingUserActions.count ; i++ ) {
+			((void (^)(void))completionsWhenNoPendingUserActions[i])();
+		}
+		[completionsWhenNoPendingUserActions release];
+		completionsWhenNoPendingUserActions = nil;
+	}
 }
 
 - (void)updateToiCloud:(NSNotification *)notificationObject {
@@ -230,7 +513,9 @@ static NSString *const recordName = @"UserDefaults";
 									changes = [[NSMutableDictionary alloc] init];
 
 								NSMutableArray *fromToTheirs = [[NSMutableArray alloc] init];
-								[fromToTheirs addObject:record[key]];
+								NSObject *from = record[key];
+								if ( !from ) from = obj; // There is no from, so the to is the from.
+								[fromToTheirs addObject:from];
 								[fromToTheirs addObject:obj];
 								[changes setObject:fromToTheirs forKey:key];
 
@@ -513,6 +798,8 @@ static NSString *const recordName = @"UserDefaults";
 
 - (void)startWithPrefix:(nonnull NSString *)prefixToSync
 withContainerIdentifier:(nonnull NSString *)containerIdentifier {
+	[self incrementUserActions];
+
 	DLog(@"Starting with prefix");
 
 	if ( !startStopQueue ) {
@@ -544,6 +831,8 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 
 - (void)startWithKeyMatchList:(nonnull NSArray *)keyMatchList
 	  withContainerIdentifier:(nonnull NSString *)containerIdentifier {
+	[self incrementUserActions];
+
 	DLog(@"Starting with match list length %lu atop %lu", (unsigned long)[keyMatchList count], (unsigned long)[matchList count]);
 
 	if ( !startStopQueue ) {
@@ -635,6 +924,8 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 }
 
 - (void)stopForKeyMatchList:(nonnull NSArray *)keyMatchList {
+	[self incrementUserActions];
+
 	DLog(@"Stopping match list length %lu from %lu", (unsigned long)[keyMatchList count], (unsigned long)[matchList count]);
 
 	if ( !startStopQueue ) {
@@ -660,11 +951,19 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 		DLog(@"Match list length is now %lu", (unsigned long)[matchList count]);
 
 		if ( 0 == matchList.count )
-			[self stop];
+			[self stopWithCompletionHandler:^{
+				[self decrementUserActions];
+			}];
+		else
+			[self decrementUserActions];
 	});
 }
 
 - (void)stop {
+	[self stopWithCompletionHandler:nil];
+}
+
+- (void)stopWithCompletionHandler:(void (^)(void))completionHandler {
 	DLog(@"Stopping.");
 
 	if ( !startStopQueue ) {
@@ -686,6 +985,8 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 
 		[self releaseClearObject:&lastUpdateRecordChangeTagReceived];
 		DLog(@"Stopped.");
+
+		if ( completionHandler ) completionHandler();
 	});
 }
 
@@ -763,18 +1064,24 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 					[delegate notifyCKAccountStatusNoAccount];
 				[self stopObservingActivity];
 				dispatch_resume(startStopQueue);
+
+				[self decrementUserActions];
 				break;
 
 			case CKAccountStatusRestricted:
 				DLog(@"iCloud restricted");
 				[self stopObservingActivity];
 				dispatch_resume(startStopQueue);
+
+				[self decrementUserActions];
 				break;
 
 			case CKAccountStatusCouldNotDetermine:
 				DLog(@"Unable to determine iCloud status");
 				[self stopObservingActivity];
 				dispatch_resume(startStopQueue);
+
+				[self decrementUserActions];
 				break;
 		}
 
@@ -844,6 +1151,8 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 				// If we don't push after the pull, we won't push until something changes.
 				[self updateFromiCloud:nil];
 				[self updateToiCloud:nil];
+
+				[self decrementUserActions];
 			}
 
 		};
@@ -1146,9 +1455,12 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 		dispatch_async(syncQueue, ^{
 			dispatch_semaphore_signal(sema);
 		});
-	dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-	dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-	dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+	if ( startStopQueue )
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+	if ( pollQueue )
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+	if ( syncQueue )
+		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
 	dispatch_release(sema);
 
 	// Release all queues after they are all completed.
@@ -1164,6 +1476,13 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 		dispatch_release(startStopQueue);
 		startStopQueue = nil;
 	}
+	if ( userActionsCountingQueue ) {
+		dispatch_release(userActionsCountingQueue);
+		userActionsCountingQueue = nil;
+	}
+	
+	[completionsWhenNoPendingUserActions release];
+	completionsWhenNoPendingUserActions = nil;
 
 	[super dealloc];
 	DLog(@"Deallocated");
