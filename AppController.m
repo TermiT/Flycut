@@ -62,7 +62,11 @@
 		[NSNumber numberWithBool:NO],
 		@"skipPasswordLengths",
 		@"12, 20, 32",
-		@"skipPasswordLengthsList",
+	 	@"skipPasswordLengthsList",
+        [NSNumber numberWithBool:NO],
+        @"skipBundleIDs",
+        @"com.example.PasswordManager",
+        @"skipBundleIDsList",
 		[NSNumber numberWithBool:NO],
 		@"revealPasteboardTypes",
         [NSNumber numberWithBool:NO],
@@ -769,16 +773,21 @@
     return NO;    // Default handling of the command
 }
 
--(BOOL)shouldSkip:(NSString *)contents
+-(BOOL)shouldSkipContents:(NSString *)contents ofType:(NSString *)type fromBundleID:(NSString *)bundleIdentifier
 {
-	NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-
 	// Check to see if we are skipping passwords based on length and characters.
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
 	{
-		// Check to see if they want a little help figuring out what types to enter.
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] )
-			[clippingStore addClipping:type ofType:type fromAppLocalizedName:@"Flycut" fromAppBundleURL:nil atTimestamp:0];
+        // Check to see if they want a little help figuring out what to blacklist.
+        if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"revealPasteboardTypes"] ) {
+            NSString* debugClipping = [NSString stringWithFormat:
+                                       @"Contents: %@\n"
+                                       @"Type: %@\n"
+                                       @"BundleID: %@",
+                                       contents, type, bundleIdentifier];
+
+            [clippingStore addClipping:debugClipping ofType:type fromAppLocalizedName:@"Flycut" fromAppBundleURL:nil atTimestamp:0];
+        }
 
 		__block bool skipClipping = NO;
 
@@ -833,7 +842,16 @@
 			if (skipClipping)
 				return YES;
 		}
+
+        if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipBundleIDs"] ) {
+            NSArray* bundleBlacklist = [[[NSUserDefaults.standardUserDefaults stringForKey:@"skipBundleIDsList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","];
+
+            if ([bundleBlacklist containsObject:bundleIdentifier]) {
+                return YES;
+            }
+        }
 	}
+
 	return NO;
 }
 
@@ -850,6 +868,7 @@
 			for (NSRunningApplication *currApp in [[NSWorkspace sharedWorkspace] runningApplications])
 				if ([currApp isActive])
 					currRunningApp = currApp;
+
 			bool largeCopyRisk = nil != currRunningApp && [[currRunningApp localizedName] rangeOfString:@"Remote Desktop Connection"].location != NSNotFound;
 
 			// Microsoft's Remote Desktop Connection has an issue with large copy actions, which appears to be in the time it takes to transer them over the network.  The copy starts being registered with OS X prior to completion of the transfer, and if the active application changes during the transfer the copy will be lost.  Indicate this time period by toggling the menu icon at the beginning of all RDC trasfers and back at the end.  Apple's Screen Sharing does not demonstrate this problem.
@@ -867,7 +886,7 @@
 				if (largeCopyRisk)
 					[self toggleMenuIconDisabled];
 
-				if ( contents == nil || [self shouldSkip:contents] ) {
+				if ( contents == nil || [self shouldSkipContents:contents ofType:type fromBundleID:currRunningApp.bundleIdentifier] ) {
                    DLog(@"Contents: Empty or skipped");
                } else {
 					if (( [clippingStore jcListCount] == 0 || ! [contents isEqualToString:[clippingStore clippingContentsAtPosition:0]])
@@ -883,11 +902,11 @@
                             [self saveFromStackWithPrefix:@"Autosave "];
                             stackPosition = savePosition;
                         }
-                        
+
                        [clippingStore addClipping:contents
 										   ofType:type
 									   fromAppLocalizedName:[currRunningApp localizedName]
-									   fromAppBundleURL:currRunningApp.bundleURL.path
+                                    fromAppBundleURL:currRunningApp.bundleURL.path
 									  atTimestamp:[[NSDate date] timeIntervalSince1970]];
 //						The below tracks our position down down down... Maybe as an option?
 //						if ( [clippingStore jcListCount] > 1 ) stackPosition++;
