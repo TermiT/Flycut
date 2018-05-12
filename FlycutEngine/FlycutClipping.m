@@ -136,22 +136,22 @@
 
 -(void) resetDisplayString
 {
-    NSString *newDisplayString, *firstLineOfClipping, *trimmedString;
-	NSUInteger start, lineEnd, contentsEnd;
-	NSRange startRange = NSMakeRange(0,0);
-	NSRange contentsRange;
+    NSString *newDisplayString;
+
 	// We're resetting the display string, so release the old one.
     [clipDisplayString release];
-	// We want to restrict the display string to the clipping contents through the first line break.
-    trimmedString = [clipContents stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    [trimmedString getLineStart:&start end:&lineEnd contentsEnd:&contentsEnd forRange:startRange];
-	contentsRange = NSMakeRange(0, contentsEnd);
-	firstLineOfClipping = [trimmedString substringWithRange:contentsRange];
-    if ( [firstLineOfClipping length] > clipDisplayLength ) {
-        newDisplayString = [[NSString stringWithString:[firstLineOfClipping substringToIndex:clipDisplayLength]] stringByAppendingString:@"…"];   
-    } else {
-        newDisplayString = [NSString stringWithString:firstLineOfClipping];
+
+    // First, trim newlines/whitespace
+    newDisplayString = [clipContents stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
+    // We want to replace newlines with spaces
+    newDisplayString = [[newDisplayString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@" "];
+
+    // shorten it if it's too long
+    if ( [newDisplayString length] > clipDisplayLength ) {
+        newDisplayString = [[NSString stringWithString:[newDisplayString substringToIndex: clipDisplayLength]] stringByAppendingString:@"…"];
     }
+
     [newDisplayString retain];
     clipDisplayString = newDisplayString;
 }
