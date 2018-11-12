@@ -18,7 +18,8 @@ Note: the App Store version is not up to date - if you want the latest version w
 **DRM-Free:**
 Download latest DRM-Free version [here](https://github.com/TermiT/Flycut/releases)
 
-**Atention Mojave Users**
+**Atention Mojave Users:**
+
 Remember to give Flycut access in System Preferences -> Security & Privacy -> Privacy -> Accesibility
 
 
