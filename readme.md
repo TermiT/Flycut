@@ -8,7 +8,7 @@ Every time you copy a code piece, Flycut stores it in history. Later, you can pa
 Developed by developers for developers.
 
 **Donation:**
-If you like Flycut, you can donate [here](http://www.pledgie.com/campaigns/16338).
+If you like Flycut, you can donate [here](https://paypal.me/flycut).
 
 **MacAppStore (outdated):**
 Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12)
@@ -17,6 +17,9 @@ Note: the App Store version is not up to date - if you want the latest version w
 
 **DRM-Free:**
 Download latest DRM-Free version [here](https://github.com/TermiT/Flycut/releases)
+
+**Atention Mojave Users**
+Remember to give Flycut access in System Preferences -> Security & Privacy -> Privacy -> Accessibility
 
 **Contributors:**
 Check the list of contributors [here](https://github.com/TermiT/Flycut/graphs/contributors)
