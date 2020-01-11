@@ -10,7 +10,7 @@ On iOS, every time you open Flycut, it checks for a new clipping and stores it i
 Developed by developers for developers.
 
 **Donation:**
-If you like Flycut, you can donate [here](http://www.pledgie.com/campaigns/16338).
+If you like Flycut, you can donate [here](https://paypal.me/flycut)
 
 ## Install
 **MacAppStore (outdated):**
@@ -23,6 +23,9 @@ Download latest DRM-Free version [here](https://github.com/MarkJerde/Flycut/rele
 
 **iOS App Store:**
 Download from the App Store [here](https://itunes.apple.com/us/app/flycut/id1273639655?mt=8)
+
+**Atention Mojave Users**
+Remember to give Flycut access in System Preferences -> Security & Privacy -> Privacy -> Accessibility
 
 ## Use
 **Documentation:**
