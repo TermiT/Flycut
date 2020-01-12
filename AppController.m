@@ -20,6 +20,8 @@
 #import "NSWindow+TrueCenter.h"
 #import "NSWindow+ULIZoomEffect.h"
 #import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
+#import <ApplicationServices/ApplicationServices.h>
+#import <CoreFoundation/CoreFoundation.h>
 
 @implementation AppController
 
@@ -57,6 +59,8 @@
         @"saveForgottenClippings",
         [NSNumber numberWithBool:YES],
         @"saveForgottenFavorites",
+        [NSNumber numberWithBool:NO],
+        @"suppressAccessibilityAlert",
         nil]];
 
 	/* For testing, the ability to force initial values of the sync settings:
@@ -76,9 +80,11 @@
 						 @"bezelWidth",
 						 @"bezelHeight",
 						 @"popUpAnimation",
-						 @"displayClippingSource"
+						 @"displayClippingSource",
 						 @"saveForgottenClippings",
-						 @"saveForgottenFavorites",];
+						 @"saveForgottenFavorites",
+                         @"suppressAccessibilityAlert",
+                        ];
 	[settingsSyncList retain];
 
 	menuQueue = dispatch_queue_create(@"com.Flycut.menuUpdateQueue", DISPATCH_QUEUE_SERIAL);
@@ -188,7 +194,23 @@
 
     [self registerOrDeregisterICloudSync];
 
+    // Check if  the app has Accessibility permission
     [NSApp activateIgnoringOtherApps: YES];
+    
+    BOOL suppressAlert = [[NSUserDefaults standardUserDefaults] boolForKey:@"suppressAccessibilityAlert"];
+    NSDictionary* options = @{(id) (kAXTrustedCheckOptionPrompt): @NO};
+    if (!suppressAlert && AXIsProcessTrustedWithOptions != NULL && !AXIsProcessTrustedWithOptions((CFDictionaryRef) (options))) {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Flycut" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"For correct functioning of the app please tick Flycut in Accessibility apps list"];
+        alert.showsSuppressionButton = YES;
+        alert.delegate = self;
+        [alert runModal];
+        if (alert.suppressionButton.state == NSOnState) {
+            [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+                                                     forKey:@"suppressAccessibilityAlert"];
+        }
+        NSString *urlString = @"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlString]];
+    }
 }
 
 -(void)savePreferencesOnDict:(NSMutableDictionary *)saveDict
