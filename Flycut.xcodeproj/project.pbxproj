@@ -52,6 +52,7 @@
 		77A4F3B2139BD72300F39666 /* SGKeyCodeTranslator.m in Sources */ = {isa = PBXBuildFile; fileRef = 77A4F3AA139BD72300F39666 /* SGKeyCodeTranslator.m */; };
 		77A4F3B3139BD72300F39666 /* SGKeyCombo.h in Headers */ = {isa = PBXBuildFile; fileRef = 77A4F3AB139BD72300F39666 /* SGKeyCombo.h */; };
 		77A4F3B4139BD72300F39666 /* SGKeyCombo.m in Sources */ = {isa = PBXBuildFile; fileRef = 77A4F3AC139BD72300F39666 /* SGKeyCombo.m */; };
+		77AE72BD23CAE81A00F6A44B /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77AE72BC23CAE81A00F6A44B /* ApplicationServices.framework */; };
 		77DA6B921CB9549B0077917F /* FlycutStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B8E1CB9549B0077917F /* FlycutStore.m */; };
 		77DA6B931CB9549B0077917F /* FlycutStore.h in Headers */ = {isa = PBXBuildFile; fileRef = 77DA6B8F1CB9549B0077917F /* FlycutStore.h */; };
 		77DA6B941CB9549B0077917F /* FlycutClipping.m in Sources */ = {isa = PBXBuildFile; fileRef = 77DA6B901CB9549B0077917F /* FlycutClipping.m */; };
@@ -253,6 +254,7 @@
 		77A4F3AA139BD72300F39666 /* SGKeyCodeTranslator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGKeyCodeTranslator.m; sourceTree = "<group>"; };
 		77A4F3AB139BD72300F39666 /* SGKeyCombo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGKeyCombo.h; sourceTree = "<group>"; };
 		77A4F3AC139BD72300F39666 /* SGKeyCombo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGKeyCombo.m; sourceTree = "<group>"; };
+		77AE72BC23CAE81A00F6A44B /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		77DA6B8E1CB9549B0077917F /* FlycutStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FlycutStore.m; path = FlycutEngine/FlycutStore.m; sourceTree = SOURCE_ROOT; };
 		77DA6B8F1CB9549B0077917F /* FlycutStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FlycutStore.h; path = FlycutEngine/FlycutStore.h; sourceTree = SOURCE_ROOT; };
 		77DA6B901CB9549B0077917F /* FlycutClipping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FlycutClipping.m; path = FlycutEngine/FlycutClipping.m; sourceTree = SOURCE_ROOT; };
@@ -329,6 +331,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77AE72BD23CAE81A00F6A44B /* ApplicationServices.framework in Frameworks */,
 				8DF82B422098FA6900E2A1B9 /* MJCloudKitUserDefaultsSync.framework in Frameworks */,
 				8DC9C99C1F742115003BE8B5 /* CloudKit.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
@@ -448,6 +451,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				77AE72BC23CAE81A00F6A44B /* ApplicationServices.framework */,
 				8D61FD581F7961D200BD4B3D /* UserNotifications.framework */,
 				8DC9C99B1F742115003BE8B5 /* CloudKit.framework */,
 				8D84B63A1F7412E600DB58F9 /* CloudKit.framework */,
@@ -759,7 +763,7 @@
 						TestTargetID = 8D0C11A41F171B140046FAA0;
 					};
 					8D1107260486CEB800E47090 = {
-						DevelopmentTeam = 66X95R6W2D;
+						DevelopmentTeam = S8JLSG5ES7;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Push = {
@@ -1411,7 +1415,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				DEVELOPMENT_TEAM = 66X95R6W2D;
+				DEVELOPMENT_TEAM = S8JLSG5ES7;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(FRAMEWORK_SEARCH_PATHS)",
 					"$(SRCROOT)",
@@ -1425,7 +1429,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				PRODUCT_BUNDLE_IDENTIFIER = "-X95R6W2D.com.mark-a-jerde.Flycut-macOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.generalarcade.flycut;
 				PRODUCT_NAME = Flycut;
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -1439,7 +1443,7 @@
 				CODE_SIGN_ENTITLEMENTS = Flycut.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 66X95R6W2D;
+				DEVELOPMENT_TEAM = S8JLSG5ES7;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(FRAMEWORK_SEARCH_PATHS)",
 					"$(SRCROOT)",
@@ -1451,7 +1455,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				PRODUCT_BUNDLE_IDENTIFIER = "-X95R6W2D.com.mark-a-jerde.Flycut-macOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.generalarcade.flycut;
 				PRODUCT_NAME = Flycut;
 				PROVISIONING_PROFILE = "";
 				STRIP_INSTALLED_PRODUCT = YES;
