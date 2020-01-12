@@ -102,7 +102,7 @@
 
 -(void) setDisplayLength:(int)newDisplayLength
 {
-    if ( newDisplayLength  > 0 ) {
+    if ( newDisplayLength > 0 && clipDisplayLength != newDisplayLength ) {
         clipDisplayLength = newDisplayLength;
         [self resetDisplayString];
     }
@@ -222,9 +222,7 @@
     if (!other || ![other isKindOfClass:[self class]])
         return NO;
     FlycutClipping * otherClip = (FlycutClipping *)other;
-    return ([self.type isEqualToString:otherClip.type] &&
-            [self.displayString isEqualToString:otherClip.displayString] &&
-            (self.displayLength == otherClip.displayLength) &&
+    return (/*[self.type isEqualToString:otherClip.type] &&*/ // Type is under-utilized a this time and will mismatch on cross-device (macOS <-> iOS) usage.  This should be revisited once we have support for more than just raw text clippings.
             [self.contents isEqualToString:otherClip.contents]);
 }
 
