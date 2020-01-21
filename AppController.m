@@ -57,7 +57,11 @@
         @"displayClippingSource",
         [NSNumber numberWithBool:NO],
         @"saveForgottenClippings",
+#ifdef SANDBOXING
+        [NSNumber numberWithBool:NO],
+#else
         [NSNumber numberWithBool:YES],
+#endif
         @"saveForgottenFavorites",
         [NSNumber numberWithBool:NO],
         @"suppressAccessibilityAlert",
@@ -100,7 +104,7 @@
 		// Not registering for conflict notifications, since we just sync settings, and if the settings are conflictingly adjusted simultaneously on two systems there is nothing to say which setting is better.
 
 		[[MJCloudKitUserDefaultsSync sharedSync] startWithKeyMatchList:settingsSyncList
-					withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
+					withContainerIdentifier:kiCloudId];
 	}
 	else {
 		[[MJCloudKitUserDefaultsSync sharedSync] stopForKeyMatchList:settingsSyncList];
@@ -624,6 +628,11 @@
                                            action:@selector(setupBezel:)];
     [appearancePanel addSubview:row];
     nextYMax = row.frame.origin.y;
+#ifdef SANDBOXING
+    forgottenItemLabel.hidden = YES;
+    forgottenClippingsCheckbox.hidden = YES;
+    forgottenFavoritesCheckbox.hidden = YES;
+#endif
 }
 
 -(IBAction) showPreferencePanel:(id)sender

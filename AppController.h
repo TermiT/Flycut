@@ -45,6 +45,9 @@
     NSString *statusItemText;
     NSImage *statusItemImage;
     
+    IBOutlet NSTextField *forgottenItemLabel;
+    IBOutlet NSButton *forgottenFavoritesCheckbox;
+    IBOutlet NSButton *forgottenClippingsCheckbox;
     // The menu attatched to same
     IBOutlet NSMenu *jcMenu;
     int jcMenuBaseItemsCount;
@@ -55,6 +58,7 @@
     NSEvent *menuOpenEvent;
     IBOutlet NSSlider * heightSlider;
     IBOutlet NSSlider * widthSlider;
+    
     // A timer which will let us check the pasteboard;
     // this should default to every .5 seconds but be user-configurable
     NSTimer *pollPBTimer;

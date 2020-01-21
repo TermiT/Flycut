@@ -5,6 +5,8 @@
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 
+#define kiCloudId @"iCloud.com.generalarcade.flycut"
+
 #ifdef DEBUG
 #   define DLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
 #else

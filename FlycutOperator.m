@@ -233,6 +233,9 @@
 
 - (bool)saveFromStore:(FlycutStore*)store atIndex:(int)index withPrefix:(NSString*) prefix
 {
+#ifdef SANDBOXING
+    return NO;
+# else
     if ( [store jcListCount] > index ) {
         // Get text from clipping store.
         NSString *pbFullText = [self clippingStringWithCount:index inStore:store];
@@ -261,6 +264,7 @@
         return YES;
     }
     return NO;
+#endif
 }
 
 - (bool)saveFromStackToFavorites
@@ -560,7 +564,7 @@
 {
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"syncSettingsViaICloud"] ) {
 		[[MJCloudKitUserDefaultsSync sharedSync] startWithKeyMatchList:settingsSyncList
-								  withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
+								  withContainerIdentifier:kiCloudId];
 	}
 	else {
 		[[MJCloudKitUserDefaultsSync sharedSync] stopForKeyMatchList:settingsSyncList];
@@ -589,7 +593,7 @@
 		[[MJCloudKitUserDefaultsSync sharedSync] addNotificationFor:MJSyncNotificationSaveSuccess withSelector:@selector(checkPreferencesSaveSuccess:) withTarget: self];
 
 		[[MJCloudKitUserDefaultsSync sharedSync] startWithKeyMatchList:@[@"store"]
-								  withContainerIdentifier:@"iCloud.com.mark-a-jerde.Flycut"];
+								  withContainerIdentifier:kiCloudId];
 	}
 	else {
 		[[MJCloudKitUserDefaultsSync sharedSync] removeNotificationsFor:MJSyncNotificationChanges forTarget:self];
