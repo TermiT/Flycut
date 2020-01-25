@@ -16,8 +16,6 @@ If you like Flycut, you can donate [here](https://paypal.me/flycut)
 **Mac App Store:**
 Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12)
 
-Note: the Mac App Store version is not up to date - if you want the latest version with all the features, you will have to download DRM-Free version or compile Flycut yourself.
-
 **DRM-Free:**
 Download latest DRM-Free version [here](https://github.com/MarkJerde/Flycut/releases/latest)
 
