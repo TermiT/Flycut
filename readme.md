@@ -13,7 +13,7 @@ Developed by developers for developers.
 If you like Flycut, you can donate [here](https://paypal.me/flycut)
 
 ## Install
-**MacAppStore (outdated):**
+**Mac App Store:**
 Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12)
 
 Note: the Mac App Store version is not up to date - if you want the latest version with all the features, you will have to download DRM-Free version or compile Flycut yourself.
@@ -37,8 +37,3 @@ Check the list of contributors [here](https://github.com/TermiT/Flycut/graphs/co
 
 **License:**
 MIT
-
-**Todo:**
-
-* Big refactoring
-* Expose-like view of all clips
