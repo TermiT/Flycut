@@ -22,6 +22,7 @@
 #import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
 #import <ApplicationServices/ApplicationServices.h>
 #import <CoreFoundation/CoreFoundation.h>
+#import <ServiceManagement/ServiceManagement.h>
 
 @implementation AppController
 
@@ -182,9 +183,18 @@
     pbBlockCount = [[NSNumber numberWithInt:0] retain];
     [pollPBTimer fire];
     
+    
     // The load-on-startup check can be really slow, so this will be dispatched out so our thread isn't blocked.
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_async(queue, ^{
+#ifdef SANDBOXING
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"bundleIdentifier == %@", kFlycutHelperId];
+        NSArray *helperApp = [[[NSWorkspace sharedWorkspace] runningApplications] filteredArrayUsingPredicate:predicate];
+        BOOL helperLaunched = ([helperApp count] != 0);
+        [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:helperLaunched]
+                                                            forKey:@"loadOnStartup"];
+#else
+
         // This can take five seconds, perhaps more, so do it in the background instead of holding up opening of the preference panel.
         int checkLoginRegistry = [UKLoginItemRegistry indexForLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
         if ( checkLoginRegistry >= 1 ) {
@@ -194,8 +204,8 @@
             [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO]
                                                      forKey:@"loadOnStartup"];
         }
+#endif
     });
-
     [self registerOrDeregisterICloudSync];
 
     // Check if  the app has Accessibility permission
@@ -653,9 +663,18 @@
 
 -(IBAction)toggleLoadOnStartup:(id)sender {
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"loadOnStartup"] ) {
-		[UKLoginItemRegistry addLoginItemWithPath:[[NSBundle mainBundle] bundlePath] hideIt:NO];
+#ifdef SANDBOXING
+        
+        SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, YES);
+#else
+    [UKLoginItemRegistry addLoginItemWithPath:[[NSBundle mainBundle] bundlePath] hideIt:NO];
+#endif
 	} else {
+#ifdef SANDBOXING
+        SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, YES);
+#else
 		[UKLoginItemRegistry removeLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
+#endif
 	}
 }
 
