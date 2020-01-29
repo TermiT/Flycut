@@ -364,7 +364,7 @@
         enumerator = [subArray objectEnumerator];
         int index = 0;
         while ( aClipping = [enumerator nextObject] ) { // Forward enumerator so we find the most recent N matches
-            if ([[self clippingContentsAtPosition:index] rangeOfString:search].location != NSNotFound) {
+            if ([[self clippingContentsAtPosition:index] rangeOfString:search options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 [returnArray insertObject:[aClipping displayString] atIndex:0];
                 howMany--;
                 if (0 == howMany)
@@ -402,7 +402,7 @@
         enumerator = [subArray objectEnumerator];
         int index = 0;
         while ( aClipping = [enumerator nextObject] ) { // Forward enumerator so we find the most recent N matches
-            if ([[self clippingContentsAtPosition:index] rangeOfString:search].location != NSNotFound) {
+            if ([[self clippingContentsAtPosition:index] rangeOfString:search options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 [returnArray addObject:[NSNumber numberWithInt:index]];
                 howMany--;
                 if (0 == howMany)
