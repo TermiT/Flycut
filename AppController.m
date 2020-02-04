@@ -116,6 +116,43 @@
 	[flycutOperator registerOrDeregisterICloudSync];
 }
 
+- (void)showAccessibilityAlert {
+    BOOL suppressAlert = [[NSUserDefaults standardUserDefaults] boolForKey:@"suppressAccessibilityAlert"];
+    NSDictionary* options = @{(id) (kAXTrustedCheckOptionPrompt): @NO};
+    if (!suppressAlert && AXIsProcessTrustedWithOptions != NULL && !AXIsProcessTrustedWithOptions((CFDictionaryRef) (options))) {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Flycut" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"For correct functioning of the app please tick Flycut in Accessibility apps list"];
+        alert.showsSuppressionButton = YES;
+        [alert runModal];
+        if (alert.suppressionButton.state == NSOnState) {
+            [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+                                                     forKey:@"suppressAccessibilityAlert"];
+        }
+        NSString *urlString = @"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlString]];
+    }
+}
+
+
+- (void)showOldOSXAlert {
+#ifdef SANDBOXING
+    NSOperatingSystemVersion ver = [[NSProcessInfo processInfo] operatingSystemVersion];
+    if (ver.majorVersion == 10 && ver.minorVersion <= 13) {
+        BOOL suppressAlert = [[NSUserDefaults standardUserDefaults] boolForKey:@"suppressOldOSXAlert"];
+        if (!suppressAlert) {
+            NSAlert *alert = [NSAlert alertWithMessageText:@"Flycut" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Unfortunatly due to some app sandbox security restrictions from Apple Flycut may not correctly function on MacOSX 10.13 or lower. You can download non sandboxed version here: https://github.com/TermiT/Flycut/releases"];
+            alert.showsSuppressionButton = YES;
+            [alert runModal];
+            if (alert.suppressionButton.state == NSOnState) {
+                [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
+                                                         forKey:@"suppressOldOSXAlert"];
+            }
+        }
+    }
+#endif
+}
+
+
+
 - (void)awakeFromNib
 {
 	[self buildAppearancesPreferencePanel];
@@ -211,20 +248,8 @@
     // Check if  the app has Accessibility permission
     [NSApp activateIgnoringOtherApps: YES];
     
-    BOOL suppressAlert = [[NSUserDefaults standardUserDefaults] boolForKey:@"suppressAccessibilityAlert"];
-    NSDictionary* options = @{(id) (kAXTrustedCheckOptionPrompt): @NO};
-    if (!suppressAlert && AXIsProcessTrustedWithOptions != NULL && !AXIsProcessTrustedWithOptions((CFDictionaryRef) (options))) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Flycut" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"For correct functioning of the app please tick Flycut in Accessibility apps list"];
-        alert.showsSuppressionButton = YES;
-        alert.delegate = self;
-        [alert runModal];
-        if (alert.suppressionButton.state == NSOnState) {
-            [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES]
-                                                     forKey:@"suppressAccessibilityAlert"];
-        }
-        NSString *urlString = @"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlString]];
-    }
+    [self showAccessibilityAlert];
+    [self showOldOSXAlert];
 }
 
 -(void)savePreferencesOnDict:(NSMutableDictionary *)saveDict
@@ -664,7 +689,6 @@
 -(IBAction)toggleLoadOnStartup:(id)sender {
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"loadOnStartup"] ) {
 #ifdef SANDBOXING
-        
         SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, YES);
 #else
     [UKLoginItemRegistry addLoginItemWithPath:[[NSBundle mainBundle] bundlePath] hideIt:NO];
