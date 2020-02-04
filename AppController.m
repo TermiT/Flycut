@@ -39,7 +39,7 @@
 		@"menuIcon",
 		[NSNumber numberWithFloat:.25],
 		@"bezelAlpha",
-		[NSNumber numberWithBool:YES],
+		[NSNumber numberWithBool:NO],
 		@"stickyBezel",
 		[NSNumber numberWithBool:NO],
 		@"wraparoundBezel",
