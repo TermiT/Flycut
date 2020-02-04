@@ -1,3 +1,5 @@
+Support: https://github.com/TermiT/Flycut/issues
+
 Flycut, developed by General Arcade (http://www.generalarcade.com/). Flycut is a fork of Jumpcut. Source code avilable on GitHub: http://github.com/TermiT/Flycut
 © General Arcade, 2011 - 2020.
 
