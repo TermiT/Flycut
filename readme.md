@@ -13,6 +13,11 @@ Developed by developers for developers.
 If you like Flycut, you can donate [here](https://paypal.me/flycut)
 
 ## Install
+
+***For OSX 10.13 and older use DRM-Free version***
+
+***For OSX 10.14 and later use either App Store or DRM-Free versions. But don't fortget to give Flycut access in System Preferences -> Security & Privacy -> Privacy -> Accessibility. If you had previous version of Flycut installed, you might need to remove if from Accessibility first and add it again.***
+
 **Mac App Store:**
 Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12)
 
@@ -21,9 +26,6 @@ Download latest DRM-Free version [here](https://github.com/MarkJerde/Flycut/rele
 
 **iOS App Store:**
 Download from the App Store [here](https://itunes.apple.com/us/app/flycut/id1273639655?mt=8)
-
-**Atention Mojave Users**
-Remember to give Flycut access in System Preferences -> Security & Privacy -> Privacy -> Accessibility
 
 ## Use
 **Documentation:**
