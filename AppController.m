@@ -758,6 +758,12 @@
 	}
 }
 
+- (void)windowDidResignKey:(NSNotification *)notification {
+	if ( isBezelPinned ) {
+		[self hideApp];
+	}
+}
+
 -(void)fakeKey:(NSNumber*) keyCode withCommandFlag:(BOOL) setFlag
 	/*" +fakeKey synthesizes keyboard events. "*/
 {     
@@ -1059,8 +1065,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 
 -(void)hideApp
 {
-	[self hideBezel];
 	isBezelPinned = NO;
+	[self hideBezel];
 	[NSApp hide:self];
 }
 

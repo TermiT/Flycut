@@ -365,12 +365,13 @@ static const float lineHeight = 16;
 	}
 }
 		
-- (id)delegate {
+- (id<BezelWindowDelegate>)delegate {
     return delegate;
 }
 
-- (void)setDelegate:(id)newDelegate {
+- (void)setDelegate:(id<BezelWindowDelegate>)newDelegate {
     delegate = newDelegate;
+	super.delegate = newDelegate;
 }
 
 @end
