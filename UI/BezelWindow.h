@@ -14,6 +14,13 @@
 #import "RoundRecBezierPath.h"
 #import "RoundRecTextField.h"
 
+@protocol BezelWindowDelegate <NSWindowDelegate>
+
+-(void)processBezelKeyDown:(NSEvent *)theEvent;
+-(void)processBezelMouseEvents:(NSEvent *)theEvent;
+-(void)metaKeysReleased;
+
+@end
 
 @interface BezelWindow : NSPanel {
 	// "n of n" text in bezel
@@ -33,7 +40,7 @@
 	RoundRecTextField	*textField;
 	RoundRecTextField	*charField;
 	NSImageView			*iconView;
-	id					delegate;
+	id<BezelWindowDelegate>	delegate;
     Boolean             color;
 }
 
@@ -57,7 +64,7 @@
 - (void)setDate:(NSString *)newDate;
 - (void)setSourceIcon:(NSImage *)newSourceIcon;
 
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
+- (id<BezelWindowDelegate>)delegate;
+- (void)setDelegate:(id<BezelWindowDelegate>)newDelegate;
 
 @end

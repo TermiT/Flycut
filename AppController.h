@@ -22,7 +22,7 @@
 
 @class SGHotKey;
 
-@interface AppController : NSObject <NSMenuDelegate, NSApplicationDelegate, NSAlertDelegate, FlycutStoreDelegate, FlycutOperatorDelegate> {
+@interface AppController : NSObject <NSMenuDelegate, NSApplicationDelegate, NSAlertDelegate, FlycutStoreDelegate, FlycutOperatorDelegate, BezelWindowDelegate> {
     BezelWindow					*bezel;
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
@@ -97,6 +97,7 @@
 -(void) processBezelKeyDown:(NSEvent *)theEvent;
 -(void) processBezelMouseEvents:(NSEvent *)theEvent;
 -(void) metaKeysReleased;
+-(void) windowDidResignKey:(NSNotification *)notification;
 
 // Menu related
 -(void) updateMenu;

@@ -22,7 +22,7 @@ If you like Flycut, you can donate [here](https://paypal.me/flycut)
 Download from the App Store [here](http://itunes.apple.com/us/app/flycut-clipboard-manager/id442160987?mt=12)
 
 **DRM-Free:**
-Download latest DRM-Free version [here](https://github.com/MarkJerde/Flycut/releases/latest)
+Download latest DRM-Free version [here](https://github.com/TermiT/Flycut/releases)
 
 **iOS App Store:**
 Download from the App Store [here](https://itunes.apple.com/us/app/flycut/id1273639655?mt=8)
