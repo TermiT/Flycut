@@ -1,5 +1,7 @@
 # Flycut
-<a href="https://github.com/TermiT/Flycut/releases"><img src="http://a3.mzstatic.com/us/r1000/047/Purple/fb/53/f2/mzi.mcaxwyjm.175x175-75.png" /></a><br />
+<a href="https://github.com/TermiT/Flycut/releases"><img src="http://a3.mzstatic.com/us/r1000/047/Purple/fb/53/f2/mzi.mcaxwyjm.175x175-75.png" /></a>
+<a href="https://macdownload.informer.com/app-awards/bd0f181384614a68b4f902472d6a42b5/"><img src="award-2021.png" /></a>
+<br />
 **Description:**
 Flycut is a clean and simple clipboard manager for developers. It's based on an open source app called Jumpcut.
 
