@@ -253,7 +253,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="420">
-                                                        <rect key="frame" x="134" y="159" width="95" height="14"/>
+                                                        <rect key="frame" x="160" y="159" width="95" height="14"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Display in menu" id="757">
                                                             <font key="font" metaFont="label" size="11"/>
@@ -262,9 +262,9 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="470">
-                                                        <rect key="frame" x="79" y="154" width="25" height="22"/>
+                                                        <rect key="frame" x="79" y="154" width="50" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
-                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="758">
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" alignment="right" id="758">
                                                             <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="483">
                                                                 <attributedString key="attributedStringForZero">
                                                                     <fragment content="0"/>
@@ -281,9 +281,9 @@
                                                         </connections>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="471">
-                                                        <rect key="frame" x="224" y="154" width="24" height="22"/>
+                                                        <rect key="frame" x="250" y="154" width="50" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
-                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="759">
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" alignment="right" id="759">
                                                             <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator=" " id="484">
                                                                 <attributedString key="attributedStringForZero">
                                                                     <fragment content="0"/>
@@ -300,16 +300,16 @@
                                                         </connections>
                                                     </textField>
                                                     <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="472">
-                                                        <rect key="frame" x="104" y="152" width="19" height="27"/>
+                                                        <rect key="frame" x="130" y="152" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
-                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="760"/>
+                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="999" doubleValue="10" valueWraps="YES" id="760"/>
                                                         <connections>
                                                             <action selector="setRememberNumPref:" target="213" id="485"/>
                                                             <binding destination="808" name="value" keyPath="values.rememberNum" id="829"/>
                                                         </connections>
                                                     </stepper>
                                                     <stepper toolTip="Controls how many clippings Flycut shows in the menu" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="473">
-                                                        <rect key="frame" x="249" y="152" width="19" height="27"/>
+                                                        <rect key="frame" x="300" y="152" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="5" maxValue="99" doubleValue="5" valueWraps="YES" id="761"/>
                                                         <connections>
@@ -363,7 +363,7 @@
                                                         </connections>
                                                     </button>
                                                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ubt-DS-zHf">
-                                                        <rect key="frame" x="280" y="159" width="62" height="14"/>
+                                                        <rect key="frame" x="330" y="159" width="62" height="14"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Favorites" id="2L6-OM-5rx">
                                                             <font key="font" metaFont="label" size="11"/>
@@ -372,9 +372,9 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dM5-eN-Zvt">
-                                                        <rect key="frame" x="346" y="154" width="25" height="22"/>
+                                                        <rect key="frame" x="396" y="154" width="50" height="22"/>
                                                         <autoresizingMask key="autoresizingMask"/>
-                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="nes-6O-e5R">
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" alignment="right" id="nes-6O-e5R">
                                                             <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#" negativeFormat="-#" hasThousandSeparators="NO" thousandSeparator="," id="aqt-p2-eya">
                                                                 <attributedString key="attributedStringForZero">
                                                                     <fragment content="0"/>
@@ -391,9 +391,9 @@
                                                         </connections>
                                                     </textField>
                                                     <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wZv-HJ-VdW">
-                                                        <rect key="frame" x="371" y="152" width="19" height="27"/>
+                                                        <rect key="frame" x="446" y="152" width="19" height="27"/>
                                                         <autoresizingMask key="autoresizingMask"/>
-                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="gUi-gl-RH6"/>
+                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="999" doubleValue="10" valueWraps="YES" id="gUi-gl-RH6"/>
                                                         <connections>
                                                             <action selector="setFavoritesRememberNumPref:" target="213" id="rm7-TX-1af"/>
                                                             <binding destination="808" name="value" keyPath="values.rememberNum" id="nUm-81-DgP"/>
