@@ -28,10 +28,10 @@
 // The the bunle URL of the app it came from
     NSString * appBundleURL;
 // The time
-    int clipTimestamp;
+    NSInteger clipTimestamp;
 }
 
--(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength withAppLocalizedName:(NSString *)localizedName withAppBundleURL:(NSString *)bundleURL withTimestamp:(int)timestamp;
+-(id) initWithContents:(NSString *)contents withType:(NSString *)type withDisplayLength:(int)displayLength withAppLocalizedName:(NSString *)localizedName withAppBundleURL:(NSString *)bundleURL withTimestamp:(NSInteger)timestamp;
 /* -(id) initWithCoder:(NSCoder *)coder;
 -(void) decodeWithCoder:(NSCoder *)coder; */
 -(NSString *) description;
@@ -51,7 +51,7 @@
 -(NSString *) type;
 -(NSString *) appLocalizedName;
 -(NSString *) appBundleURL;
--(int) timestamp;
+-(NSInteger) timestamp;
 -(BOOL) hasName;
 
 // Additional functions

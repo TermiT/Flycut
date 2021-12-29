@@ -1,0 +1,3 @@
+Target Version SubmissionDate Hash
+iOS Initial 2017-08-21 3e4ea04567f834b37b8c8e4baf75d20ba1e898e1 (roughly. Some commits were merged between then and PR.)
+iOS 1.2.3 2017-11-13 61053c2dde7e0bc6f7d472e193637354587277f9 (roughly. Some commits were merged between then and PR amounting to ARC release and threading differences.)

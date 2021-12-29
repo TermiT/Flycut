@@ -26,18 +26,58 @@
         displaying:(int)nowDisplaying
         withDisplayLength:(int)displayLength
 {
+	// Ensure that we don't remember zero or fewer clippings.  Very unlikely, but this provides a safeguard just in case.
+	if ( nowRemembering <= 0 )
+		nowRemembering = 40;
+
     [super init];
     jcList = [[NSMutableArray alloc] init];
+	insertionJournal = [[NSMutableArray alloc] init];
+	deletionJournal = [[NSMutableArray alloc] init];
     [self setRememberNum:nowRemembering];
     [self setDisplayNum:nowDisplaying];
     [self setDisplayLen:displayLength];
     return self;
 }
 
+-(int) indexOfClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp{
+	if ([clipping length] == 0) {
+		return -1;
+	}
+	// Clipping object
+	FlycutClipping * newClipping;
+	// Create clipping
+	newClipping = [[FlycutClipping alloc] initWithContents:clipping
+												  withType:type
+										 withDisplayLength:[self displayLen]
+									  withAppLocalizedName:appLocalizedName
+										  withAppBundleURL:bundleURL
+											 withTimestamp:timestamp];
+
+	int result = [self indexOfClipping: newClipping];
+
+	[newClipping release];
+
+	return result;
+}
+
+-(int) indexOfClipping:(FlycutClipping*) clipping{
+	return [self indexOfClipping:clipping afterIndex:-1];
+}
+
+-(int) indexOfClipping:(FlycutClipping*) clipping afterIndex:(int) after{
+	NSUInteger index = [jcList indexOfObject:clipping
+									 inRange:NSMakeRange(after + 1, [jcList count] - (after + 1) )];
+	if ( NSNotFound == index ) {
+		return -1;
+	}
+	return (int)index;
+}
+
 // Add a clipping
--(void) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp{
+-(bool) addClipping:(NSString *)clipping ofType:(NSString *)type fromAppLocalizedName:(NSString *)appLocalizedName fromAppBundleURL:(NSString *)bundleURL atTimestamp:(int) timestamp{
     if ([clipping length] == 0) {
-        return;
+        return NO;
     }
     // Clipping object
     FlycutClipping * newClipping;
@@ -52,18 +92,49 @@
 	[self addClipping:newClipping];
 	
 	[newClipping release];
+	return YES;
+}
+
+-(bool) removeDuplicates{
+	return [[[NSUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue];
 }
 
 -(void) addClipping:(FlycutClipping*) clipping{
-    if ([jcList containsObject:clipping] && [[[NSUserDefaults standardUserDefaults] valueForKey:@"removeDuplicates"] boolValue]) {
+	[self insertClipping:clipping atIndex:0];
+}
+
+-(void) insertClipping:(FlycutClipping*) clipping atIndex:(int) index{
+	[self delegateBeginUpdates];
+
+	int moveFromIndex = -1;
+	if ([jcList containsObject:clipping] && [self removeDuplicates]) {
+		moveFromIndex = (int)[jcList indexOfObject:clipping];
         [jcList removeObject:clipping];
     }
+
     // Push it onto our recent clippings stack
-	[jcList insertObject:clipping atIndex:0];
+	if ( index < [jcList count] ) {
+		[jcList insertObject:clipping atIndex:index];
+	}
+	else {
+		// If the index is beyond the current count then just append it and disregard requested index.
+		// This doesn't alter the remember number and the jcList is self-growing so it is fine to append.
+		index = [jcList count];
+		[jcList addObject:clipping];
+	}
+	if ( moveFromIndex >= 0 )
+		[self delegateMoveClippingAtIndex:moveFromIndex toIndex:index];
+	else
+		[self delegateInsertClippingAtIndex:index];
+
 	// Delete clippings older than jcRememberNum
 	while ( [jcList count] > jcRememberNum ) {
+		[self delegateWillDeleteClippingAtIndex:jcRememberNum];
 		[jcList removeObjectAtIndex:jcRememberNum];
+		[self delegateDeleteClippingAtIndex:(jcRememberNum-1)]; // -1 for before-add indexing
 	}
+
+	[self delegateEndUpdates];
 }
 
 -(void) addClipping:(NSString *)clipping ofType:(NSString *)type withPBCount:(int *)pbCount
@@ -73,10 +144,20 @@
 
 // Clear remembered and listed
 -(void) clearList {
+    [self delegateBeginUpdates];
+
+    for ( int i = (int)[jcList count] ; i > 0 ; i-- )
+	{
+		[self delegateWillDeleteClippingAtIndex:(i-1)];
+        [self delegateDeleteClippingAtIndex:(i-1)];
+	}
+
     NSMutableArray *emptyJCList;
     emptyJCList = [[NSMutableArray alloc] init];
     [jcList release];
     jcList = emptyJCList;
+
+    [self delegateEndUpdates];
 }
 
 -(void) mergeList {
@@ -86,14 +167,30 @@
 
 -(void) clearItem:(int)index
 {
+    [self delegateBeginUpdates];
+
+	[self delegateWillDeleteClippingAtIndex:index];
     [jcList removeObjectAtIndex:index];
+    [self delegateDeleteClippingAtIndex:index];
+
+    [self delegateEndUpdates];
 }
 
 -(void) clippingMoveToTop:(int)index
 {
+	[self clippingMoveFrom:index To:0];
+}
+
+-(void) clippingMoveFrom:(int)index To:(int)toIndex
+{
+	[self delegateBeginUpdates];
+
 	FlycutClipping *clipping = [jcList objectAtIndex:index];
-	[jcList insertObject:clipping atIndex:0];
+	[jcList insertObject:clipping atIndex:toIndex];
 	[jcList removeObjectAtIndex:index+1];
+	[self delegateMoveClippingAtIndex:index toIndex:toIndex];
+
+	[self delegateEndUpdates];
 }
 
 // Set various values
@@ -101,8 +198,16 @@
 {
     if ( nowRemembering  > 0 ) {
         jcRememberNum = nowRemembering;
-		while ( [jcList count] > jcRememberNum ) {
-			[jcList removeObjectAtIndex:jcRememberNum];
+
+		if ( [jcList count] > jcRememberNum ) {
+			[self delegateBeginUpdates];
+
+			while ( [jcList count] > jcRememberNum ) {
+				[self delegateWillDeleteClippingAtIndex:jcRememberNum];
+				[jcList removeObjectAtIndex:jcRememberNum];
+				[self delegateDeleteClippingAtIndex:jcRememberNum];
+			}
+			[self delegateEndUpdates];
 		}
     }
 }
@@ -125,6 +230,39 @@
     }
 }
 
+-(void) clearModifiedSinceLastSaveStore
+{
+	modifiedSinceLastSaveStore = NO;
+	insertionJournalCountLastSave = [insertionJournal count];
+	deletionJournalCountLastSave = [deletionJournal count];
+}
+
+-(void) pruneJournals
+{
+	[self clearInsertionJournalCount:insertionJournalCountLastSave];
+	[self clearDeletionJournalCount:deletionJournalCountLastSave];
+}
+
+-(void) clearInsertionJournalCount:(NSUInteger)count
+{
+	while ( count-- > 0 )
+	{
+		[insertionJournal removeLastObject];
+		if ( insertionJournalCountLastSave > 0 )
+			insertionJournalCountLastSave--;
+	}
+}
+
+-(void) clearDeletionJournalCount:(NSUInteger)count
+{
+	while ( count-- > 0 )
+	{
+		[deletionJournal removeLastObject];
+		if ( deletionJournalCountLastSave > 0 )
+			deletionJournalCountLastSave--;
+	}
+}
+
 -(int) rememberNum
 {
     return jcRememberNum;
@@ -138,6 +276,21 @@
 -(int) jcListCount
 {
     return [jcList count];
+}
+
+-(bool) modifiedSinceLastSaveStore
+{
+	return modifiedSinceLastSaveStore;
+}
+
+-(NSArray *) insertionJournal
+{
+	return insertionJournal;
+}
+
+-(NSArray *) deletionJournal
+{
+	return deletionJournal;
 }
 
 -(FlycutClipping *) clippingAtPosition:(int)index
@@ -211,7 +364,7 @@
         enumerator = [subArray objectEnumerator];
         int index = 0;
         while ( aClipping = [enumerator nextObject] ) { // Forward enumerator so we find the most recent N matches
-            if ([[self clippingContentsAtPosition:index] rangeOfString:search].location != NSNotFound) {
+            if ([[self clippingContentsAtPosition:index] rangeOfString:search options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 [returnArray insertObject:[aClipping displayString] atIndex:0];
                 howMany--;
                 if (0 == howMany)
@@ -249,7 +402,7 @@
         enumerator = [subArray objectEnumerator];
         int index = 0;
         while ( aClipping = [enumerator nextObject] ) { // Forward enumerator so we find the most recent N matches
-            if ([[self clippingContentsAtPosition:index] rangeOfString:search].location != NSNotFound) {
+            if ([[self clippingContentsAtPosition:index] rangeOfString:search options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 [returnArray addObject:[NSNumber numberWithInt:index]];
                 howMany--;
                 if (0 == howMany)
@@ -264,6 +417,60 @@
             [returnArray addObject:[NSNumber numberWithInt:i]];
     }
     return returnArray;
+}
+
+-(void) delegateBeginUpdates
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(beginUpdates)] )
+		[self.delegate beginUpdates];
+}
+
+-(void) delegateEndUpdates
+{
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(endUpdates)] )
+		[self.delegate endUpdates];
+}
+
+-(void) delegateInsertClippingAtIndex:(int)index
+{
+	[insertionJournal insertObject:[jcList objectAtIndex:index] atIndex:0];
+	if ( [insertionJournal count] > jcRememberNum )
+		[self clearInsertionJournalCount:( [insertionJournal count] - jcRememberNum )];
+
+	modifiedSinceLastSaveStore = YES;
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(insertClippingAtIndex:)] )
+		[self.delegate insertClippingAtIndex:index];
+}
+
+-(void) delegateWillDeleteClippingAtIndex:(int)index
+{
+	[deletionJournal insertObject:[jcList objectAtIndex:index] atIndex:0];
+	if ( [deletionJournal count] > jcRememberNum )
+		[self clearDeletionJournalCount:( [deletionJournal count] - jcRememberNum )];
+
+	if ( self.deleteDelegate && [self.deleteDelegate respondsToSelector:@selector(willDeleteClippingFromStore:AtIndex:)] )
+		[self.deleteDelegate willDeleteClippingFromStore:self AtIndex:index];
+}
+
+-(void) delegateDeleteClippingAtIndex:(int)index
+{
+	modifiedSinceLastSaveStore = YES;
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(deleteClippingAtIndex:)] )
+		[self.delegate deleteClippingAtIndex:index];
+}
+
+-(void) delegateReloadClippingAtIndex:(int)index
+{
+	modifiedSinceLastSaveStore = YES;
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(reloadClippingAtIndex:)] )
+		[self.delegate reloadClippingAtIndex:index];
+}
+
+-(void) delegateMoveClippingAtIndex:(int)index toIndex:(int)newIndex
+{
+	modifiedSinceLastSaveStore = YES;
+	if ( self.delegate && [self.delegate respondsToSelector:@selector(moveClippingAtIndex:toIndex:)] )
+		[self.delegate moveClippingAtIndex:index toIndex:newIndex];
 }
 
 -(void) dealloc

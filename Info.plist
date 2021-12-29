@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>flycut.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.generalarcade.flycut</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,17 +17,19 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.8.1</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.3456789</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSUIElement</key>
 	<string>1</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Flycut needs this permission to be able to paste text into other applications</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>(c) General Arcade, 2011-2016</string>
+	<string>(c) General Arcade, 2011-2020</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
