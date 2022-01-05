@@ -22,7 +22,7 @@
 
 @class SGHotKey;
 
-@interface AppController : NSObject <NSMenuDelegate, NSApplicationDelegate, NSAlertDelegate, FlycutStoreDelegate, FlycutOperatorDelegate, BezelWindowDelegate> {
+@interface AppController : NSObject <NSMenuDelegate, NSApplicationDelegate, FlycutStoreDelegate, FlycutOperatorDelegate, BezelWindowDelegate> {
     BezelWindow					*bezel;
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
