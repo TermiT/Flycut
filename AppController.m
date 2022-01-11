@@ -245,9 +245,9 @@
     });
     [self registerOrDeregisterICloudSync];
 
-    // Check if  the app has Accessibility permission
     [NSApp activateIgnoringOtherApps: YES];
     
+    // Check if the app has Accessibility permission
     [self showAccessibilityAlert];
     [self showOldOSXAlert];
 }
