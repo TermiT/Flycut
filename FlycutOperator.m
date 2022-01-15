@@ -249,7 +249,7 @@
         // Get the timestamp string:
         NSDate *currentDate = [NSDate date];
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateFormat:@"YYYY-MM-dd 'at' HH.mm.ss"];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd 'at' HH.mm.ss"];
         NSString *dateString = [dateFormatter stringFromDate:currentDate];
 
         // Make a file name to write the data to using the Desktop directory:
