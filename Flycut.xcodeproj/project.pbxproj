@@ -779,6 +779,7 @@
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
+				8D60A1BA1BC8399900A26CBF /* Set meaningful build number */,
 				AAE2036C0A27B2B9002DCC2A /* Headers */,
 				77AE730823D2D49100F6A44B /* Embed Frameworks */,
 				77192A3923D6F45F00EDB9BC /* CopyFiles */,
@@ -1012,6 +1013,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8D60A1BA1BC8399900A26CBF /* Set meaningful build number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+				$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH,
+			);
+			name = "Set meaningful build number";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Sets the build number to identify, to some extent, the git version of the code.\n# Combines the hash of the origin commit, number of commits of divergence, local HEAD commit, local uncommitted lines of change, and year/month of build.\n# Eliminates all except for the origin commit if there are no local changes, since that can be easily tracked.\n# e.g. 1.b690b47.1.1.cb73ce6.35.1510 from origin b690b47, one and one different, locally at commit cb73ce6, with a further 35 lines of change, built in 2015 in the tenth month.  Day numbers are excluded for brevity, as there is already much uncertainty in the local changes and this field is only to indicate a rough level of freshness.  Build numer starts with \"1.\" to avoid strange compile errors.\ncd \"${SOURCE_ROOT}\"\n\n# Skip setting the build number if this is a SANDBOXING build, since the helper probably needs a matching build number. Making them match is as easy as putting this script in both targets, though it's also easy to have one target read it from the other, but that's a task best left to the developer doing SANDBOXING builds since they would be in the position to make sure it is done correctly.\ngrep -q '^#define SANDBOXING *$' Flycut_Prefix.pch\nif [ \"0\" != \"$?\" ]\nthen\n\t\n\tORIGIN=$(git rev-parse --short remotes/origin/master)\n\tOFFSET=\".$(git status|sed -n '1,/^# *$/ p'|grep \"[0-9]\"|head -1|sed 's/^[^0-9]*//;s/[^0-9]*$//'|sed 's/[^0-9][^0-9]*/./')\"\n\tLOCAL=\".$(git rev-parse --short HEAD)\"\n\tUNCOMMITTED=\".$(git diff -b -w HEAD|grep \"^[+\\-]\"|grep -v \"^[+\\-][+\\-][+\\-] [ab]\"|wc -l|sed 's/[^0-9]//g')\"\n\tBUILD_YEAR_MONTH=\".$(date +\"%y%m\")\"\n\tif [ \".$ORIGIN\" == \"$LOCAL\" ]\n\tthen\n\t\tOFFSET=\"\"\n\t\tLOCAL=\"\"\n\t\tif [ \".0\" == \"$UNCOMMITTED\" ]\n\t\tthen\n\t\t\tUNCOMMITTED=\"\"\n\t\t\tBUILD_YEAR_MONTH=\"\"\n\t\tfi\n\tfi\n\tNEWVERSIONSTRING=\"1.$ORIGIN$OFFSET$LOCAL$UNCOMMITTED$BUILD_YEAR_MONTH\"\n\t/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $NEWVERSIONSTRING\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		77192A2223D6EA7A00EDB9BC /* Sources */ = {
