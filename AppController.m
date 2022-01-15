@@ -858,7 +858,7 @@
 				if (largeCopyRisk)
 					[self toggleMenuIconDisabled];
 
-				if ( contents == nil || [flycutOperator shouldSkip:contents ofType:[jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]]] ) {
+				if ( contents == nil || [flycutOperator shouldSkip:contents ofType:[jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]] fromAvailableTypes:[jcPasteboard types]] ) {
                    DLog(@"Contents: Empty or skipped");
                } else if ( ! [pbCount isEqualTo:pbBlockCount] ) {
                    [flycutOperator addClipping:contents ofType:type fromApp:[currRunningApp localizedName] withAppBundleURL:currRunningApp.bundleURL.path target:self clippingAddedSelector:@selector(updateMenu)];

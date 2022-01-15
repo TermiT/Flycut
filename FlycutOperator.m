@@ -303,7 +303,7 @@
     return [self clippingStringWithCount:indexInt];
 }
 
--(BOOL)shouldSkip:(NSString *)contents ofType:(NSString *)type
+-(BOOL)shouldSkip:(NSString *)contents ofType:(NSString *)type fromAvailableTypes:(NSArray<NSString *> *)availableTypes
 {
 	// Check to see if we are skipping passwords based on length and characters.
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
@@ -316,10 +316,10 @@
 		__block bool skipClipping = NO;
 
 		// Check the array of types to skip.
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
+		if ( availableTypes && [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
 		{
 			NSSet *typesToSkip = [NSSet setWithArray: [[[[NSUserDefaults standardUserDefaults] stringForKey:@"skipPboardTypesList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","]];
-			NSSet *pasteBoardTypes = [NSSet setWithArray: [[NSPasteboard generalPasteboard] types]];
+			NSSet *pasteBoardTypes = [NSSet setWithArray: availableTypes];
 
 			if ( [pasteBoardTypes intersectsSet: typesToSkip] )
 				{
