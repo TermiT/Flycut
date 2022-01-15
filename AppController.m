@@ -687,6 +687,7 @@
 }
 
 -(IBAction)toggleLoadOnStartup:(id)sender {
+	// Since the control in Interface Builder is bound to User Defaults and sends this action, this method is called after User Defaults already reflects the newly-selected state and merely conveys that value to the relevant mechanisms rather than acting to negate the User Defaults state.
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"loadOnStartup"] ) {
 #ifdef SANDBOXING
         SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, YES);
@@ -695,7 +696,7 @@
 #endif
 	} else {
 #ifdef SANDBOXING
-        SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, YES);
+        SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, NO);
 #else
 		[UKLoginItemRegistry removeLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
 #endif
