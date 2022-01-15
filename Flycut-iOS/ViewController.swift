@@ -445,8 +445,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	}
 
 	func notifyCKAccountStatusNoAccount() {
-		if ( !self.ignoreCKAccountStatusNoAccount )
-		{
+		DispatchQueue.main.async {
+			guard !self.ignoreCKAccountStatusNoAccount else { return }
+
 			let alert = UIAlertController(title: "No iCloud Account", message: "An iCloud account with iCloud Drive enabled is required for iCloud sync.", preferredStyle: .alert)
 			alert.addAction(UIAlertAction(title: "Preferences", style: .default, handler: { (_) in
 				if #available(iOS 10.0, *)
