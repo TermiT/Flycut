@@ -4,6 +4,8 @@
 
 #ifdef __OBJC__
 
+#define kiCloudId @"iCloud.com.mark-a-jerde.Flycut"
+
 #ifdef DEBUG
 #   define DLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
 #else
