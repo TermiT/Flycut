@@ -8,6 +8,7 @@
 #define kiCloudId @"iCloud.com.generalarcade.flycut"
 #define kFlycutHelperId @"com.generalarcade.flycuthelper"
 
+// The SANDBOXING flag isn't tightly coupled with the sandboxing entitlement, so this amounts to more of a code policy flag than a feature availability flag at the moment. [AppController isAppSandboxed] is more effective for feature availability checks.
 //#define SANDBOXING
 
 #ifdef DEBUG

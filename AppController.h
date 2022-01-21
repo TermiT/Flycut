@@ -45,9 +45,13 @@
     NSString *statusItemText;
     NSImage *statusItemImage;
     
+    IBOutlet NSTextField *savingSectionLabel;
+    IBOutlet NSTextField *saveFromBezelToLabel;
     IBOutlet NSTextField *forgottenItemLabel;
     IBOutlet NSButton *forgottenFavoritesCheckbox;
     IBOutlet NSButton *forgottenClippingsCheckbox;
+    IBOutlet NSButton *saveToLocationButton;
+    IBOutlet NSButton *autoSaveToLocationButton;
     // The menu attatched to same
     IBOutlet NSMenu *jcMenu;
     int jcMenuBaseItemsCount;
@@ -74,6 +78,8 @@
 	BOOL needBezelUpdate;
 	BOOL needMenuUpdate;
 }
+
++ (BOOL)isAppSandboxed;
 
 // Basic functionality
 -(void) pollPB:(NSTimer *)timer;

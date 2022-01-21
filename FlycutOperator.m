@@ -16,6 +16,10 @@
 #import "FlycutOperator.h"
 #import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
 
+#ifdef FLYCUT_MAC
+#import "AppController.h"
+#endif
+
 @implementation FlycutOperator
 
 - (id)init
@@ -234,6 +238,7 @@
 - (bool)saveFromStore:(FlycutStore*)store atIndex:(int)index withPrefix:(NSString*) prefix
 {
 #ifdef SANDBOXING
+    // This works fine when sandboxed. It just saves to ~/Library/Containers/.....
     return NO;
 # else
     if ( [store jcListCount] > index ) {
@@ -241,23 +246,61 @@
         NSString *pbFullText = [self clippingStringWithCount:index inStore:store];
         pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
 
-        // Get the Desktop directory:
-        NSArray *paths = NSSearchPathForDirectoriesInDomains
-        (NSDesktopDirectory, NSUserDomainMask, YES);
-        NSString *desktopDirectory = [paths objectAtIndex:0];
-
         // Get the timestamp string:
         NSDate *currentDate = [NSDate date];
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"yyyy-MM-dd 'at' HH.mm.ss"];
         NSString *dateString = [dateFormatter stringFromDate:currentDate];
 
-        // Make a file name to write the data to using the Desktop directory:
-        NSString *fileName = [NSString stringWithFormat:@"%@/%@%@Clipping %@.txt",
-                              desktopDirectory, prefix, store == favoritesStore ? @"Favorite " : @"", dateString];
+        // Make a file name
+        NSString *fileName = [NSString stringWithFormat:@"%@%@Clipping %@.txt",
+                              prefix, store == favoritesStore ? @"Favorite " : @"", dateString];
+
+        NSString *fileNameWithPath = nil;
+
+#ifdef FLYCUT_MAC
+        if ([AppController isAppSandboxed] && ![prefix isEqualToString:@"Autosave "]) {
+            // Since the app is sandboxed and this is not an auto-save, the user might want to say where to save it rather than just put it in ~/Library/Containers/..., so show a save dialog.
+
+            // Set the default name for the file and show the panel.
+            NSSavePanel* panel = [NSSavePanel savePanel];
+            [panel setNameFieldStringValue:fileName];
+            [panel setLevel:NSModalPanelWindowLevel];
+            [panel setAllowedFileTypes:@[@"txt"]];
+            if ([panel runModal] == NSFileHandlingPanelOKButton)
+            {
+                fileNameWithPath = [panel URL].path;
+            }
+        } else {
+            if ([prefix isEqualToString:@"Autosave "]) {
+                NSURL* autoSaveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"autoSaveToLocation"];
+                if (autoSaveToLocation) {
+                    fileNameWithPath = [NSString stringWithFormat:@"%@/%@",
+                                        autoSaveToLocation.path, fileName];
+                }
+            } else {
+                NSURL* saveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"saveToLocation"];
+                if (saveToLocation) {
+                    fileNameWithPath = [NSString stringWithFormat:@"%@/%@",
+                                        saveToLocation.path, fileName];
+                }
+            }
+        }
+#endif
+
+        if (!fileNameWithPath) {
+            // Get the Desktop directory:
+            NSArray *paths = NSSearchPathForDirectoriesInDomains
+            (NSDesktopDirectory, NSUserDomainMask, YES);
+            NSString *desktopDirectory = [paths objectAtIndex:0];
+
+            // Make a file name to write the data to using the Desktop directory:
+            fileNameWithPath = [NSString stringWithFormat:@"%@/%@",
+                                desktopDirectory, fileName];
+        }
 
         // Save content to the file
-        [pbFullText writeToFile:fileName
+        [pbFullText writeToFile:fileNameWithPath
                   atomically:NO
                     encoding:NSNonLossyASCIIStringEncoding
                        error:nil];
