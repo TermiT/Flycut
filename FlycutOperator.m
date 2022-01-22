@@ -20,7 +20,9 @@
 #import "AppController.h"
 #endif
 
-@implementation FlycutOperator
+@implementation FlycutOperator {
+	NSDateFormatter *dateFormatter;
+}
 
 - (id)init
 {
@@ -246,10 +248,14 @@
         NSString *pbFullText = [self clippingStringWithCount:index inStore:store];
         pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
 
+        if (!dateFormatter) {
+            // Date formatters are time-expensive to create, so create once and reuse.
+            dateFormatter = [[NSDateFormatter alloc] init];
+            [dateFormatter setDateFormat:@"yyyy-MM-dd 'at' HH.mm.ss"];
+        }
+
         // Get the timestamp string:
         NSDate *currentDate = [NSDate date];
-        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateFormat:@"yyyy-MM-dd 'at' HH.mm.ss"];
         NSString *dateString = [dateFormatter stringFromDate:currentDate];
 
         // Make a file name
