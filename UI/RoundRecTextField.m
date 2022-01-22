@@ -13,41 +13,41 @@
 #import "RoundRecTextField.h"
 #import "RoundRecBezierPath.h"
 
-// Okay, on doing some reading, the -best- way to handle this is probably to cache 
-// an NSImage on the init and then (as needed) composite it to the back of the view.
-// We can then turn the rectangles on and off by compositing or not compositing the
-// images.
-
-// This can wait for another time.
-
 @implementation RoundRecTextField
 
 // We may want to make this a more flexible class sometime by taking radius as an argument.
-// Until then, this is kind of useless code.
 
-/*
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code here.
+		_background = [[NSView alloc] initWithFrame:frame];
+		[self addSubview:_background];
+
+		[_background setWantsLayer:YES];
+		[_background.layer setCornerRadius:8];
+
+		_background.translatesAutoresizingMaskIntoConstraints = NO;
+		[NSLayoutConstraint activateConstraints:@[
+			[_background.topAnchor constraintEqualToAnchor:self.topAnchor],
+			[_background.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+			[_background.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+			[_background.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+		]];
+
+		_textField = [[NSTextField alloc] initWithFrame:frame];
+		[self addSubview:_textField];
+		[_textField setDrawsBackground:NO];
+
+		// Set 8px leading and trailing padding.
+		_textField.translatesAutoresizingMaskIntoConstraints = NO;
+		[NSLayoutConstraint activateConstraints:@[
+			[_textField.topAnchor constraintEqualToAnchor:self.topAnchor],
+			[_textField.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+			[_textField.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:8],
+			[_textField.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-8],
+		]];
     }
     return self;
-}
-*/
-
-- (BOOL)isOpaque {
-    return NO;
-}
-
-- (void)drawRect:(NSRect)rect {
-    // Oh, the hackishness.
-    NSBezierPath *roundedRec = [NSBezierPath bezierPathWithRoundRectInRect:rect radius:8];
-    [[self backgroundColor] set];
-    [roundedRec fill];
-    [self setDrawsBackground:NO];
-	// We might eventually want to pass [super drawRect] something smaller than rect, to ensure that we don't bleed over the corners
-    [super drawRect:rect];
-    [self setDrawsBackground:YES];
 }
 
 @end
