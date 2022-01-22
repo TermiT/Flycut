@@ -21,7 +21,8 @@
 #endif
 
 @implementation FlycutOperator {
-	NSDateFormatter *dateFormatter;
+	NSDateFormatter *dateFormatterForFilename;
+	NSDateFormatter *dateFormatterForDirectory;
 }
 
 - (id)init
@@ -248,20 +249,32 @@
         NSString *pbFullText = [self clippingStringWithCount:index inStore:store];
         pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
 
-        if (!dateFormatter) {
+        if (!dateFormatterForFilename) {
             // Date formatters are time-expensive to create, so create once and reuse.
-            dateFormatter = [[NSDateFormatter alloc] init];
-            [dateFormatter setDateFormat:@"yyyy-MM-dd 'at' HH.mm.ss"];
+            dateFormatterForFilename = [[NSDateFormatter alloc] init];
+            [dateFormatterForFilename setDateFormat:@"yyyy-MM-dd 'at' HH.mm.ss"];
         }
 
         // Get the timestamp string:
         NSDate *currentDate = [NSDate date];
-        NSString *dateString = [dateFormatter stringFromDate:currentDate];
+        NSString *dateString = [dateFormatterForFilename stringFromDate:currentDate];
 
         // Make a file name
         NSString *fileName = [NSString stringWithFormat:@"%@%@Clipping %@.txt",
                               prefix, store == favoritesStore ? @"Favorite " : @"", dateString];
 
+        // Make a subdirectory, if doing autosave, to avoid a directory with too many files in it as that can make Finder effectively hang on launch if that directory were the desktop.
+        NSString *subdirectoryString = nil;
+        if ([prefix isEqualToString:@"Autosave "]) {
+            if (!dateFormatterForDirectory) {
+                // Date formatters are time-expensive to create, so create once and reuse.
+                dateFormatterForDirectory = [[NSDateFormatter alloc] init];
+                [dateFormatterForDirectory setDateFormat:@"'Autosave Clippings' yyyy/MM"];
+            }
+            subdirectoryString = [dateFormatterForDirectory stringFromDate:currentDate];
+        }
+
+        NSString *baseDirectoryString = nil;
         NSString *fileNameWithPath = nil;
 
 #ifdef FLYCUT_MAC
@@ -281,28 +294,43 @@
             if ([prefix isEqualToString:@"Autosave "]) {
                 NSURL* autoSaveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"autoSaveToLocation"];
                 if (autoSaveToLocation) {
-                    fileNameWithPath = [NSString stringWithFormat:@"%@/%@",
-                                        autoSaveToLocation.path, fileName];
+                    baseDirectoryString = autoSaveToLocation.path;
                 }
             } else {
                 NSURL* saveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"saveToLocation"];
                 if (saveToLocation) {
-                    fileNameWithPath = [NSString stringWithFormat:@"%@/%@",
-                                        saveToLocation.path, fileName];
+                    baseDirectoryString = saveToLocation.path;
                 }
             }
         }
 #endif
 
         if (!fileNameWithPath) {
-            // Get the Desktop directory:
-            NSArray *paths = NSSearchPathForDirectoriesInDomains
-            (NSDesktopDirectory, NSUserDomainMask, YES);
-            NSString *desktopDirectory = [paths objectAtIndex:0];
+            // An exact place to save wasn't set (like from a Save panel), so build one.
 
-            // Make a file name to write the data to using the Desktop directory:
+            if (!baseDirectoryString) {
+                // Get the Desktop directory since nothing else was specified.
+                NSArray *paths = NSSearchPathForDirectoriesInDomains
+                (NSDesktopDirectory, NSUserDomainMask, YES);
+                NSString *desktopDirectory = [paths objectAtIndex:0];
+
+                baseDirectoryString = desktopDirectory;
+            }
+
+            if (subdirectoryString) {
+                // Apply a subdirectory / subdirectories.
+                NSString *directoryPath = [NSString stringWithFormat:@"%@/%@",
+                                           baseDirectoryString, subdirectoryString];
+                [[NSFileManager defaultManager] createDirectoryAtPath:directoryPath
+                                          withIntermediateDirectories:YES
+                                                           attributes:nil
+                                                                error:nil];
+                baseDirectoryString = directoryPath;
+            }
+
+            // Make a file name to write the data to using the base directory:
             fileNameWithPath = [NSString stringWithFormat:@"%@/%@",
-                                desktopDirectory, fileName];
+                                baseDirectoryString, fileName];
         }
 
         // Save content to the file
