@@ -280,7 +280,7 @@
                                                     </textField>
                                                     <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="472">
                                                         <rect key="frame" x="113" y="271" width="19" height="28"/>
-                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="760"/>
+                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="999" doubleValue="10" valueWraps="YES" id="760"/>
                                                         <connections>
                                                             <action selector="setRememberNumPref:" target="213" id="485"/>
                                                             <binding destination="808" name="value" keyPath="values.rememberNum" id="829"/>
@@ -350,15 +350,15 @@
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <binding destination="808" name="value" keyPath="values.rememberNum" id="887-jS-Kpn"/>
+                                                            <binding destination="808" name="value" keyPath="values.favoritesRememberNum" id="bQe-4R-RSr"/>
                                                         </connections>
                                                     </textField>
-                                                    <stepper toolTip="Controls how many clippings Flycut stores in its stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wZv-HJ-VdW">
+                                                    <stepper toolTip="Controls how many clippings Flycut stores in its favorites stack" horizontalHuggingPriority="750" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wZv-HJ-VdW">
                                                         <rect key="frame" x="380" y="271" width="19" height="28"/>
-                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="99" doubleValue="10" valueWraps="YES" id="gUi-gl-RH6"/>
+                                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="10" maxValue="999" doubleValue="10" valueWraps="YES" id="gUi-gl-RH6"/>
                                                         <connections>
                                                             <action selector="setFavoritesRememberNumPref:" target="213" id="rm7-TX-1af"/>
-                                                            <binding destination="808" name="value" keyPath="values.rememberNum" id="nUm-81-DgP"/>
+                                                            <binding destination="808" name="value" keyPath="values.favoritesRememberNum" id="nUm-81-DgP"/>
                                                         </connections>
                                                     </stepper>
                                                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" ambiguous="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IZZ-Ep-7nD" userLabel="Passwords:">
