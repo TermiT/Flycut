@@ -15,7 +15,7 @@ class SettingsViewController: IASKAppSettingsViewController {
 	}
 
 	// - (id)initWithStyle:(UITableViewStyle)style {
-	required override init(style:UITableViewStyle) {
+	required override init(style:UITableView.Style) {
 		super.init(style: style)
 		commonInitContent()
 	}

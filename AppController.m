@@ -26,6 +26,15 @@
 
 @implementation AppController
 
+/// Determines, through a hack of sorts, if the app is running sandboxed. The SANDBOXING define has no direct connection to being sandboxed, but this method identifies the state by looking for a directory which will have at least eight path components if sandboxed and is quite unlikely to have that many if not sandboxed. Of course, if this doesn't work for your unique case, just do a custom build with this method returning NO.
++ (BOOL)isAppSandboxed {
+	// Get the Desktop directory:
+	NSArray *paths = NSSearchPathForDirectoriesInDomains
+	(NSDesktopDirectory, NSUserDomainMask, YES);
+	NSString *desktopDirectory = [paths objectAtIndex:0];
+	return ((NSArray*)[desktopDirectory componentsSeparatedByString:@"/"]).count >= 8;
+}
+
 - (id)init
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
@@ -134,6 +143,7 @@
 
 
 - (void)showOldOSXAlert {
+    // FIXME: Should ask Gennadii if the "#ifdef SANDBOXING" should be removed and replaced with "if (![AppController isAppSandboxed]) { return; }"
 #ifdef SANDBOXING
     NSOperatingSystemVersion ver = [[NSProcessInfo processInfo] operatingSystemVersion];
     if (ver.majorVersion == 10 && ver.minorVersion <= 13) {
@@ -224,6 +234,7 @@
     // The load-on-startup check can be really slow, so this will be dispatched out so our thread isn't blocked.
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_async(queue, ^{
+        // FIXME: Should ask Gennadii if the "#ifdef SANDBOXING" should be removed and replaced with "if ([AppController isAppSandboxed])"
 #ifdef SANDBOXING
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"bundleIdentifier == %@", kFlycutHelperId];
         NSArray *helperApp = [[[NSWorkspace sharedWorkspace] runningApplications] filteredArrayUsingPredicate:predicate];
@@ -245,9 +256,9 @@
     });
     [self registerOrDeregisterICloudSync];
 
-    // Check if  the app has Accessibility permission
     [NSApp activateIgnoringOtherApps: YES];
     
+    // Check if the app has Accessibility permission
     [self showAccessibilityAlert];
     [self showOldOSXAlert];
 }
@@ -664,10 +675,22 @@
     [appearancePanel addSubview:row];
     nextYMax = row.frame.origin.y;
 #ifdef SANDBOXING
+    // Hide the Save Clippings preferences. These work fine when sandboxed. They just save to somwehere under ~/Library/Containers. If SANDBOXING isn't set, automatic saving of forgotten clippings will go somewhere under ~/Library/Containers while manual saving (s or S in the bezel) will open an NSSavePanel to prompt the user to pick.
     forgottenItemLabel.hidden = YES;
     forgottenClippingsCheckbox.hidden = YES;
     forgottenFavoritesCheckbox.hidden = YES;
+    savingSectionLabel.hidden = YES;
+    saveToLocationButton.hidden = YES;
+    autoSaveToLocationButton.hidden = YES;
+    saveFromBezelToLabel.hidden = YES;
 #endif
+    if ([AppController isAppSandboxed]) {
+        // Saving to a prior-selected location while sandboxed would be unpleasant, so these really should be disabled always when sandboxed but can still show where the saves happen so the user knows what to expect.
+        saveToLocationButton.enabled = NO;
+        [saveToLocationButton setTitle:@"Ask User"];
+        autoSaveToLocationButton.enabled = NO;
+        [autoSaveToLocationButton setTitle:@"App Sandbox"];
+    }
 }
 
 -(IBAction) showPreferencePanel:(id)sender
@@ -683,19 +706,32 @@
 												   encoding:NSUTF8StringEncoding
 													  error:NULL];
 	[acknowledgementsView setString:contents];
+	if (![AppController isAppSandboxed]) {
+		NSURL* saveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"saveToLocation"];
+		if (saveToLocation) {
+			[saveToLocationButton setTitle:[saveToLocation lastPathComponent]];
+		}
+		NSURL* autoSaveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"autoSaveToLocation"];
+		if (autoSaveToLocation) {
+			[autoSaveToLocationButton setTitle:[autoSaveToLocation lastPathComponent]];
+		}
+	}
 	[flycutOperator willShowPreferences];
 }
 
 -(IBAction)toggleLoadOnStartup:(id)sender {
+	// Since the control in Interface Builder is bound to User Defaults and sends this action, this method is called after User Defaults already reflects the newly-selected state and merely conveys that value to the relevant mechanisms rather than acting to negate the User Defaults state.
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"loadOnStartup"] ) {
+        // FIXME: Should ask Gennadii if the "#ifdef SANDBOXING" should be removed and replaced with "if ([AppController isAppSandboxed])"
 #ifdef SANDBOXING
         SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, YES);
 #else
     [UKLoginItemRegistry addLoginItemWithPath:[[NSBundle mainBundle] bundlePath] hideIt:NO];
 #endif
 	} else {
+        // FIXME: Should ask Gennadii if the "#ifdef SANDBOXING" should be removed and replaced with "if ([AppController isAppSandboxed])"
 #ifdef SANDBOXING
-        SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, YES);
+        SMLoginItemSetEnabled((__bridge CFStringRef)kFlycutHelperId, NO);
 #else
 		[UKLoginItemRegistry removeLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
 #endif
@@ -857,7 +893,7 @@
 				if (largeCopyRisk)
 					[self toggleMenuIconDisabled];
 
-				if ( contents == nil || [flycutOperator shouldSkip:contents ofType:[jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]]] ) {
+				if ( contents == nil || [flycutOperator shouldSkip:contents ofType:[jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]] fromAvailableTypes:[jcPasteboard types]] ) {
                    DLog(@"Contents: Empty or skipped");
                } else if ( ! [pbCount isEqualTo:pbBlockCount] ) {
                    [flycutOperator addClipping:contents ofType:type fromApp:[currRunningApp localizedName] withAppBundleURL:currRunningApp.bundleURL.path target:self clippingAddedSelector:@selector(updateMenu)];
@@ -1175,6 +1211,37 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 			[alert release];
 		}
 	}
+}
+
+- (IBAction)selectSaveLocation:(id)sender {
+	// Create and configure the panel.
+	NSOpenPanel* panel = [NSOpenPanel openPanel];
+	[panel retain];
+	[panel setCanChooseFiles:NO];
+	[panel setCanChooseDirectories:YES];
+	[panel setCanCreateDirectories:YES];
+	[panel setAllowsMultipleSelection:NO];
+	[panel setMessage:@"Select a directory."];
+
+	// Display the panel attached to the document's window.
+	[panel beginSheetModalForWindow:prefsPanel completionHandler:^(NSInteger result){
+		if (result == NSFileHandlingPanelOKButton) {
+			NSURL* url = [[panel URLs] firstObject];
+
+			[panel release];
+
+			if (!url) { return; }
+
+			if (sender == saveToLocationButton) {
+				[[NSUserDefaults standardUserDefaults] setURL:url forKey:@"saveToLocation"];
+			}
+			else if (sender == autoSaveToLocationButton) {
+				[[NSUserDefaults standardUserDefaults] setURL:url forKey:@"autoSaveToLocation"];
+			}
+			[sender setTitle:[url lastPathComponent]];
+		}
+
+	}];
 }
 
 -(IBAction)clearClippingList:(id)sender {

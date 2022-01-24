@@ -13,7 +13,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	let flycut:FlycutOperator = FlycutOperator()
 	var activeUpdates:Int = 0
 	var tableView:UITableView!
-	var currentAnimation = UITableViewRowAnimation.none
+	var currentAnimation = UITableView.RowAnimation.none
 	var pbCount:Int = -1
 	var rememberedSyncSettings:Bool = false
 	var rememberedSyncClippings:Bool = false
@@ -60,7 +60,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 			let indexPath = self.tableView.indexPath(for: cell)
 			if ( nil != indexPath ) {
 				let previousAnimation = self.currentAnimation
-				self.currentAnimation = UITableViewRowAnimation.left // Use .left to look better with swiping left to delete.
+				self.currentAnimation = UITableView.RowAnimation.left // Use .left to look better with swiping left to delete.
 				self.flycut.setStackPositionTo( Int32((indexPath?.row)! ))
 				self.flycut.clearItemAtStackPosition()
 				self.currentAnimation = previousAnimation
@@ -79,7 +79,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 					// Fallback on earlier versions
 					UIApplication.shared.openURL(url!)
 				}
-				self.tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.none)
+				self.tableView.reloadRows(at: [indexPath!], with: UITableView.RowAnimation.none)
 			}
 
 			return true;
@@ -100,18 +100,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
 		flycut.awake(fromNibDisplaying: 10, withDisplayLength: 140, withSave: #selector(savePreferences(toDict:)), forTarget: self) // The 10 isn't used in iOS right now and 140 characters seems to be enough to cover the width of the largest screen.
 
-		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: .UIPasteboardChanged, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: UIPasteboard.changedNotification, object: nil)
 
-		NotificationCenter.default.addObserver(self, selector: #selector(self.applicationWillTerminate), name: .UIApplicationWillTerminate, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.applicationWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
 
 		// Check for clipping whenever we become active.
-		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: .UIApplicationDidBecomeActive, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.checkForClippingAddedToClipboard), name: UIApplication.didBecomeActiveNotification, object: nil)
 		checkForClippingAddedToClipboard() // Since the first-launch notification will occur before we add observer.
 
 		// Register for notifications for the scenarios in which we should save the engine.
-		[ Notification.Name.UIApplicationWillResignActive,
-		  Notification.Name.UIApplicationDidEnterBackground,
-		  Notification.Name.UIApplicationWillTerminate ]
+		[ UIApplication.willResignActiveNotification,
+		  UIApplication.didEnterBackgroundNotification,
+		  UIApplication.willTerminateNotification ]
 			.forEach { (notification) in
 			NotificationCenter.default.addObserver(self,
 			                                       selector: #selector(self.saveEngine),
@@ -148,7 +148,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		}
 	}
 
-	func defaultsChanged() {
+	@objc func defaultsChanged() {
 		// This seems to be the only way to respond to Settings changes, though it doesn't inform us what changed so we will have to check each to see if they were the one(s).
 
 		// Don't use DispatchQueue.main.async since that will still end up blocking the UI draw until the user responds to what hasn't been drawn yet.
@@ -209,7 +209,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		flycut.willShowPreferences()
 	}
 
-	func savePreferences(toDict: NSMutableDictionary)
+	@objc func savePreferences(toDict: NSMutableDictionary)
 	{
 	}
 
@@ -320,7 +320,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		return selection
 	}
 
-	func checkForClippingAddedToClipboard()
+	@objc func checkForClippingAddedToClipboard()
 	{
 		pasteboardInteractionQueue.async {
 			// This is a suitable place to prepare to possible eventual display of preferences, resetting values that should reset before each display of preferences.
@@ -330,26 +330,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 			{
 				self.pbCount = UIPasteboard.general.changeCount;
 
-				if ( UIPasteboard.general.types.contains("public.utf8-plain-text") )
+				if UIPasteboard.general.types.contains("public.utf8-plain-text"),
+				   let pasteboard = UIPasteboard.general.value(forPasteboardType: "public.utf8-plain-text") as? String
 				{
-					let pasteboard = UIPasteboard.general.value(forPasteboardType: "public.utf8-plain-text")
-					self.flycut.addClipping(pasteboard as! String!, ofType: "public.utf8-plain-text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+					self.flycut.addClipping(pasteboard, ofType: "public.utf8-plain-text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
 				}
-				else if ( UIPasteboard.general.types.contains("public.text") )
+				else if UIPasteboard.general.types.contains("public.text"),
+						let pasteboard = UIPasteboard.general.value(forPasteboardType: "public.text") as? String
 				{
-					let pasteboard = UIPasteboard.general.value(forPasteboardType: "public.text")
-					self.flycut.addClipping(pasteboard as! String!, ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
+					self.flycut.addClipping(pasteboard, ofType: "public.text", fromApp: "iOS", withAppBundleURL: "iOS", target: nil, clippingAddedSelector: nil)
 				}
 			}
 		}
 	}
 
-	func applicationWillTerminate()
+	@objc func applicationWillTerminate()
 	{
 		saveEngine()
 	}
 
-	func saveEngine()
+	@objc func saveEngine()
 	{
 		flycut.saveEngine()
 	}
@@ -371,7 +371,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let item: MGSwipeTableCell = tableView.dequeueReusableCell(withIdentifier: "FlycutCell", for: indexPath) as! MGSwipeTableCell
 
-		item.textLabel?.text = flycut.previousDisplayStrings(indexPath.row + 1, containing: nil).last as! String?
+		item.textLabel?.text = flycut.previousDisplayStrings(Int32(indexPath.row + 1), containing: nil).last as! String?
 
 		//configure left buttons
 		var removeAll:Bool = true
@@ -382,7 +382,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 			// NSTextCheckingResult.CheckingType.link.rawValue blocks things like single words that URL() would let in
 			// URL() blocks things like paragraphs of text containing a URL that NSTextCheckingResult.CheckingType.link.rawValue would let in
 
-			let matches = isURLDetector?.matches(in: content, options: .reportCompletion, range: NSMakeRange(0, content.characters.count))
+			let matches = isURLDetector?.matches(in: content, options: .reportCompletion, range: NSMakeRange(0, content.count))
 			if let matchesCount = matches?.count
 			{
 				if matchesCount > 0
@@ -445,8 +445,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	}
 
 	func notifyCKAccountStatusNoAccount() {
-		if ( !ignoreCKAccountStatusNoAccount )
-		{
+		DispatchQueue.main.async {
+			guard !self.ignoreCKAccountStatusNoAccount else { return }
+
 			let alert = UIAlertController(title: "No iCloud Account", message: "An iCloud account with iCloud Drive enabled is required for iCloud sync.", preferredStyle: .alert)
 			alert.addAction(UIAlertAction(title: "Preferences", style: .default, handler: { (_) in
 				if #available(iOS 10.0, *)

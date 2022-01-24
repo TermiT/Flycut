@@ -16,7 +16,14 @@
 #import "FlycutOperator.h"
 #import "MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync/MJCloudKitUserDefaultsSync.h"
 
-@implementation FlycutOperator
+#ifdef FLYCUT_MAC
+#import "AppController.h"
+#endif
+
+@implementation FlycutOperator {
+	NSDateFormatter *dateFormatterForFilename;
+	NSDateFormatter *dateFormatterForDirectory;
+}
 
 - (id)init
 {
@@ -234,6 +241,7 @@
 - (bool)saveFromStore:(FlycutStore*)store atIndex:(int)index withPrefix:(NSString*) prefix
 {
 #ifdef SANDBOXING
+    // This works fine when sandboxed. It just saves to ~/Library/Containers/.....
     return NO;
 # else
     if ( [store jcListCount] > index ) {
@@ -241,23 +249,92 @@
         NSString *pbFullText = [self clippingStringWithCount:index inStore:store];
         pbFullText = [pbFullText stringByReplacingOccurrencesOfString:@"\r" withString:@"\r\n"];
 
-        // Get the Desktop directory:
-        NSArray *paths = NSSearchPathForDirectoriesInDomains
-        (NSDesktopDirectory, NSUserDomainMask, YES);
-        NSString *desktopDirectory = [paths objectAtIndex:0];
+        if (!dateFormatterForFilename) {
+            // Date formatters are time-expensive to create, so create once and reuse.
+            dateFormatterForFilename = [[NSDateFormatter alloc] init];
+            [dateFormatterForFilename setDateFormat:@"yyyy-MM-dd 'at' HH.mm.ss"];
+        }
 
         // Get the timestamp string:
         NSDate *currentDate = [NSDate date];
-        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateFormat:@"YYYY-MM-dd 'at' HH.mm.ss"];
-        NSString *dateString = [dateFormatter stringFromDate:currentDate];
+        NSString *dateString = [dateFormatterForFilename stringFromDate:currentDate];
 
-        // Make a file name to write the data to using the Desktop directory:
-        NSString *fileName = [NSString stringWithFormat:@"%@/%@%@Clipping %@.txt",
-                              desktopDirectory, prefix, store == favoritesStore ? @"Favorite " : @"", dateString];
+        // Make a file name
+        NSString *fileName = [NSString stringWithFormat:@"%@%@Clipping %@.txt",
+                              prefix, store == favoritesStore ? @"Favorite " : @"", dateString];
+
+        // Make a subdirectory, if doing autosave, to avoid a directory with too many files in it as that can make Finder effectively hang on launch if that directory were the desktop.
+        NSString *subdirectoryString = nil;
+        if ([prefix isEqualToString:@"Autosave "]) {
+            if (!dateFormatterForDirectory) {
+                // Date formatters are time-expensive to create, so create once and reuse.
+                dateFormatterForDirectory = [[NSDateFormatter alloc] init];
+                [dateFormatterForDirectory setDateFormat:@"'Autosave Clippings' yyyy/MM"];
+            }
+            subdirectoryString = [dateFormatterForDirectory stringFromDate:currentDate];
+        }
+
+        NSString *baseDirectoryString = nil;
+        NSString *fileNameWithPath = nil;
+
+#ifdef FLYCUT_MAC
+        if ([AppController isAppSandboxed] && ![prefix isEqualToString:@"Autosave "]) {
+            // Since the app is sandboxed and this is not an auto-save, the user might want to say where to save it rather than just put it in ~/Library/Containers/..., so show a save dialog.
+
+            // Set the default name for the file and show the panel.
+            NSSavePanel* panel = [NSSavePanel savePanel];
+            [panel setNameFieldStringValue:fileName];
+            [panel setLevel:NSModalPanelWindowLevel];
+            [panel setAllowedFileTypes:@[@"txt"]];
+            if ([panel runModal] == NSFileHandlingPanelOKButton)
+            {
+                fileNameWithPath = [panel URL].path;
+            }
+        } else {
+            if ([prefix isEqualToString:@"Autosave "]) {
+                NSURL* autoSaveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"autoSaveToLocation"];
+                if (autoSaveToLocation) {
+                    baseDirectoryString = autoSaveToLocation.path;
+                }
+            } else {
+                NSURL* saveToLocation = [[NSUserDefaults standardUserDefaults] URLForKey:@"saveToLocation"];
+                if (saveToLocation) {
+                    baseDirectoryString = saveToLocation.path;
+                }
+            }
+        }
+#endif
+
+        if (!fileNameWithPath) {
+            // An exact place to save wasn't set (like from a Save panel), so build one.
+
+            if (!baseDirectoryString) {
+                // Get the Desktop directory since nothing else was specified.
+                NSArray *paths = NSSearchPathForDirectoriesInDomains
+                (NSDesktopDirectory, NSUserDomainMask, YES);
+                NSString *desktopDirectory = [paths objectAtIndex:0];
+
+                baseDirectoryString = desktopDirectory;
+            }
+
+            if (subdirectoryString) {
+                // Apply a subdirectory / subdirectories.
+                NSString *directoryPath = [NSString stringWithFormat:@"%@/%@",
+                                           baseDirectoryString, subdirectoryString];
+                [[NSFileManager defaultManager] createDirectoryAtPath:directoryPath
+                                          withIntermediateDirectories:YES
+                                                           attributes:nil
+                                                                error:nil];
+                baseDirectoryString = directoryPath;
+            }
+
+            // Make a file name to write the data to using the base directory:
+            fileNameWithPath = [NSString stringWithFormat:@"%@/%@",
+                                baseDirectoryString, fileName];
+        }
 
         // Save content to the file
-        [pbFullText writeToFile:fileName
+        [pbFullText writeToFile:fileNameWithPath
                   atomically:NO
                     encoding:NSNonLossyASCIIStringEncoding
                        error:nil];
@@ -303,7 +380,7 @@
     return [self clippingStringWithCount:indexInt];
 }
 
--(BOOL)shouldSkip:(NSString *)contents ofType:(NSString *)type
+-(BOOL)shouldSkip:(NSString *)contents ofType:(NSString *)type fromAvailableTypes:(NSArray<NSString *> *)availableTypes
 {
 	// Check to see if we are skipping passwords based on length and characters.
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPasswordFields"] )
@@ -316,10 +393,10 @@
 		__block bool skipClipping = NO;
 
 		// Check the array of types to skip.
-		if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
+		if ( availableTypes && [[NSUserDefaults standardUserDefaults] boolForKey:@"skipPboardTypes"] )
 		{
 			NSSet *typesToSkip = [NSSet setWithArray: [[[[NSUserDefaults standardUserDefaults] stringForKey:@"skipPboardTypesList"] stringByReplacingOccurrencesOfString:@" " withString:@""] componentsSeparatedByString: @","]];
-			NSSet *pasteBoardTypes = [NSSet setWithArray: [[NSPasteboard generalPasteboard] types]];
+			NSSet *pasteBoardTypes = [NSSet setWithArray: availableTypes];
 
 			if ( [pasteBoardTypes intersectsSet: typesToSkip] )
 				{

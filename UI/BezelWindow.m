@@ -10,6 +10,7 @@
 //
 
 #import "BezelWindow.h"
+#import <AppKit/AppKit.h>
 
 static const float lineHeight = 16;
 
@@ -47,68 +48,70 @@ static const float lineHeight = 16;
 
             sourceFieldBackground = [[RoundRecTextField alloc] initWithFrame:[self sourceFrame]];
             [[self contentView] addSubview:sourceFieldBackground];
-            [sourceFieldBackground setEditable:NO];
-            [sourceFieldBackground setTextColor:[NSColor whiteColor]];
-            [sourceFieldBackground setBackgroundColor:[NSColor colorWithCalibratedWhite:0.1 alpha:.45]];
-            [sourceFieldBackground setDrawsBackground:YES];
-            [sourceFieldBackground setBordered:NO];
+            [sourceFieldBackground.textField setEditable:NO];
+            [sourceFieldBackground.textField setTextColor:[NSColor whiteColor]];
+            [sourceFieldBackground.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
+            [sourceFieldBackground.textField setBordered:NO];
 
             sourceFieldApp = [[RoundRecTextField alloc] initWithFrame:[self sourceFrameLeft]];
             [[self contentView] addSubview:sourceFieldApp];
-            [sourceFieldApp setEditable:NO];
-            [sourceFieldApp setTextColor:[NSColor whiteColor]];
-            [sourceFieldApp setBackgroundColor:[NSColor colorWithCalibratedWhite:0.1 alpha:0]];
-            [sourceFieldApp setDrawsBackground:YES];
-            [sourceFieldApp setBordered:NO];
-            [sourceFieldApp setAlignment:NSLeftTextAlignment];
+            [sourceFieldApp.textField setEditable:NO];
+            [sourceFieldApp.textField setTextColor:[NSColor whiteColor]];
+            [sourceFieldApp.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0)];
+            [sourceFieldApp.textField setBordered:NO];
+            [sourceFieldApp.textField setAlignment:NSLeftTextAlignment];
 
             NSMutableParagraphStyle *textParagraph = [[NSMutableParagraphStyle alloc] init];
             [textParagraph setLineSpacing:100.0];
 
             NSDictionary *attrDic = [NSDictionary dictionaryWithObjectsAndKeys:textParagraph, NSParagraphStyleAttributeName, nil];
             NSAttributedString *attrString = [[NSAttributedString alloc] initWithString:@"" attributes:attrDic];
-            [sourceFieldApp setAllowsEditingTextAttributes:YES];
-            [sourceFieldApp setAttributedStringValue:attrString];
+            [sourceFieldApp.textField setAllowsEditingTextAttributes:YES];
+            [sourceFieldApp.textField setAttributedStringValue:attrString];
 
-            NSFont *font = [sourceFieldApp font];
+            NSFont *font = [sourceFieldApp.textField font];
             NSFont *newFont = [NSFont fontWithName:[font fontName] size:font.pointSize*3/2];
-            [sourceFieldApp setFont:newFont];
+            [sourceFieldApp.textField setFont:newFont];
 
             sourceFieldDate = [[RoundRecTextField alloc] initWithFrame:[self sourceFrameRight]];
             [[self contentView] addSubview:sourceFieldDate];
-            [sourceFieldDate setEditable:NO];
-            [sourceFieldDate setTextColor:[NSColor whiteColor]];
-            [sourceFieldDate setBackgroundColor:[NSColor colorWithCalibratedWhite:0.1 alpha:0]];
-            [sourceFieldDate setDrawsBackground:YES];
-            [sourceFieldDate setBordered:NO];
-            [sourceFieldDate setAlignment:NSRightTextAlignment];
-            font = [sourceFieldDate font];
+            [sourceFieldDate.textField setEditable:NO];
+            [sourceFieldDate.textField setTextColor:[NSColor whiteColor]];
+            [sourceFieldDate.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0)];
+            [sourceFieldDate.textField setBordered:NO];
+            [sourceFieldDate.textField setAlignment:NSRightTextAlignment];
+            font = [sourceFieldDate.textField font];
             newFont = [NSFont fontWithName:[font fontName] size:font.pointSize*5/4];
-            [sourceFieldDate setFont:newFont];
+            [sourceFieldDate.textField setFont:newFont];
         }
 
 		NSRect textFrame = [self textFrame];
 		textField = [[RoundRecTextField alloc] initWithFrame:textFrame];
 		[[self contentView] addSubview:textField];
-		[textField setEditable:NO];
+		[textField.textField setEditable:NO];
 		//[[textField cell] setScrollable:YES];
 		//[[textField cell] setWraps:NO];
-		[textField setTextColor:[NSColor whiteColor]];
-		[textField setBackgroundColor:[NSColor colorWithCalibratedWhite:0.1 alpha:.45]];
-		[textField setDrawsBackground:YES];
-		[textField setBordered:NO];
-		[textField setAlignment:NSLeftTextAlignment];
+		[textField.textField setTextColor:[NSColor whiteColor]];
+		[textField.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
+		[textField.textField setBordered:NO];
+		[textField.textField setAlignment:NSLeftTextAlignment];
 
 		NSRect charFrame = [self charFrame];
 		charField = [[RoundRecTextField alloc] initWithFrame:charFrame];
 		[[self contentView] addSubview:charField];
-		[charField setEditable:NO];
-		[charField setTextColor:[NSColor whiteColor]];
-		[charField setBackgroundColor:[NSColor colorWithCalibratedWhite:0.1 alpha:.45]];
-		[charField setDrawsBackground:YES];
-		[charField setBordered:NO];
-		[charField setAlignment:NSCenterTextAlignment];
-        [charField setStringValue:@"Empty"];
+		[charField.textField setEditable:NO];
+		[charField.textField setTextColor:[NSColor whiteColor]];
+		[charField.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
+		[charField.textField setBordered:NO];
+		[charField.textField setAlignment:NSCenterTextAlignment];
+        [charField.textField setStringValue:@"Empty"];
+		// Use Auto Layout for dynamic width.
+		charField.translatesAutoresizingMaskIntoConstraints = NO;
+		[NSLayoutConstraint activateConstraints:@[
+			[charField.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-charFrame.origin.y],
+			[charField.centerXAnchor constraintEqualToAnchor:self.contentView.centerXAnchor],
+			[charField.heightAnchor constraintEqualToConstant:charFrame.size.height],
+		]];
 
 		[self setInitialFirstResponder:textField];         
 		return self;
@@ -130,9 +133,9 @@ static const float lineHeight = 16;
     NSRect charFrame = [self charFrame];
     [charField setFrame:charFrame];
     if (showSourceField)
-        [sourceFieldBackground setBackgroundColor:[NSColor colorWithCalibratedWhite:0.1 alpha:.45]];
+        [sourceFieldBackground.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
     else if ( nil != sourceFieldApp )
-        [sourceFieldBackground setBackgroundColor:[NSColor colorWithCalibratedWhite:0.1 alpha:0]];
+        [sourceFieldBackground.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0)];
     
     showSourceField = savedShowSourceField;
 
@@ -161,7 +164,6 @@ static const float lineHeight = 16;
 {
     NSRect frame = [self sourceFrame];
     frame.size.width = frame.size.width * 1 / 3 - 5;
-    frame.origin.x += 5;
     return frame;
 }
 
@@ -219,7 +221,7 @@ static const float lineHeight = 16;
 	[newChar retain];
 	[charString release];
 	charString = newChar;
-	[charField setStringValue:charString];
+	[charField.textField setStringValue:charString];
 }
 
 - (void)setText:(NSString *)newText
@@ -231,7 +233,7 @@ static const float lineHeight = 16;
 	[newText retain];
 	[bezelText release];
 	bezelText = newText;
-	[textField setStringValue:bezelText];
+	[textField.textField setStringValue:bezelText];
 }
 
 - (void)setSourceIcon:(NSImage *)newSourceIcon
@@ -250,7 +252,7 @@ static const float lineHeight = 16;
 		return;
 
 	// Ensure that the source will fit in the screen space available, and truncate nicely if need be.
-	NSDictionary *attributes = @{NSFontAttributeName: sourceFieldApp.font};
+	NSDictionary *attributes = @{NSFontAttributeName: sourceFieldApp.textField.font};
 	CGSize size = [newSource sizeWithAttributes:attributes]; // How big is this string when drawn in this font?
 	if (size.width >= sourceFieldApp.frame.size.width - 5)
 	{
@@ -265,7 +267,7 @@ static const float lineHeight = 16;
 	[newSource retain];
 	[sourceText release];
 	sourceText = newSource;
-	[sourceFieldApp setStringValue:sourceText];
+	[sourceFieldApp.textField setStringValue:sourceText];
 }
 
 - (void)setDate:(NSString *)newDate
@@ -275,7 +277,7 @@ static const float lineHeight = 16;
 	[newDate retain];
 	[dateText release];
 	dateText = newDate;
-	[sourceFieldDate setStringValue:dateText];
+	[sourceFieldDate.textField setStringValue:dateText];
 }
 
 - (void)setColor:(BOOL)value

@@ -12,9 +12,9 @@
 #import <AppKit/AppKit.h>
 
 
-@interface RoundRecTextField : NSTextField {
-    IBOutlet RoundRecTextField *characterBackground;
-    IBOutlet RoundRecTextField *textBackground;
-}
+@interface RoundRecTextField : NSView
+
+@property (nonatomic, nonnull, readonly) NSTextField *textField;
+@property (nonatomic, nonnull, readonly) NSView *background;
 
 @end
