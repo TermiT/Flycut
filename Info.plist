@@ -27,7 +27,7 @@
 	<key>LSUIElement</key>
 	<string>1</string>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Flycut needs this permission to be able to paste text into other applications</string>
+	<string>Flycut needs this permission to be able to paste text into other applications, and add itself to Login Items to be launched on login.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>(c) General Arcade, 2011-2020</string>
 	<key>NSMainNibFile</key>

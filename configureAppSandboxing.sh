@@ -40,5 +40,30 @@ do
 	done
 done
 
+for entitlements in $(git grep -l -e ">com.apple.security.automation.apple-events<" -- '*.entitlements')
+do
+	if [ "$defineSandboxing" == "false" ]
+	then
+		/usr/libexec/PlistBuddy -c "Set :com.apple.security.automation.apple-events true" "$entitlements"
+	else
+		/usr/libexec/PlistBuddy -c "Delete :com.apple.security.automation.apple-events" "$entitlements"
+	fi
+
+	git add "$entitlements"
+done
+
+
+for entitlements in $(git grep -l -e ">com.apple.security.temporary-exception.apple-events<" -- '*.entitlements')
+do
+	if [ "$appSandboxing" == "true" ] && [ "$defineSandboxing" == "false" ]
+	then
+		/usr/libexec/PlistBuddy -c "Set :com.apple.security.temporary-exception.apple-events com.apple.systemevents" "$entitlements"
+	else
+		/usr/libexec/PlistBuddy -c "Delete :com.apple.security.temporary-exception.apple-events" "$entitlements"
+	fi
+
+	git add "$entitlements"
+done
+
 git commit -m "App Sandbox $(if [ "$appSandboxing" == "true" ] ; then echo "ON" ; else echo "OFF" ; fi)$(if [ "$defineSandboxing" == "true" ] ; then echo " with define" ; fi)"
 
