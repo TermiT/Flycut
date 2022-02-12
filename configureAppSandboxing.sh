@@ -17,7 +17,7 @@ then
 	defineSandboxing=true
 else
 	echo "Run with parameter YES or NO to enable or disable app sandboxing."
-	echo "Or with parameter SANDBOXING to enable or app sandboxing and define SANDBOXING"
+	echo "Or with parameter SANDBOXING to enable app sandboxing and define SANDBOXING"
 	echo "  in the prefix header."
 	exit -1
 fi
