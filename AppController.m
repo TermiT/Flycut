@@ -1300,6 +1300,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 		// If we remove all of them and add all new ones, the menu won't redraw if the count is unchanged, so just reuse them by changing their title.
 		int oldItems = [menuItems count]-jcMenuBaseItemsCount;
 		int newItems = [clipStrings count];
+        DLog(@"list=%@, oldItems=%d, newItems=%d", returnedDisplayStrings, oldItems, newItems);
 
 		if ( oldItems > newItems )
 		{
@@ -1321,14 +1322,26 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 				[item release];
 			}
 		}
-
-		// Now set the correct titles for each menu item.
-		for(NSString *pbMenuTitle in clipStrings) {
-			newItems--;
-			NSMenuItem *item = [jcMenu itemAtIndex:newItems];
-			[item setTitle:pbMenuTitle];
-			[jcMenu itemChanged: item];
-		}
+        
+        // Now set the correct titles for each menu item in main queue.
+        NSUInteger total = [clipStrings count];
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+            for (NSUInteger i = 0; i < total; i++) {
+                NSString *pbMenuTitle = [clipStrings objectAtIndex:i];
+                NSUInteger index = total - 1 - i;
+                if (index < [jcMenu numberOfItems]) {
+                    NSMenuItem *item = [jcMenu itemAtIndex:index];
+                    
+                    [item setTitle:pbMenuTitle];
+                    [jcMenu itemChanged:item];
+                } else {
+                    DLog(@"Error: Index %lu is out of bounds",
+                         (unsigned long)index);
+                    }
+                }
+            });
+        
 	});
 }
 
