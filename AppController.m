@@ -1287,7 +1287,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 
 - (void)updateMenuContaining:(NSString*)search {
 	// Use GDC to prevent concurrent modification of the menu, since that would be messy.
-	dispatch_sync(menuQueue, ^{
+	dispatch_async(dispatch_get_main_queue(), ^{
 		[jcMenu setMenuChangedMessagesEnabled:NO];
 
 		NSArray *returnedDisplayStrings = [flycutOperator previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
@@ -1301,48 +1301,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 		int oldItems = [menuItems count]-jcMenuBaseItemsCount;
 		int newItems = [clipStrings count];
         DLog(@"list=%@, oldItems=%d, newItems=%d", returnedDisplayStrings, oldItems, newItems);
-
-		if ( oldItems > newItems )
-		{
-			for ( int i = newItems; i < oldItems; i++ )
-				[jcMenu removeItemAtIndex:0];
-		}
-		else if ( newItems > oldItems )
-		{
-			for ( int i = oldItems; i < newItems; i++ )
-			{
-				NSMenuItem *item;
-				item = [[NSMenuItem alloc] initWithTitle:@"foo"
-												  action:@selector(processMenuClippingSelection:)
-										   keyEquivalent:@""];
-				[item setTarget:self];
-				[item setEnabled:YES];
-				[jcMenu insertItem:item atIndex:0];
-				// Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
-				[item release];
-			}
-		}
         
-        // Now set the correct titles for each menu item in main queue.
-        NSUInteger total = [clipStrings count];
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-            for (NSUInteger i = 0; i < total; i++) {
-                NSString *pbMenuTitle = [clipStrings objectAtIndex:i];
-                NSUInteger index = total - 1 - i;
-                if (index < [jcMenu numberOfItems]) {
-                    NSMenuItem *item = [jcMenu itemAtIndex:index];
-                    
-                    [item setTitle:pbMenuTitle];
-                    [jcMenu itemChanged:item];
-                } else {
-                    DLog(@"Error: Index %lu is out of bounds",
-                         (unsigned long)index);
-                    }
-                }
-            });
+        for ( int i = 0; i < oldItems; i++ )
+            [jcMenu removeItemAtIndex:0];
         
-	});
+        for ( int i = 0; i < newItems; i++ )
+        {
+            NSMenuItem *item;
+            item = [[NSMenuItem alloc] initWithTitle:[clipStrings objectAtIndex:i]
+                                              action:@selector(processMenuClippingSelection:)
+                                       keyEquivalent:@""];
+            [item setTarget:self];
+            [item setEnabled:YES];
+            [jcMenu insertItem:item atIndex:0];
+            // Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
+            [item release];
+        }
+    });
 }
 
 -(IBAction)processMenuClippingSelection:(id)sender
