@@ -34,12 +34,38 @@
 
 #import "MJCloudKitUserDefaultsSync.h"
 #import <CloudKit/CloudKit.h>
+#import <Security/Security.h>
 
 // String constants we use.
 static NSString *const recordZoneName = @"MJCloudKitUserDefaultsSync";
 static NSString *const subscriptionID = @"UserDefaultSubscription";
 static NSString *const recordType = @"UserDefault";
 static NSString *const recordName = @"UserDefaults";
+
+static BOOL MJCloudKitProcessHasICloudEntitlement(void) {
+	static dispatch_once_t onceToken;
+	static BOOL hasEntitlement = NO;
+	dispatch_once(&onceToken, ^{
+		SecTaskRef task = SecTaskCreateFromSelf(kCFAllocatorDefault);
+		if ( nil == task ) {
+			return;
+		}
+
+		CFTypeRef entitlementValue = SecTaskCopyValueForEntitlement(task, CFSTR("com.apple.developer.icloud-container-identifiers"), NULL);
+		if ( nil != entitlementValue ) {
+			if ( CFArrayGetTypeID() == CFGetTypeID(entitlementValue) ) {
+				hasEntitlement = (CFArrayGetCount((CFArrayRef)entitlementValue) > 0);
+			}
+			else if ( CFStringGetTypeID() == CFGetTypeID(entitlementValue) ) {
+				hasEntitlement = (CFStringGetLength((CFStringRef)entitlementValue) > 0);
+			}
+			CFRelease(entitlementValue);
+		}
+
+		CFRelease(task);
+	});
+	return hasEntitlement;
+}
 
 @interface MJCloudKitUserDefaultsSync_NotificationHander : NSObject
 @end
@@ -892,8 +918,21 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 		DLog(@"Waited for sync queue to clear before adding new criteria.");
 	});
 
+	NSString *effectiveContainerIdentifier = containerIdentifier;
+	if ( nil == effectiveContainerIdentifier || 0 == [effectiveContainerIdentifier length] ) {
+		NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+		if ( nil != bundleIdentifier && 0 != [bundleIdentifier length] ) {
+			effectiveContainerIdentifier = [NSString stringWithFormat:@"iCloud.%@", bundleIdentifier];
+			DLog(@"Missing container identifier. Falling back to %@", effectiveContainerIdentifier);
+		}
+	}
+	if ( nil == effectiveContainerIdentifier || 0 == [effectiveContainerIdentifier length] ) {
+		DLog(@"No valid container identifier available.");
+		return;
+	}
+
 	[databaseContainerIdentifier release];
-	databaseContainerIdentifier = [containerIdentifier retain];
+	databaseContainerIdentifier = [effectiveContainerIdentifier retain];
 }
 
 - (void)pause {
@@ -1051,7 +1090,38 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 - (void)attemptToEnable {
 	dispatch_suspend(startStopQueue);
 	DLog(@"Attempting to enable");
-	[[CKContainer defaultContainer] accountStatusWithCompletionHandler:^(CKAccountStatus accountStatus, NSError *error) {
+	if ( nil == databaseContainerIdentifier || 0 == [databaseContainerIdentifier length] ) {
+		DLog(@"No container identifier configured; skipping enable.");
+		dispatch_resume(startStopQueue);
+		[self decrementUserActions];
+		return;
+	}
+	if ( !MJCloudKitProcessHasICloudEntitlement() ) {
+		DLog(@"Missing iCloud entitlement. Skipping CloudKit enable.");
+		[self stopObservingActivity];
+		dispatch_resume(startStopQueue);
+		[self decrementUserActions];
+		return;
+	}
+
+	CKContainer *statusContainer = nil;
+	@try {
+		statusContainer = [CKContainer containerWithIdentifier:databaseContainerIdentifier];
+	}
+	@catch (NSException *exception) {
+		DLog(@"Unable to create CloudKit container for account check: %@", exception);
+		dispatch_resume(startStopQueue);
+		[self decrementUserActions];
+		return;
+	}
+	if ( nil == statusContainer ) {
+		DLog(@"Unable to create CloudKit container for account check.");
+		dispatch_resume(startStopQueue);
+		[self decrementUserActions];
+		return;
+	}
+
+	[statusContainer accountStatusWithCompletionHandler:^(CKAccountStatus accountStatus, NSError *error) {
 		switch ( accountStatus ) {
 			case CKAccountStatusAvailable:  // is iCloud enabled
 				DLog(@"iCloud Available");
@@ -1096,11 +1166,27 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 		observingActivity = YES;
 
 		// Setup database connections.
-		CKContainer *container = [CKContainer containerWithIdentifier:databaseContainerIdentifier];
-		int environmentValue = ((NSNumber *)[[container valueForKey:@"containerID"] valueForKey:@"environment"]).intValue;
-		productionMode = (1 == environmentValue);
-		publicDB = [container publicCloudDatabase];
-		privateDB = [container privateCloudDatabase];
+		@try {
+			CKContainer *container = [CKContainer containerWithIdentifier:databaseContainerIdentifier];
+			if ( nil == container ) {
+				DLog(@"Unable to create CloudKit container.");
+				observingActivity = NO;
+				dispatch_resume(startStopQueue);
+				[self decrementUserActions];
+				return;
+			}
+			int environmentValue = ((NSNumber *)[[container valueForKey:@"containerID"] valueForKey:@"environment"]).intValue;
+			productionMode = (1 == environmentValue);
+			publicDB = [container publicCloudDatabase];
+			privateDB = [container privateCloudDatabase];
+		}
+		@catch (NSException *exception) {
+			DLog(@"CloudKit unavailable: %@", exception);
+			observingActivity = NO;
+			dispatch_resume(startStopQueue);
+			[self decrementUserActions];
+			return;
+		}
 
 		// Create a record zone ID.
 		[recordZoneID release];
@@ -1488,4 +1574,3 @@ withContainerIdentifier:(nonnull NSString *)containerIdentifier {
 	DLog(@"Deallocated");
 }
 @end
-
