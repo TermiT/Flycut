@@ -890,8 +890,11 @@
                 NSString *contents = [jcPasteboard stringForType:type];
 
 				// Toggle back if dealing with the RDC issue.
-				if (largeCopyRisk)
-					[self toggleMenuIconDisabled];
+				if (largeCopyRisk) {
+					dispatch_async(dispatch_get_main_queue(), ^{
+						[self toggleMenuIconDisabled];
+					});
+				}
 
 				if ( contents == nil || [flycutOperator shouldSkip:contents ofType:[jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]] fromAvailableTypes:[jcPasteboard types]] ) {
                    DLog(@"Contents: Empty or skipped");
