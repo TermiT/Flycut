@@ -62,9 +62,10 @@
     IBOutlet NSSlider * heightSlider;
     IBOutlet NSSlider * widthSlider;
     
-    // A timer which will let us check the pasteboard;
-    // this should default to every .5 seconds but be user-configurable
-    NSTimer *pollPBTimer;
+    // Poll the pasteboard change counter away from AppKit's main run loop.
+    dispatch_source_t pasteboardPollTimer;
+    dispatch_queue_t pasteboardPollQueue;
+    NSInteger observedPasteboardChangeCount;
     // We want an interface to the pasteboard
     NSPasteboard *jcPasteboard;
     // Track the clipboard count so we only act when its contents change
@@ -81,7 +82,6 @@
 + (BOOL)isAppSandboxed;
 
 // Basic functionality
--(void) pollPB:(NSTimer *)timer;
 -(void) addClipToPasteboard:(NSString*)pbFullText;
 -(void) setPBBlockCount:(NSNumber *)newPBBlockCount;
 -(void) hideApp;

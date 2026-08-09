@@ -25,6 +25,19 @@
 #import <ServiceManagement/ServiceManagement.h>
 #import <Carbon/Carbon.h>
 
+@interface AppController ()
+- (void)checkPasteboardChangeCount;
+- (void)processPasteboardChange;
+- (void)stopPasteboardPolling;
+@end
+
+static void pollPasteboardTimerFired(void *context)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    [(AppController *)context checkPasteboardChangeCount];
+    [pool drain];
+}
+
 @implementation AppController
 
 /// Determines, through a hack of sorts, if the app is running sandboxed. The SANDBOXING define has no direct connection to being sandboxed, but this method identifies the state by looking for a directory which will have at least eight path components if sandboxed and is quite unlikely to have that many if not sandboxed. Of course, if this doesn't work for your unique case, just do a custom build with this method returning NO.
@@ -215,21 +228,24 @@
         [self updateMenu];
 	}
 
-	// Build our listener timer
-	NSDate *oneSecondFromNow = [NSDate dateWithTimeIntervalSinceNow:1.0];
-	pollPBTimer = [[NSTimer alloc] initWithFireDate:oneSecondFromNow
-										   interval:(1.0)
-											 target:self
-										   selector:@selector(pollPB:)
-										   userInfo:nil
-											repeats:YES];
-	// Assign it to NSRunLoopCommonModes so that it will still poll while the menu is open.  Using a simple NSTimer scheduledTimerWithTimeInterval: would result in polling that stops while the menu is active.  In the past this was okay but with Universal Clipboard a new clipping an arrive while the user has the menu open.
-	[[NSRunLoop currentRunLoop] addTimer:pollPBTimer forMode:NSRunLoopCommonModes];
+	// Poll only the lightweight change counter in the background. Waking the main
+	// run loop every second makes AppKit repeatedly update status-item tracking
+	// regions on modern multi-display macOS systems.
+    observedPasteboardChangeCount = [jcPasteboard changeCount];
+    pasteboardPollQueue = dispatch_queue_create("com.Flycut.pasteboardPollQueue", DISPATCH_QUEUE_SERIAL);
+    pasteboardPollTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, pasteboardPollQueue);
+    dispatch_set_context(pasteboardPollTimer, self);
+    dispatch_source_set_event_handler_f(pasteboardPollTimer, pollPasteboardTimerFired);
+    dispatch_source_set_timer(pasteboardPollTimer,
+                              dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC),
+                              NSEC_PER_SEC,
+                              100 * NSEC_PER_MSEC);
+    dispatch_resume(pasteboardPollTimer);
 
     // Finish up
 	srTransformer = [[[SRKeyCodeTransformer alloc] init] retain];
     pbBlockCount = [[NSNumber numberWithInt:0] retain];
-    [pollPBTimer fire];
+    [self processPasteboardChange];
     
     
     // The load-on-startup check can be really slow, so this will be dispatched out so our thread isn't blocked.
@@ -280,11 +296,8 @@
         bool disableStore = [self toggleMenuIconDisabled];
         if (!disableStore)
         {
-            // Update the pbCount so we don't enable and have it immediately copy the thing the user was trying to avoid.
-            // Code copied from pollPB, which is disabled at this point, so the "should be okay" should still be okay.
-            
-            // Reload pbCount with the current changeCount
-            // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
+            // Synchronize the count so re-enabling storage does not capture the
+            // pasteboard contents the user intentionally excluded.
             [pbCount release];
             pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         }
@@ -861,14 +874,14 @@
     return NO;    // Default handling of the command
 }
 
--(void)pollPB:(NSTimer *)timer
+- (void)processPasteboardChange
 {
-    NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-    if ( [pbCount intValue] != [jcPasteboard changeCount] && ![flycutOperator storeDisabled] ) {
-        // Reload pbCount with the current changeCount
-        // Probably poor coding technique, but pollPB should be the only thing messing with pbCount, so it should be okay
+    NSInteger currentChangeCount = [jcPasteboard changeCount];
+    if ( [pbCount integerValue] != currentChangeCount && ![flycutOperator storeDisabled] ) {
+        // Record the change before reading its contents so it is processed once.
         [pbCount release];
-        pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
+        pbCount = [[NSNumber numberWithInteger:currentChangeCount] retain];
+        NSString *type = [jcPasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
         if ( type != nil ) {
 			NSRunningApplication *currRunningApp = nil;
 			for (NSRunningApplication *currApp in [[NSWorkspace sharedWorkspace] runningApplications])
@@ -909,6 +922,33 @@
             });
         } 
     }
+}
+
+- (void)checkPasteboardChangeCount
+{
+    NSInteger currentChangeCount = [jcPasteboard changeCount];
+    if (currentChangeCount == observedPasteboardChangeCount)
+        return;
+
+    observedPasteboardChangeCount = currentChangeCount;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self processPasteboardChange];
+    });
+}
+
+- (void)stopPasteboardPolling
+{
+    if (pasteboardPollTimer == NULL)
+        return;
+
+    dispatch_source_cancel(pasteboardPollTimer);
+    dispatch_sync(pasteboardPollQueue, ^{});
+#if !OS_OBJECT_USE_OBJC_RETAIN_RELEASE
+    dispatch_release(pasteboardPollTimer);
+    dispatch_release(pasteboardPollQueue);
+#endif
+    pasteboardPollTimer = NULL;
+    pasteboardPollQueue = NULL;
 }
 
 - (void)processBezelKeyDown:(NSEvent *)theEvent {
@@ -1468,6 +1508,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
+	[self stopPasteboardPolling];
 	[flycutOperator applicationWillTerminate];
 	//Unregister our hot key (not required)
 	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
@@ -1485,6 +1526,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 }
 
 - (void) dealloc {
+	[self stopPasteboardPolling];
 	[bezel release];
 	[srTransformer release];
 	[super dealloc];
