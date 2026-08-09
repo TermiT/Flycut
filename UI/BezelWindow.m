@@ -50,14 +50,18 @@ static const float lineHeight = 16;
             [[self contentView] addSubview:sourceFieldBackground];
             [sourceFieldBackground.textField setEditable:NO];
             [sourceFieldBackground.textField setTextColor:[NSColor whiteColor]];
-            [sourceFieldBackground.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
+            CGColorRef sourceBackgroundColor = CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45);
+            [sourceFieldBackground.background.layer setBackgroundColor:sourceBackgroundColor];
+            CGColorRelease(sourceBackgroundColor);
             [sourceFieldBackground.textField setBordered:NO];
 
             sourceFieldApp = [[RoundRecTextField alloc] initWithFrame:[self sourceFrameLeft]];
             [[self contentView] addSubview:sourceFieldApp];
             [sourceFieldApp.textField setEditable:NO];
             [sourceFieldApp.textField setTextColor:[NSColor whiteColor]];
-            [sourceFieldApp.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0)];
+            CGColorRef sourceAppColor = CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0);
+            [sourceFieldApp.background.layer setBackgroundColor:sourceAppColor];
+            CGColorRelease(sourceAppColor);
             [sourceFieldApp.textField setBordered:NO];
             [sourceFieldApp.textField setAlignment:NSLeftTextAlignment];
 
@@ -77,7 +81,9 @@ static const float lineHeight = 16;
             [[self contentView] addSubview:sourceFieldDate];
             [sourceFieldDate.textField setEditable:NO];
             [sourceFieldDate.textField setTextColor:[NSColor whiteColor]];
-            [sourceFieldDate.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0)];
+            CGColorRef sourceDateColor = CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0);
+            [sourceFieldDate.background.layer setBackgroundColor:sourceDateColor];
+            CGColorRelease(sourceDateColor);
             [sourceFieldDate.textField setBordered:NO];
             [sourceFieldDate.textField setAlignment:NSRightTextAlignment];
             font = [sourceFieldDate.textField font];
@@ -92,7 +98,9 @@ static const float lineHeight = 16;
 		//[[textField cell] setScrollable:YES];
 		//[[textField cell] setWraps:NO];
 		[textField.textField setTextColor:[NSColor whiteColor]];
-		[textField.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
+		CGColorRef textFieldColor = CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45);
+		[textField.background.layer setBackgroundColor:textFieldColor];
+		CGColorRelease(textFieldColor);
 		[textField.textField setBordered:NO];
 		[textField.textField setAlignment:NSLeftTextAlignment];
 
@@ -101,7 +109,9 @@ static const float lineHeight = 16;
 		[[self contentView] addSubview:charField];
 		[charField.textField setEditable:NO];
 		[charField.textField setTextColor:[NSColor whiteColor]];
-		[charField.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
+		CGColorRef charFieldColor = CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45);
+		[charField.background.layer setBackgroundColor:charFieldColor];
+		CGColorRelease(charFieldColor);
 		[charField.textField setBordered:NO];
 		[charField.textField setAlignment:NSCenterTextAlignment];
         [charField.textField setStringValue:@"Empty"];
@@ -132,10 +142,16 @@ static const float lineHeight = 16;
     [textField setFrame:textFrame];
     NSRect charFrame = [self charFrame];
     [charField setFrame:charFrame];
-    if (showSourceField)
-        [sourceFieldBackground.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45)];
-    else if ( nil != sourceFieldApp )
-        [sourceFieldBackground.background.layer setBackgroundColor:CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0)];
+    if (showSourceField) {
+        CGColorRef sourceBackgroundColor = CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.45);
+        [sourceFieldBackground.background.layer setBackgroundColor:sourceBackgroundColor];
+        CGColorRelease(sourceBackgroundColor);
+    }
+    else if ( nil != sourceFieldApp ) {
+        CGColorRef sourceBackgroundColor = CGColorCreateGenericRGB(0.1, 0.1, 0.1, 0.0);
+        [sourceFieldBackground.background.layer setBackgroundColor:sourceBackgroundColor];
+        CGColorRelease(sourceBackgroundColor);
+    }
     
     showSourceField = savedShowSourceField;
 
@@ -190,7 +206,25 @@ static const float lineHeight = 16;
 
 -(NSColor*) backgroundColor
 {
-    return [self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]];
+    NSSize backgroundSize = [self frame].size;
+    float backgroundAlpha = [[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"];
+
+    // AppKit may call -update frequently on modern macOS. Rebuilding the
+    // bitmap pattern on every update is unnecessarily expensive and can keep
+    // the main thread busy while the bezel is idle. Rebuild only when one of
+    // the inputs that affects the background has changed.
+    if (backgroundColorCache != nil
+        && NSEqualSizes(backgroundColorCacheSize, backgroundSize)
+        && backgroundColorCacheAlpha == backgroundAlpha
+        && backgroundColorCacheColor == color)
+        return backgroundColorCache;
+
+    [backgroundColorCache release];
+    backgroundColorCache = [[self sizedBezelBackgroundWithRadius:25.0 withAlpha:backgroundAlpha] retain];
+    backgroundColorCacheSize = backgroundSize;
+    backgroundColorCacheAlpha = backgroundAlpha;
+    backgroundColorCacheColor = color;
+    return backgroundColorCache;
 }
 
 - (void) setAlpha:(float)newValue
@@ -314,6 +348,7 @@ static const float lineHeight = 16;
 
 - (void)dealloc
 {
+	[backgroundColorCache release];
 	[textField release];
 	[charField release];
 	[iconView release];
