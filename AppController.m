@@ -24,6 +24,54 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <Carbon/Carbon.h>
+#import <stdlib.h>
+#import <unistd.h>
+
+static const useconds_t FlycutTypingDelayMicroseconds = 20000;
+
+static void FlycutPostKeyCode(CGEventSourceRef sourceRef, CGKeyCode keyCode)
+{
+    CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, keyCode, true);
+    CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, keyCode, false);
+    if (eventDown && eventUp) {
+        CGEventSetFlags(eventDown, 0);
+        CGEventSetFlags(eventUp, 0);
+        CGEventPost(kCGHIDEventTap, eventDown);
+        CGEventPost(kCGHIDEventTap, eventUp);
+    }
+    if (eventDown)
+        CFRelease(eventDown);
+    if (eventUp)
+        CFRelease(eventUp);
+}
+
+static void FlycutPostUnicodeString(CGEventSourceRef sourceRef, NSString *string)
+{
+    NSUInteger length = [string length];
+    if (length == 0)
+        return;
+
+    UniChar *characters = calloc(length, sizeof(UniChar));
+    if (!characters)
+        return;
+    [string getCharacters:characters range:NSMakeRange(0, length)];
+
+    CGEventRef eventDown = CGEventCreateKeyboardEvent(sourceRef, 0, true);
+    CGEventRef eventUp = CGEventCreateKeyboardEvent(sourceRef, 0, false);
+    if (eventDown && eventUp) {
+        CGEventSetFlags(eventDown, 0);
+        CGEventSetFlags(eventUp, 0);
+        CGEventKeyboardSetUnicodeString(eventDown, length, characters);
+        CGEventKeyboardSetUnicodeString(eventUp, length, characters);
+        CGEventPost(kCGHIDEventTap, eventDown);
+        CGEventPost(kCGHIDEventTap, eventUp);
+    }
+    if (eventDown)
+        CFRelease(eventDown);
+    if (eventUp)
+        CFRelease(eventUp);
+    free(characters);
+}
 
 @implementation AppController
 
@@ -103,6 +151,7 @@
 	[settingsSyncList retain];
 
 	menuQueue = dispatch_queue_create(@"com.Flycut.menuUpdateQueue", DISPATCH_QUEUE_SERIAL);
+	typingQueue = dispatch_queue_create("com.Flycut.keystrokeTypingQueue", DISPATCH_QUEUE_SERIAL);
 
 	return [super init];
 }
@@ -758,6 +807,18 @@
     [self restoreStashedStoreAndUpdate];
 }
 
+- (void)typeFromStack
+{
+	NSString *content = [flycutOperator getPasteFromStackPosition];
+	if ( nil != content ) {
+		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+		[self performSelector:@selector(typeStringAsKeystrokes:) withObject:content afterDelay:0.2];
+	} else {
+		[self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+	}
+    [self restoreStashedStoreAndUpdate];
+}
+
 - (void)moveItemAtStackPositionToTopOfStack
 {
 	if ( [flycutOperator stackPositionIsInBounds] ) {
@@ -768,14 +829,24 @@
 	}
 }
 
-- (void)pasteIndexAndUpdate:(int) position {
+- (int)stackPositionForDisplayPosition:(int)position {
     // If there is an active search, we need to map the menu index to the stack position.
     NSString* search = [searchBox stringValue];
     if ( nil != search && 0 != search.length )
     {
-        NSArray *mapping = [flycutOperator previousIndexes:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
-        position = [mapping[position] intValue];
+        NSArray *mapping = [flycutOperator previousIndexes:(int)[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
+        if (position < 0 || (NSUInteger)position >= [mapping count])
+            return -1;
+        return [mapping[position] intValue];
     }
+
+    return position;
+}
+
+- (void)pasteIndexAndUpdate:(int) position {
+    position = [self stackPositionForDisplayPosition:position];
+    if (position < 0)
+        return;
 
     NSString *content = [flycutOperator getPasteFromIndex: position];
     if ( nil != content )
@@ -783,6 +854,20 @@
         [self addClipToPasteboard:content];
         [self updateMenu];
 	}
+}
+
+- (void)typeIndexAndUpdate:(int)position {
+    position = [self stackPositionForDisplayPosition:position];
+    if (position < 0)
+        return;
+
+    NSString *content = [flycutOperator getPasteFromIndex:position];
+    if ( nil != content )
+    {
+        [self updateMenu];
+        [self performSelector:@selector(hideApp) withObject:nil];
+        [self performSelector:@selector(typeStringAsKeystrokes:) withObject:content afterDelay:0.2];
+    }
 }
 
 - (void)metaKeysReleased
@@ -821,6 +906,55 @@
 
 /*" +fakeCommandV synthesizes keyboard events for Cmd-v Paste shortcut. "*/
 -(void)fakeCommandV { [self fakeKey:@(kVK_ANSI_V) withCommandFlag:TRUE]; }
+
+/* Types text directly for applications that do not accept clipboard paste. */
+-(void)typeStringAsKeystrokes:(NSString *)content
+{
+    if (content.length == 0)
+        return;
+    if (isTypingAsKeystrokes) {
+        NSBeep();
+        return;
+    }
+    isTypingAsKeystrokes = YES;
+
+    NSString *normalizedText = [content stringByReplacingOccurrencesOfString:@"\r\n" withString:@"\n"];
+    normalizedText = [normalizedText stringByReplacingOccurrencesOfString:@"\r" withString:@"\n"];
+    NSString *text = [normalizedText copy];
+
+    dispatch_async(typingQueue, ^{
+        @autoreleasepool {
+            // A private source prevents the Option key used to choose the menu action,
+            // or any other physically held modifier, from changing the typed text.
+            CGEventSourceRef sourceRef = CGEventSourceCreate(kCGEventSourceStatePrivate);
+            if (!sourceRef) {
+                DLog(@"No event source for keystroke typing");
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    isTypingAsKeystrokes = NO;
+                });
+                return;
+            }
+
+            [text enumerateSubstringsInRange:NSMakeRange(0, text.length)
+                                     options:NSStringEnumerationByComposedCharacterSequences
+                                  usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
+                if ([substring isEqualToString:@"\n"])
+                    FlycutPostKeyCode(sourceRef, kVK_Return);
+                else if ([substring isEqualToString:@"\t"])
+                    FlycutPostKeyCode(sourceRef, kVK_Tab);
+                else
+                    FlycutPostUnicodeString(sourceRef, substring);
+                usleep(FlycutTypingDelayMicroseconds);
+            }];
+
+            CFRelease(sourceRef);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                isTypingAsKeystrokes = NO;
+            });
+        }
+    });
+    [text release];
+}
 
 /*" +fakeDownArrow synthesizes keyboard events for the down-arrow key. "*/
 -(void)fakeDownArrow { [self fakeKey:@125 withCommandFlag:FALSE]; }
@@ -1016,6 +1150,9 @@
                 }
 
                 [self performSelector:@selector(hideApp) withObject:nil afterDelay:0.2];
+                break;
+            case 't': case 'T':
+                [self typeFromStack];
                 break;
             default: // It's not a navigation/application-defined thing, so let's figure out what to do with it.
 				DLog(@"PRESSED %d", pressed);
@@ -1298,26 +1435,35 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 
 		NSArray *returnedDisplayStrings = [flycutOperator previousDisplayStrings:[[NSUserDefaults standardUserDefaults] integerForKey:@"displayNum"] containing:search];
 
-		NSArray *menuItems = [[[jcMenu itemArray] reverseObjectEnumerator] allObjects];
+		NSArray *menuItems = [jcMenu itemArray];
 
-		NSArray *clipStrings = [[returnedDisplayStrings reverseObjectEnumerator] allObjects];
-
-		// Figure out if the number of menu items is changing and add or remove entries as necessary.
-		// If we remove all of them and add all new ones, the menu won't redraw if the count is unchanged, so just reuse them by changing their title.
-		int oldItems = [menuItems count]-jcMenuBaseItemsCount;
-		int newItems = [clipStrings count];
-        DLog(@"list=%@, oldItems=%d, newItems=%d", returnedDisplayStrings, oldItems, newItems);
+		// Replace the dynamic clipping entries with normal and Option-key alternate actions.
+		NSInteger oldItems = [menuItems count]-jcMenuBaseItemsCount;
+		NSInteger newItems = [returnedDisplayStrings count];
+        DLog(@"list=%@, oldItems=%ld, newItems=%ld", returnedDisplayStrings, (long)oldItems, (long)newItems);
         
-        for ( int i = 0; i < oldItems; i++ )
+        for ( NSInteger i = 0; i < oldItems; i++ )
             [jcMenu removeItemAtIndex:0];
         
-        for ( int i = 0; i < newItems; i++ )
+        for ( NSInteger i = newItems - 1; i >= 0; i-- )
         {
-            NSMenuItem *item;
-            item = [[NSMenuItem alloc] initWithTitle:[clipStrings objectAtIndex:i]
+            NSString *title = [returnedDisplayStrings objectAtIndex:i];
+            NSMenuItem *alternateItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Type as Keystrokes: %@", nil), title]
+                                                                   action:@selector(processMenuClippingTypingSelection:)
+                                                            keyEquivalent:@""];
+            [alternateItem setTarget:self];
+            [alternateItem setRepresentedObject:[NSNumber numberWithInteger:i]];
+            [alternateItem setAlternate:YES];
+            [alternateItem setKeyEquivalentModifierMask:NSEventModifierFlagOption];
+            [alternateItem setEnabled:YES];
+            [jcMenu insertItem:alternateItem atIndex:0];
+            [alternateItem release];
+
+            NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:title
                                               action:@selector(processMenuClippingSelection:)
                                        keyEquivalent:@""];
             [item setTarget:self];
+            [item setRepresentedObject:[NSNumber numberWithInteger:i]];
             [item setEnabled:YES];
             [jcMenu insertItem:item atIndex:0];
             // Way back in 0.2, failure to release the new item here was causing a quite atrocious memory leak.
@@ -1328,13 +1474,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 
 -(IBAction)processMenuClippingSelection:(id)sender
 {
-	int index=[[sender menu] indexOfItem:sender];
+	int index=(int)[[sender representedObject] integerValue];
 	[self pasteIndexAndUpdate:index];
 
 	if ( [[NSUserDefaults standardUserDefaults] boolForKey:@"menuSelectionPastes"] ) {
 		[self performSelector:@selector(hideApp) withObject:nil];
 		[self performSelector:@selector(fakeCommandV) withObject:nil afterDelay:0.2];
 	}
+}
+
+-(IBAction)processMenuClippingTypingSelection:(id)sender
+{
+	int index=(int)[[sender representedObject] integerValue];
+	[self typeIndexAndUpdate:index];
 }
 
 -(void) setPBBlockCount:(NSNumber *)newPBBlockCount

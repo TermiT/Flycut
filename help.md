@@ -24,6 +24,8 @@ Here's a complete list of keys you can use in the Bezel.
 
 **Return**: Paste the clipboard history item currently displayed, closing the Bezel.
 
+**t** or **T**: Type the clipboard history item currently displayed as individual keystrokes, closing the Bezel. This is useful for VM consoles and other fields that block clipboard paste. Flycut must have Accessibility permission. Keep the destination focused until typing finishes.
+
 **Esc**: Close the bezel without pasting, preserving bezel position in the history.
 
 **Enter** (Fn-Return): Move the clipboard history item currently displayed to the front of the history, closing the Bezel.
@@ -50,9 +52,8 @@ Here's a complete list of keys you can use in the Bezel.
 
 **Menu Features**
 
-The Flycut menu allows you to select from the most recent items in the main clipboard history store, clear all of them, merge them all into one entry, or access the preferences panel.  You can also Option-Click the Flycut menu icon to disable or reenable clipboard tracking, in case you are copying sensitive information such as passwords.
+The Flycut menu allows you to select from the most recent items in the main clipboard history store, clear all of them, merge them all into one entry, or access the preferences panel. Hold Option while the menu is open to replace each clipping with a "Type as Keystrokes" action. You can also Option-Click the Flycut menu icon to disable or reenable clipboard tracking, in case you are copying sensitive information such as passwords.
 
 **Preferences Panel**
 
 The preferences panel allows you to customize a large number of settings, several of which should be documented here but will have to wait for another day.
-
