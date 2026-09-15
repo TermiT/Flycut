@@ -26,6 +26,10 @@
     BezelWindow					*bezel;
 	SGHotKey					*mainHotKey;
 	IBOutlet SRRecorderControl	*mainRecorder;
+	// The pop-paste hotkey pastes and then steps one clipping less recent.  Its
+	// recorder is built in code rather than in the nib, alongside mainRecorder.
+	SGHotKey					*popPasteHotKey;
+	SRRecorderControl			*popPasteRecorder;
 	IBOutlet NSPanel			*prefsPanel;
 	IBOutlet NSTextView			*acknowledgementsView;
 	IBOutlet NSBox			  *appearancePanel;
@@ -94,6 +98,7 @@
 
 // Hotkey related
 -(void)hitMainHotKey:(SGHotKey *)hotKey;
+-(void)hitPopPasteHotKey:(SGHotKey *)hotKey;
 
 // Bezel related
 -(void) updateBezel;
@@ -120,6 +125,7 @@
 -(IBAction) switchMenuIcon:(id)sender;
 -(IBAction) toggleLoadOnStartup:(id)sender;
 -(IBAction) toggleMainHotKey:(id)sender;
+-(IBAction) togglePopPasteHotKey:(id)sender;
 -(IBAction) toggleICloudSyncSettings:(id)sender;
 -(IBAction) toggleICloudSyncClippings:(id)sender;
 -(IBAction) setSavePreference:(id)sender;

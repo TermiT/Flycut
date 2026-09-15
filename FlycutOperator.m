@@ -367,6 +367,28 @@
 	return clipping;
 }
 
+// Returns the clipping at the current stack position, then steps the position
+// one clipping less recent, stopping at the oldest.  Nothing leaves the store,
+// so repeated calls walk the list newest-to-oldest the way popping a stack
+// would, and the clippings remain available afterwards.
+//
+// Deliberately does not honor pasteMovesToTop the way getPasteFromIndex: does:
+// that behavior pulls each clipping to the top and resets stackPosition to
+// zero, which would leave every call returning the same clipping.
+- (NSString*)getPasteAndAdvanceStackPosition {
+	if ( ! [self stackPositionIsInBounds] ) {
+		return nil;
+	}
+
+	NSString *clipping = [self getClipFromCount:stackPosition];
+
+	if ( stackPosition + 1 < [clippingStore jcListCount] ) {
+		stackPosition++;
+	}
+
+	return clipping;
+}
+
 -(NSString*)getClipFromCount:(int)indexInt
 {
     NSString *pbFullText;

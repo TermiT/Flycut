@@ -175,6 +175,16 @@
 		];
 	};
 
+	// The pop-paste recorder is not in the nib, so build it next to mainRecorder
+	// and restore its combo the same way.  It has no default: the feature stays
+	// off until the user records a hotkey for it.
+	[self buildPopPasteHotKeyPreferenceRow];
+	if ( [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder popPasteHotkey"] ) {
+		[popPasteRecorder setKeyCombo:SRMakeKeyCombo([[[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder popPasteHotkey"] objectForKey:@"keyCode"] intValue],
+													 [[[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"ShortcutRecorder popPasteHotkey"] objectForKey:@"modifierFlags"] intValue] )
+		];
+	};
+
 	// Initialize the FlycutOperator
 	flycutOperator = [[FlycutOperator alloc] init];
 	flycutOperator.delegate = self;
@@ -508,6 +518,46 @@
 	[newLabel setFont:[NSFont labelFontOfSize:10]];
 	[newLabel setStringValue:text];
 	return newLabel;
+}
+
+// Adds a second shortcut recorder to the Hotkeys preference pane, one row below
+// the main one.  That pane comes from a compiled nib with no editable source in
+// the repository, so the row is assembled here instead, in the same spirit as
+// buildAppearancesPreferencePanel.  Positions are taken from mainRecorder at
+// runtime so the row follows it if the nib is ever changed.
+-(void) buildPopPasteHotKeyPreferenceRow
+{
+	if ( nil != popPasteRecorder )
+		return; // Already built.
+
+	NSView *hotkeyPanel = [mainRecorder superview];
+	if ( nil == hotkeyPanel )
+		return;
+
+	NSRect mainFrame = [mainRecorder frame];
+	CGFloat rowY = mainFrame.origin.y - 30;
+
+	// Matches the nib's "Main Hotkey" label above: same origin, width and font.
+	NSTextField *rowLabel = [self preferencePanelSliderLabelForText:@"Pop Paste"
+														   aligned:NSNaturalTextAlignment
+														  andFrame:NSMakeRect(16, rowY + 2, 65, 18)];
+	[rowLabel setFont:[NSFont systemFontOfSize:10]];
+	[hotkeyPanel addSubview:rowLabel];
+	[rowLabel release];
+
+	popPasteRecorder = [[SRRecorderControl alloc] initWithFrame:NSMakeRect(mainFrame.origin.x,
+																		  rowY,
+																		  mainFrame.size.width,
+																		  mainFrame.size.height)];
+	[popPasteRecorder setDelegate:self];
+	[hotkeyPanel addSubview:popPasteRecorder];
+
+	NSTextField *rowHelp = [self preferencePanelSliderLabelForText:@"Pastes the current clipping, then steps one older.  Press again for the next one back.  Copying anything new returns to the newest.  Nothing is deleted."
+														  aligned:NSNaturalTextAlignment
+														 andFrame:NSMakeRect(mainFrame.origin.x, 4, 410, 42)];
+	[[rowHelp cell] setWraps:YES];
+	[hotkeyPanel addSubview:rowHelp];
+	[rowHelp release];
 }
 
 -(NSBox*) preferencePanelSliderRowForText:(NSString*)title withTicks:(int)ticks minText:(NSString*)minText maxText:(NSString*)maxText minValue:(double)min maxValue:(double)max frameMaxY:(int)frameMaxY binding:(NSString*)keyPath action:(SEL)action
@@ -1044,6 +1094,7 @@
 
 	//Create our hot key
 	[self toggleMainHotKey:[NSNull null]];
+	[self togglePopPasteHotKey:[NSNull null]];
 }
 
 // Remote Notifications (APN, aka Push Notifications) are only available on apps distributed via the App Store.
@@ -1150,6 +1201,48 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 	[mainHotKey setTarget: self];
 	[mainHotKey setAction: @selector(hitMainHotKey:)];
 	[[SGHotKeyCenter sharedCenter] registerHotKey:mainHotKey];
+}
+
+// Pastes at the current stack position and steps one clipping less recent, so
+// holding no keys and pressing this repeatedly walks back through the list.
+// The bezel is not shown: this is meant to fire without taking focus.
+- (void)hitPopPasteHotKey:(SGHotKey *)hotKey
+{
+	// The bezel drives the stack position while it is up; leave it alone there.
+	if ( isBezelDisplayed )
+		return;
+
+	NSString *content = [flycutOperator getPasteAndAdvanceStackPosition];
+	if ( nil == content )
+		return;
+
+	// This also records the pasteboard change count, so pollPB: will not treat
+	// our own write as a new clipping and reset the position back to the top.
+	[self addClipToPasteboard:content];
+	[self performSelector:@selector(fakeCommandV) withObject:nil afterDelay:0.2];
+}
+
+- (IBAction)togglePopPasteHotKey:(id)sender
+{
+	if (popPasteHotKey != nil)
+	{
+		[[SGHotKeyCenter sharedCenter] unregisterHotKey:popPasteHotKey];
+		[popPasteHotKey release];
+		popPasteHotKey = nil;
+	}
+
+	// There is no default combo for this hotkey, so there is nothing to register
+	// until the user records one.
+	if ( nil == popPasteRecorder || ShortcutRecorderEmptyCode == [popPasteRecorder keyCombo].code )
+		return;
+
+	popPasteHotKey = [[SGHotKey alloc] initWithIdentifier:@"popPasteHotKey"
+												 keyCombo:[SGKeyCombo keyComboWithKeyCode:[popPasteRecorder keyCombo].code
+																				modifiers:[popPasteRecorder cocoaToCarbonFlags: [popPasteRecorder keyCombo].flags]]];
+	[popPasteHotKey setName: @"Flycut Pop Paste HotKey"];
+	[popPasteHotKey setTarget: self];
+	[popPasteHotKey setAction: @selector(hitPopPasteHotKey:)];
+	[[SGHotKeyCenter sharedCenter] registerHotKey:popPasteHotKey];
 }
 
 - (IBAction)toggleICloudSyncSettings:(id)sender
@@ -1394,6 +1487,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 			[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:[mainRecorder keyCombo].code],[NSNumber numberWithInt:[mainRecorder keyCombo].flags],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]]
 		forKey:@"ShortcutRecorder mainHotkey"];
 	}
+	else if (aRecorder == popPasteRecorder) {
+		[[NSUserDefaults standardUserDefaults] setObject:
+			[NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:[popPasteRecorder keyCombo].code],[NSNumber numberWithInt:[popPasteRecorder keyCombo].flags],nil] forKeys:[NSArray arrayWithObjects:@"keyCode",@"modifierFlags",nil]]
+		forKey:@"ShortcutRecorder popPasteHotkey"];
+	}
 }
 
 - (BOOL)shortcutRecorder:(SRRecorderControl *)aRecorder isKeyCode:(NSInteger)keyCode andFlagsTaken:(NSUInteger)flags reason:(NSString **)aReason {
@@ -1403,6 +1501,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 - (void)shortcutRecorder:(SRRecorderControl *)aRecorder keyComboDidChange:(KeyCombo)newKeyCombo {
 	if (aRecorder == mainRecorder) {
 		[self toggleMainHotKey: aRecorder];
+		[self setHotKeyPreferenceForRecorder: aRecorder];
+	}
+	else if (aRecorder == popPasteRecorder) {
+		[self togglePopPasteHotKey: aRecorder];
 		[self setHotKeyPreferenceForRecorder: aRecorder];
 	}
 	DLog(@"code: %ld, flags: %lu", (long)newKeyCombo.code, (unsigned long)newKeyCombo.flags);
@@ -1473,6 +1575,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 	[[SGHotKeyCenter sharedCenter] unregisterHotKey: mainHotKey];
 	[mainHotKey release];
 	mainHotKey = nil;
+	if ( popPasteHotKey != nil ) {
+		[[SGHotKeyCenter sharedCenter] unregisterHotKey: popPasteHotKey];
+		[popPasteHotKey release];
+		popPasteHotKey = nil;
+	}
 	[self hideBezel];
 	[[NSDistributedNotificationCenter defaultCenter]
 		removeObserver:self
@@ -1487,6 +1594,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 - (void) dealloc {
 	[bezel release];
 	[srTransformer release];
+	[popPasteRecorder release];
 	[super dealloc];
 }
 

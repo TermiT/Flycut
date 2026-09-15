@@ -53,6 +53,7 @@
 -(int)stackPosition;
 -(NSString*)getPasteFromStackPosition;
 -(NSString*)getPasteFromIndex:(int) position;
+-(NSString*)getPasteAndAdvanceStackPosition;
 -(bool) saveFromStack;
 -(bool)clearItemAtStackPosition;
 -(void)clearList;
