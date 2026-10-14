@@ -793,7 +793,9 @@
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
-	if ( isBezelPinned ) {
+	// Once the bezel loses key it stops getting flagsChanged:, so the modifier release never arrives; hide it (like Esc) or it stays stuck on screen.
+	// https://github.com/TermiT/Flycut/issues/201
+	if ( isBezelDisplayed ) {
 		[self hideApp];
 	}
 }
@@ -1102,9 +1104,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 
 - (void) hideBezel
 {
+	isBezelDisplayed = NO; // Before orderOut:, since that triggers windowDidResignKey:.
 	[bezel orderOut:nil];
 	[bezel setCharString:@"Empty"];
-	isBezelDisplayed = NO;
 }
 
 -(void)hideApp
