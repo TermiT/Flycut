@@ -59,6 +59,7 @@
     NSResponder *menuFirstResponder;
     dispatch_queue_t menuQueue;
     NSRunningApplication *currentRunningApplication;
+    BOOL statusMenuOpenPending; // Set between a click on the status item and the menu actually opening (we activate Flycut first).
     IBOutlet NSSlider * heightSlider;
     IBOutlet NSSlider * widthSlider;
     

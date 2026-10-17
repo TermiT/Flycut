@@ -204,7 +204,12 @@
             statusItemWithLength:NSVariableStatusItemLength] retain];
     [statusItem setHighlightMode:YES];
     [self switchMenuIconTo: [[NSUserDefaults standardUserDefaults] integerForKey:@"menuIcon"]];
-	[statusItem setMenu:jcMenu];
+    // The menu is not attached to the status item permanently.  The search field only works while Flycut is the
+    // active application, and activating while the menu is already tracking closes it (and on macOS 27 reopening it
+    // flashes the icon and the menu).  So the click action activates Flycut first and opens the menu afterwards.
+    [[statusItem button] setTarget:self];
+    [[statusItem button] setAction:@selector(statusItemClicked:)];
+    [[statusItem button] sendActionOn:(NSEventMaskLeftMouseUp | NSEventMaskRightMouseUp)];
     [jcMenu setDelegate:self];
     jcMenuBaseItemsCount = [[[[jcMenu itemArray] reverseObjectEnumerator] allObjects] count];
     [statusItem setEnabled:YES];
@@ -272,11 +277,11 @@
 				 forKey:@"displayNum"];
 }
 
--(void)menuWillOpen:(NSMenu *)menu
+-(void)statusItemClicked:(id)sender
 {
     NSEvent *event = [NSApp currentEvent];
     if([event modifierFlags] & NSAlternateKeyMask) {
-        [menu cancelTracking];
+        // Option-click toggles the "disabled" state instead of opening the menu.
         bool disableStore = [self toggleMenuIconDisabled];
         if (!disableStore)
         {
@@ -289,33 +294,55 @@
             pbCount = [[NSNumber numberWithInt:[jcPasteboard changeCount]] retain];
         }
         [flycutOperator setDisableStoreTo:disableStore];
+        return;
+    }
+
+    if ( statusMenuOpenPending )
+        return;
+    statusMenuOpenPending = YES;
+
+    if ( [NSApp isActive] )
+    {
+        // Open outside of the button's action so the click is fully processed first.
+        [self performSelector:@selector(openStatusItemMenu) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
     }
     else
     {
-        // We need to do a little trick to get the search box functional.  Figure out what is currently active.
-        NSString *currRunningApp = @"";
-        NSRunningApplication *currApp = nil;
-        for (currApp in [[NSWorkspace sharedWorkspace] runningApplications])
-            if ([currApp isActive])
-            {
-                currRunningApp = [currApp localizedName];
-                break;
-            }
-
-        if ( [currRunningApp rangeOfString:@"Flycut"].location == NSNotFound )
-        {
-            // We haven't activated Flycut yet.
-            currentRunningApplication = [currApp retain]; // Remember what app we came from.
-            [menu cancelTracking]; // Prevent the menu from displaying, since activateIgnoringOtherApps would close it anyway.
-            [NSApp activateIgnoringOtherApps: YES]; // Required to make the search field firstResponder any good.
-            [self performSelector:@selector(showMenuAfterActivation) withObject:nil afterDelay:0.2 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]]; // Because we really do want the menu open.
-        }
-        else
-        {
-            // Flycut is now active, so set the first responder once the menu opens.
-            [self performSelector:@selector(activateSearchBox) withObject:nil afterDelay:0.2 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
-        }
+        // We need to do a little trick to get the search box functional: Flycut has to be the active application for the
+        // search field to become firstResponder, so activate first and open the menu once that has happened.
+        [currentRunningApplication release];
+        currentRunningApplication = [[[NSWorkspace sharedWorkspace] frontmostApplication] retain]; // Remember what app we came from.
+        [NSApp activateIgnoringOtherApps: YES];
+        // applicationDidBecomeActive: opens the menu as soon as the activation lands.  The delayed call is the fallback for
+        // when activation is refused (macOS 27 can do that), so the menu opens regardless, just without search focus.
+        [self performSelector:@selector(openStatusItemMenu) withObject:nil afterDelay:0.3 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
     }
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification
+{
+    if ( statusMenuOpenPending )
+    {
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(openStatusItemMenu) object:nil];
+        [self performSelector:@selector(openStatusItemMenu) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+    }
+}
+
+- (void)openStatusItemMenu
+{
+    if ( !statusMenuOpenPending )
+        return;
+    statusMenuOpenPending = NO;
+    // Attach the menu just for this click; performClick: opens it like a real click would and returns once it closes.
+    [statusItem setMenu:jcMenu];
+    [[statusItem button] performClick:nil];
+    [statusItem setMenu:nil];
+}
+
+-(void)menuWillOpen:(NSMenu *)menu
+{
+    // Flycut was activated by statusItemClicked: before the menu opened, so just set the first responder once the menu is up.
+    [self performSelector:@selector(activateSearchBox) withObject:nil afterDelay:0.2 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
 }
 
 -(void)menuDidClose:(NSMenu *)menu
@@ -357,11 +384,6 @@
         statusItemImage = nil;
     }
     return false;
-}
-
-- (void)showMenuAfterActivation
-{
-    [statusItem popUpStatusItemMenu:jcMenu];
 }
 
 - (void)activateSearchBox
