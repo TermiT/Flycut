@@ -59,6 +59,7 @@
     NSResponder *menuFirstResponder;
     dispatch_queue_t menuQueue;
     NSRunningApplication *currentRunningApplication;
+    NSRunningApplication *lastActiveOtherApplication;
     IBOutlet NSSlider * heightSlider;
     IBOutlet NSSlider * widthSlider;
     

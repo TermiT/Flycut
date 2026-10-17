@@ -320,6 +320,13 @@
 
 -(void)menuDidClose:(NSMenu *)menu
 {
+    // If the menu was dismissed by clicking into the preference panel, the user wants Flycut to stay in front, so don't hand focus back to the previous app.
+    if ( [prefsPanel isVisible] && [NSEvent pressedMouseButtons] != 0
+        && NSPointInRect([NSEvent mouseLocation], [prefsPanel frame]) )
+    {
+        [currentRunningApplication release];
+        currentRunningApplication = nil;
+    }
     // The method the menu triggers may clear currentRunningApplication, but that method won't be called until after the menu has closed.  Queue a call to the reactivate method that will come up after the method resulting from the menu.
     [self performSelector:@selector(reactivateCurrentRunningApplication) withObject:nil afterDelay:0.0 inModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
 }
@@ -697,6 +704,11 @@
     currentRunningApplication = nil; // So it doesn't get pulled foreground atop the preference panel.
 	if ([prefsPanel respondsToSelector:@selector(setCollectionBehavior:)])
 		[prefsPanel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
+	// Flycut hands focus back to the app the user was working in after the menu closes or a clipping is pasted, and
+	// the preference panel must survive that: keep it on screen while Flycut is inactive and above the other app's
+	// windows, which otherwise cover it, so it only goes away when the user closes it.
+	[prefsPanel setHidesOnDeactivate:NO];
+	[prefsPanel setFloatingPanel:YES];
 	[NSApp activateIgnoringOtherApps: YES];
 	[prefsPanel makeKeyAndOrderFront:self];
 	NSString *fileRoot = [[NSBundle mainBundle] pathForResource:@"acknowledgements" ofType:@"txt"];
@@ -1044,6 +1056,22 @@
 
 	//Create our hot key
 	[self toggleMainHotKey:[NSNull null]];
+
+	// Track the last app other than Flycut that was active, so focus can be handed back to it without hiding the preference panel.
+	[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self
+														   selector:@selector(workspaceDidActivateApplication:)
+															   name:NSWorkspaceDidActivateApplicationNotification
+															 object:nil];
+}
+
+- (void)workspaceDidActivateApplication:(NSNotification *)notification
+{
+	NSRunningApplication *app = [[notification userInfo] objectForKey:NSWorkspaceApplicationKey];
+	if ( nil != app && ![app isEqual:[NSRunningApplication currentApplication]] ) {
+		[app retain];
+		[lastActiveOtherApplication release];
+		lastActiveOtherApplication = app;
+	}
 }
 
 // Remote Notifications (APN, aka Push Notifications) are only available on apps distributed via the App Store.
@@ -1111,7 +1139,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 {
 	isBezelPinned = NO;
 	[self hideBezel];
-	[NSApp hide:self];
+	if ( [prefsPanel isVisible] ) {
+		// Hiding the app would take the preference panel down with it, so only hand focus back to the app the user came from.
+		if ( [NSApp isActive] ) {
+			if ( nil != lastActiveOtherApplication && ![lastActiveOtherApplication isTerminated] )
+				[lastActiveOtherApplication activateWithOptions: NSApplicationActivateIgnoringOtherApps];
+			else
+				[NSApp hide:self];
+		}
+	} else {
+		[NSApp hide:self];
+	}
 }
 
 - (void) applicationWillResignActive:(NSApplication *)app; {
@@ -1482,11 +1520,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
 		removeObserver:self
 				  name:@"AppleSelectedInputSourcesChangedNotification"
 				object:nil];
+	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
 }
 
 - (void) dealloc {
 	[bezel release];
 	[srTransformer release];
+	[lastActiveOtherApplication release];
 	[super dealloc];
 }
 
