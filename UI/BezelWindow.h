@@ -42,6 +42,12 @@
 	NSImageView			*iconView;
 	id<BezelWindowDelegate>	delegate;
     Boolean             color;
+	// Rendered background and the parameters it was rendered for
+	NSColor				*cachedBackground;
+	NSSize				cachedBackgroundSize;
+	float				cachedBackgroundAlpha;
+	Boolean				cachedBackgroundColor;
+	Boolean				backgroundNeedsApply;
 }
 
 - (id)initWithContentRect:(NSRect)contentRect

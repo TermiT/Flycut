@@ -122,7 +122,24 @@ static const float lineHeight = 16;
 
 - (void) update  {
     [super update];
-    [self setBackgroundColor:[self backgroundColor]];
+    // AppKit sends -update after every event, also while the bezel is ordered out.
+    // Nothing to lay out until it is on screen; makeKeyAndOrderFront: catches up.
+    if (![self isVisible])
+        return;
+    [self layoutBezel];
+}
+
+- (void) makeKeyAndOrderFront:(id)sender {
+    [self layoutBezel];
+    [super makeKeyAndOrderFront:sender];
+}
+
+- (void) layoutBezel {
+    NSColor *background = [self backgroundColor];
+    if (backgroundNeedsApply) {
+        backgroundNeedsApply = NO;
+        [self setBackgroundColor:background];
+    }
 
     Boolean savedShowSourceField = showSourceField;
     if (nil == sourceText || 0 == sourceText.length)
@@ -190,7 +207,20 @@ static const float lineHeight = 16;
 
 -(NSColor*) backgroundColor
 {
-    return [self sizedBezelBackgroundWithRadius:25.0 withAlpha:[[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"]];
+    // AppKit calls this getter itself (e.g. from setBackgroundColor:), so only
+    // re-render the rounded background when something it depends on changed.
+    float alpha = [[NSUserDefaults standardUserDefaults] floatForKey:@"bezelAlpha"];
+    NSSize size = [self frame].size;
+    if (nil == cachedBackground || !NSEqualSizes(size, cachedBackgroundSize)
+        || alpha != cachedBackgroundAlpha || color != cachedBackgroundColor) {
+        [cachedBackground release];
+        cachedBackground = [[self sizedBezelBackgroundWithRadius:25.0 withAlpha:alpha] retain];
+        cachedBackgroundSize = size;
+        cachedBackgroundAlpha = alpha;
+        cachedBackgroundColor = color;
+        backgroundNeedsApply = YES;
+    }
+    return cachedBackground;
 }
 
 - (void) setAlpha:(float)newValue
@@ -317,6 +347,7 @@ static const float lineHeight = 16;
 	[textField release];
 	[charField release];
 	[iconView release];
+	[cachedBackground release];
 	[super dealloc];
 }
 
